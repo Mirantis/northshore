@@ -26,7 +26,7 @@
 # Example:
 #   make
 #   make build
-#   make all WHAT=cmd/nshore
+#   make build WHAT=cmd/nshore
 build:
 	build/build.sh $(WHAT)
 .PHONY: build
