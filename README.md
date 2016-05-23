@@ -7,6 +7,10 @@ NorthShore is just getting started. We anticipate a 0.1 Release by the of Q2 201
 
 ## Install
 TBD .. for more information, please visit the doc directory.
+* If you have a GOLANG environment, and $GOPATH/bin in your PATH, go to the northshore source directory and:
+  * `go install`
+  * `nshore`
+  * `nshore run local`
 
 ## Develop
 TBD .. for more information, please visit the doc directory.
