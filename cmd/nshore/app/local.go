@@ -15,9 +15,12 @@
 package cmd
 
 import (
-	"fmt"
+	//"fmt"
+	"log"
+	"net/http"
 
 	"github.com/spf13/cobra"
+	"github.com/gorilla/mux"
 )
 
 // localCmd represents the local command
@@ -31,9 +34,20 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("local called")
+		r := mux.NewRouter()
+		r.HandleFunc("/api", apiHandler)
+		// with 'nshore run local', you can got to http://localhost:8998/ and see a list of
+		// what is in static ... if you put index.html in there, it'll be returned.
+		// NB: do not put /static in the path, that'll get you a 404.
+		r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("static/"))))
+
+		log.Println("Listening at port 8998")
+		http.ListenAndServe(":8998", r)
 	},
+}
+
+func apiHandler(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("Hello, World! (api)"))
 }
 
 func init() {
@@ -48,5 +62,21 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// localCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }
+
+
+// package main
+//
+// import (
+//   "log"
+//   "net/http"
+//   "github.com/gorilla/mux"
+// )
+//
+// func main() {
+//   r := mux.NewRouter()
+//   r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("assets/"))))
+//
+//   log.Println("Listening at port 3000")
+//   http.ListenAndServe(":3000", r)
+// }
