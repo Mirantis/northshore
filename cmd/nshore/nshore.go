@@ -13,7 +13,7 @@
 
 package main
 
-import "github.com/carmine/northshore/cmd/nshore/app"
+import "github.com/Mirantis/northshore/cmd/nshore/app"
 
 func main() {
 	cmd.Execute()

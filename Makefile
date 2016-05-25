@@ -30,3 +30,7 @@
 build:
 	build/build.sh $(WHAT)
 .PHONY: build
+
+deps:
+	go get github.com/tools/godep
+.PHONY: deps
