@@ -95,7 +95,7 @@ In the NSUI [a2app example](https://github.com/johnpapa/angular2-tour-of-heroes/
 
 - XHR API calls from a2app, the location in general hardcoded as
 
-        prefix(/api/v1/) + callname
+        prefix + callname => /api/v1/callname
 
 
 So, we have to handle few cases:
@@ -108,9 +108,9 @@ And there are 2 different a2app config options:
 - the _base_ tag, in general '/' for clear url-line in one_app_domain
 - System.config({baseURL}), that partially affects a2app
 
-We can use some special prefix in a2app for static XHR GET, but I prefer to handle reqs as:
+Instead of using some special prefix in a2app for static XHR GET, let's handle reqs as:
 
-- `*` - default - 404 disallowed, index.html instead
+- \* - default - 404 disallowed, index.html instead
 - ^/api/* - starts with _/api/_ - 404 allowed, API for a2app
 - ^/app/* - starts with _/app/_ - 404 allowed, static resources for a2app
 - ^/assets/* - starts with _/assets/_ - 404 allowed, static resources such as CSS, IMG, third party libs
@@ -118,9 +118,17 @@ We can use some special prefix in a2app for static XHR GET, but I prefer to hand
 
 That scheme allows integration with third party services - the default should be defined as a2app route list.
 
-Add the "ui" prefix to routes, it's combines and marks them as targeted for UI:
+Add the "ui" prefix to routes, it's combines and marks them as targeted for UI.
+The allowed routes start with BASE (ie `http://host:port/`) and so:
 
 - BASE/ui/api/
 - BASE/ui/app/
 - BASE/ui/assets/
 - BASE/ui/node_modules/
+
+
+UI API Scheme
+-------------
+
+There we choose the [JSON API](http://jsonapi.org/) for scheme of calls from
+the Frontend to the Backend for data and actions.
