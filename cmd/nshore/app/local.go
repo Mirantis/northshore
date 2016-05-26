@@ -16,6 +16,7 @@ package cmd
 
 import (
 	//"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -35,7 +36,16 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		r := mux.NewRouter()
-		r.HandleFunc("/api", apiHandler)
+
+		uiApi1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
+		uiApi1.HandleFunc("/", uiApi1RootHandler).Methods("GET")
+		uiApi1.HandleFunc("/action", uiApi1ActionHandler).Methods("GET", "POST")
+
+		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
+		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
+		ui.HandleFunc("/{s}", uiIndexHandler)
+		ui.HandleFunc("/", uiIndexHandler)
+
 		// with 'nshore run local', you can got to http://localhost:8998/ and see a list of
 		// what is in static ... if you put index.html in there, it'll be returned.
 		// NB: do not put /static in the path, that'll get you a 404.
@@ -46,8 +56,19 @@ to quickly create a Cobra application.`,
 	},
 }
 
-func apiHandler(w http.ResponseWriter, r *http.Request) {
-				w.Write([]byte("Hello, World! (api)"))
+func uiApi1ActionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(map[string]interface{}{"message": "Api1ActionHandler"})
+}
+
+func uiApi1RootHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(map[string]interface{}{"version": 1})
+}
+
+func uiIndexHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("#uiIndexHandler")
+  http.ServeFile(w, r, "ui/index.html")
 }
 
 func init() {
