@@ -4,43 +4,9 @@ NorthShore UI
 NSUI is Web UI.
 The frontend part is Angular 2 application.
 
-
-Development Environment
------------------------
-
 The Angular 2 framework allows coding on JavaScript, TypeScript and Dart.
 There we choose the TypeScript for the current project. Some useful info about editor support for TypeScript can be
 found at [TypeScript Editor Support](https://github.com/Microsoft/TypeScript/wiki/TypeScript-Editor-Support)
-
-Setup Development Environment with Atom on Ubuntu
--------------------------------------------------
-
-* RTFM [Atom TypeScript](https://atom.io/packages/atom-typescript)
-
-* Install NodeJS
-
-        curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-
-    It adds [deb.nodesource.com](https://deb.nodesource.com/node_6.x) repository
-    and updates apt-get lists.
-
-        sudo apt-get install nodejs
-
-    Check installed
-
-        node -v
-          v6.2.0
-        npm -v
-          3.8.9
-
-* Install Atom
-
-        sudo add-apt-repository ppa:webupd8team/atom
-        sudo apt-get update
-        sudo apt-get install atom
-
-        apm install atom-typescript
-        apm install linter
 
 
 Development Convention
@@ -132,3 +98,64 @@ UI API Scheme
 
 There we choose the [JSON API](http://jsonapi.org/) for scheme of calls from
 the Frontend to the Backend for data and actions.
+
+
+Local Environment
+-----------------
+
+Angular application developers rely on the _npm_ package manager to install the libraries and packages their apps require.
+
+* Install NodeJS
+
+        curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+
+    It adds [deb.nodesource.com](https://deb.nodesource.com/node_6.x) repository
+    and updates apt-get lists.
+
+        sudo apt-get install nodejs
+
+    Check installed
+
+        node -v
+          v6.2.0
+        npm -v
+          3.8.9
+
+* Adding the libraries and packages we need with npm
+
+        cd ui
+        npm install
+
+* Run local Backend server
+
+        cd ${GOPATH}/src/github.com/Mirantis/northshore
+        go run cmd/nshore/nshore.go run local
+
+* Run browser http://localhost:8998/ui
+
+
+Setup Development Environment with Atom on Ubuntu
+-------------------------------------------------
+
+* RTFM [Atom TypeScript](https://atom.io/packages/atom-typescript)
+
+* Install Atom
+
+        sudo add-apt-repository ppa:webupd8team/atom
+        sudo apt-get update
+        sudo apt-get install atom
+
+        apm install atom-typescript
+        apm install linter
+
+* Run local _lite-server_ for UI Development
+
+  There are few helpful scripts from  [angular/quickstart](https://angular.io/docs/ts/latest/quickstart.html#!#config-files).
+
+        cd ui
+        npm start
+
+  It runs the compiler and a server at the same time, both in "watch mode" for  changes to TypeScript files and recompiling when it sees them.
+  There is the proxy for the API calls to the Backend http://localhost:8998.
+
+* Run browser http://localhost:3000
