@@ -1,0 +1,45 @@
+<nav class="navbar navbar-inverse navbar-static-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" (click)="toggleNavbar = !toggleNavbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" [routerLink]="['Home']">NorthShore</a>
+    </div>
+    <div class="navbar-collapse collapse" [collapse]="!toggleNavbar">
+      <ul class="nav navbar-nav navbar-left">
+        <li [class.active]="router.isRouteActive(router.generate(['Dashboard']))">
+          <a [routerLink]="['Dashboard']">Dashboard</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="row">
+    <main class="col-sm-12 col-md-12">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<!--
+<div class="container alerts"
+ng-controller="AlertsController as view">
+<div class="alerts-float container">
+  <div class="alerts-float-wrapper">
+    <uib-alert
+    ng-repeat="(key, alert) in view.getAlerts()"
+    close="view.deleteAlert(key)"
+    dismiss-on-timeout="{{view.alertDismiss}}"
+    type="{{alert.type}}">
+    <div ng-bind="alert.message"></div>
+  </uib-alert>
+</div>
+</div>
+</div>
+-->
