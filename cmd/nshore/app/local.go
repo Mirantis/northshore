@@ -15,13 +15,14 @@
 package cmd
 
 import (
-	//"fmt"
+	"fmt"
 	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/spf13/cobra"
 	"github.com/gorilla/mux"
+	"github.com/boltdb/bolt"
 )
 
 // localCmd represents the local command
@@ -50,6 +51,49 @@ to quickly create a Cobra application.`,
 		// what is in static ... if you put index.html in there, it'll be returned.
 		// NB: do not put /static in the path, that'll get you a 404.
 		r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("static/"))))
+
+		db, err := bolt.Open("my.db", 0600, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+
+		bname := []byte("MyBucket")
+		key := []byte("answer")
+		value := []byte("42")
+		err = db.Update(func(tx *bolt.Tx) error {
+			b, err := tx.CreateBucketIfNotExists(bname)
+			if err != nil {
+				return fmt.Errorf("Create bucket: %s", err)
+			}
+			log.Printf("Bucket \"%s\" created\n", bname)
+			err = b.Put(key, value)
+			if err != nil {
+				return err
+			}
+			log.Printf("Info puted with key \"%s\"\n", key)
+			return nil
+		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = db.View(func(tx *bolt.Tx) error {
+			bucket := tx.Bucket(bname)
+			if bucket == nil {
+				return fmt.Errorf("Bucket %s not found", bname)
+			}
+
+			v := bucket.Get(key)
+			log.Printf("Get value by key \"%s\": v => \"%s\" \n", key, v)
+
+			return nil
+		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		log.Println("Listening at port 8998")
 		http.ListenAndServe(":8998", r)
