@@ -12,6 +12,11 @@
 			"Rev": "056c9bc7be7190eaa7715723883caffa5f8fa3e4"
 		},
 		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.2.1",
+			"Rev": "dfb21201d9270c1082d5fb0f07f500311ff72f18"
+		},
+		{
 			"ImportPath": "github.com/gorilla/context",
 			"Comment": "v1.1-2-ga8d44e7",
 			"Rev": "a8d44e7d8e4d532b6a27a02dd82abb31cc1b01bd"
@@ -98,6 +103,10 @@
 		{
 			"ImportPath": "github.com/spf13/viper",
 			"Rev": "110492b3001269a0777997fcbe68a60828fac4cb"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "d4feaf1a7e61e1d9e79e6c4e76c6349e9cab0a03"
 		},
 		{
 			"ImportPath": "gopkg.in/fsnotify.v1",
