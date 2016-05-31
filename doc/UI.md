@@ -123,7 +123,8 @@ Angular application developers rely on the _npm_ package manager to install the 
 
 * Adding the libraries and packages we need with npm
 
-        cd ui
+        cd ${GOPATH}/src/github.com/Mirantis/northshore
+        cd ./ui
         npm install
 
 * Run local Backend server
@@ -147,12 +148,14 @@ Setup Development Environment with Atom on Ubuntu
 
         apm install atom-typescript
         apm install linter
+        apm install editorconfig
 
 * Run local _lite-server_ for UI Development
 
   There are few helpful scripts from  [angular/quickstart](https://angular.io/docs/ts/latest/quickstart.html#!#config-files).
 
-        cd ui
+        cd ${GOPATH}/src/github.com/Mirantis/northshore
+        cd ./ui
         npm start
 
   It runs the compiler and a server at the same time, both in "watch mode" for  changes to TypeScript files and recompiling when it sees them.
