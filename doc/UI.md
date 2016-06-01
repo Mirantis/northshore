@@ -145,12 +145,14 @@ Angular application developers rely on the _npm_ package manager to install the 
 
 ### Common Instructions once Node and Atom are installed
 
-* Add Atom plugins:
+* Add Atom plugins
+
   ```
   apm install atom-typescript
   apm install linter
   apm install editorconfig
   ```
+
 * Adding the libraries and packages we need with _npm_
   and compile TypeScript into JavaScript
   ```
