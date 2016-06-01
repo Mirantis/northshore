@@ -5,8 +5,9 @@ NSUI is Web UI.
 The frontend part is Angular 2 application.
 
 The Angular 2 framework allows coding on JavaScript, TypeScript and Dart.
-There we choose the TypeScript for the current project. Some useful info about editor support for TypeScript can be
-found at [TypeScript Editor Support](https://github.com/Microsoft/TypeScript/wiki/TypeScript-Editor-Support)
+There we choose the TypeScript for the current project.
+Some useful info about editor support for TypeScript can be found at
+[TypeScript Editor Support](https://github.com/Microsoft/TypeScript/wiki/TypeScript-Editor-Support)
 
 
 Development Convention
@@ -121,11 +122,13 @@ Angular application developers rely on the _npm_ package manager to install the 
         npm -v
           3.8.9
 
-* Adding the libraries and packages we need with npm
+* Adding the libraries and packages we need with _npm_
+  and compile the TS sources into JS
 
         cd ${GOPATH}/src/github.com/Mirantis/northshore
         cd ./ui
         npm install
+        npm run tsc
 
 * Run local Backend server
 
