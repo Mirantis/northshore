@@ -1,1 +1,6 @@
+# ignore mac filesystem magic
 .DS_Store
+
+# ignore embedded databases
+*.db
+
