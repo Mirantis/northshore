@@ -1,20 +1,17 @@
 NorthShore UI
 =============
 
-NSUI is Web UI.
-The frontend part is Angular 2 application.
+The NorthShore UI (NSUI) is an Angular2 based single-page Web UI.
 
-The Angular 2 framework allows coding on JavaScript, TypeScript and Dart.
-There we choose the TypeScript for the current project.
+The Angular 2 framework allows coding on JavaScript, TypeScript and Dart. We have started with TypeScript.
+
 Some useful info about editor support for TypeScript can be found at
 [TypeScript Editor Support](https://github.com/Microsoft/TypeScript/wiki/TypeScript-Editor-Support)
 
+Development Conventions
+-----------------------
 
-Development Convention
-----------------------
-
-* Use style-guides and best-practices
-* RTFM
+* Use the appropriate style-guides and best-practices:
   - [A2 Style Guide](https://angular.io/docs/ts/latest/guide/style-guide.html)
   - [johnpapa/angular-styleguide](https://github.com/johnpapa/angular-styleguide)
   - [JSON API](http://jsonapi.org/)
@@ -22,11 +19,8 @@ Development Convention
 
 Client Side Routing
 -------------------
-
-There is the specific of single_page_apps with client-side routing.
-
-To handle the current application state such as the current view the location
-params are used. It allows store/share link with the application state.
+With single-page apps client-side routing gets interesting. Issues like permanent links come to the front. To handle the application state (eg current view) the location
+params are used.
 
 Previously the anchors were used (/appname#view_1). And since browsers
 implemented the HTML5 History API the separate links are used (/appname/view_1).
@@ -35,13 +29,11 @@ app-handled route the app index.html should be returned instead of 404 error.
 
 So the backend have to know if 404 is allowed.
 
-
 Backend Routing
 ---------------
-
-In the NSUI
+In the
 [a2app example](https://github.com/johnpapa/angular2-tour-of-heroes/blob/master/index.html)
-we have few request types:
+we have a few request types:
 
 - GET for index.html from brsr, even on reload at some a2app route,
   the location depends on the _base_ tag:
@@ -106,14 +98,10 @@ The allowed routes start with BASE (ie `http://host:port/`) and so:
 
 UI API Scheme
 -------------
-
-There we choose the [JSON API](http://jsonapi.org/) for scheme of calls from
-the Frontend to the Backend for data and actions.
-
+We chose [JSON API](http://jsonapi.org/) for the frontend to backend calling design. This is for data and actions.
 
 Local Environment
 -----------------
-
 * Run local Backend server
 
         cd ${GOPATH}/src/github.com/Mirantis/northshore
@@ -122,59 +110,67 @@ Local Environment
 * Run browser http://localhost:8998/ui
 
 
-Setup Development Environment with Atom on Ubuntu
--------------------------------------------------
+## Setup Development Environment with Node and Atom on Ubuntu
 
-Angular application developers rely on the _npm_ package manager
-to install the libraries and packages their apps require.
+Angular application developers rely on the _npm_ package manager to install the libraries and packages their apps require.
 
+### Instructions for Ubuntu
 * Install NodeJS
-
-        curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-
-    It adds [deb.nodesource.com](https://deb.nodesource.com/node_6.x) repository
-    and updates apt-get lists.
-
-        sudo apt-get install nodejs
-
-    Check installed
-
-        node -v
-          v6.2.0
-        npm -v
-          3.8.9
+  ```
+  curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  sudo apt-get install nodejs
+  # NB: verify `node -v` and `npm -v`
+  ```
 
 * Install Atom.
 
   RTFM [Atom TypeScript](https://atom.io/packages/atom-typescript)
+  ```
+  sudo add-apt-repository ppa:webupd8team/atom
+  sudo apt-get update
+  sudo apt-get install atom
+  ```
 
-        sudo add-apt-repository ppa:webupd8team/atom
-        sudo apt-get update
-        sudo apt-get install atom
+### Instructions for Mac
+* Install NodeJS and Atom
+  * using `homebrew`
+  ```
+  brew install node
+  brew cask install atom
+  ```
+  * using pkg or dmg
+    1. Node - follow instructions at https://nodejs.org/en/download/
+    1. Atom - https://atom.io/download/mac
 
-        apm install atom-typescript
-        apm install linter
-        apm install editorconfig
+
+### Common Instructions once Node and Atom are installed
+
+* Add Atom plugins
+
+  ```
+  apm install atom-typescript
+  apm install linter
+  apm install editorconfig
+  ```
 
 * Adding the libraries and packages we need with _npm_
-  and compile the TS sources into JS
-
-        cd ${GOPATH}/src/github.com/Mirantis/northshore
-        cd ./ui
-        npm install
-        npm run tsc
+  and compile TypeScript into JavaScript
+  ```
+  cd ${GOPATH}/src/github.com/Mirantis/northshore/ui
+  npm install
+  npm run tsc
+  ```
 
 * Run local _lite-server_ for UI Development
 
   There are few helpful scripts from
   [angular/quickstart](https://angular.io/docs/ts/latest/quickstart.html#!#config-files).
-
-        cd ${GOPATH}/src/github.com/Mirantis/northshore
-        cd ./ui
-        npm start
-
+  ```
+  cd ${GOPATH}/src/github.com/Mirantis/northshore/ui
+  npm start
+  ```
   It runs the compiler and a server at the same time, both in "watch mode" for
   changes to TypeScript files and recompiling when it sees them.
   There is the proxy for the API calls to the Backend http://localhost:8998.
 
-* Run browser http://localhost:3000
+* In your browser, go to http://localhost:3000
