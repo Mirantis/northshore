@@ -26,7 +26,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                         selector: 'my-dashboard',
                         styleUrls: ['app/components/dashboard/dashboard.css'],
                         templateUrl: 'app/components/dashboard/dashboard.html',
-                    }), 
+                    }),
                     __metadata('design:paramtypes', [])
                 ], DashboardComponent);
                 return DashboardComponent;
