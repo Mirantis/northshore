@@ -1,4 +1,5 @@
 # NorthShore: A Pipeline Generator
+[![Build Status](https://travis-ci.org/Mirantis/northshore.svg)][travis]
 
 NorthShore is just getting started. We anticipate a 0.1 Release by the of Q2 2016.
 
@@ -23,3 +24,5 @@ TBD .. for more information, please visit the doc directory.
 
 ## Roadmap
 TBD .. for more information, please visit the doc directory.
+
+[travis]: https://travis-ci.org/Mirantis/northshore
