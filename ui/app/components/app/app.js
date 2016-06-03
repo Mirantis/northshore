@@ -56,11 +56,6 @@ System.register(['@angular/core', '@angular/common', '@angular/router-deprecated
                 AppComponent.prototype.getAlerts = function () {
                     return this.alertsService.getAlerts();
                 };
-                AppComponent.prototype.checkAlerts = function () {
-                    this.alertsService.alert('Some alert here');
-                    this.alertsService.alertError('Some error alert here');
-                    this.alertsService.alertSuccess('Some success alert here');
-                };
                 AppComponent = __decorate([
                     core_1.Component({
                         directives: [

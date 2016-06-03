@@ -57,10 +57,4 @@ export class AppComponent {
     return this.alertsService.getAlerts();
   }
 
-  checkAlerts(): void {
-    this.alertsService.alert('Some alert here');
-    this.alertsService.alertError('Some error alert here');
-    this.alertsService.alertSuccess('Some success alert here');
-  }
-
 }
