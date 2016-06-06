@@ -27,19 +27,17 @@
   </div>
 </div>
 
-<!--
-<div class="container alerts"
-ng-controller="AlertsController as view">
-<div class="alerts-float container">
-  <div class="alerts-float-wrapper">
-    <uib-alert
-    ng-repeat="(key, alert) in view.getAlerts()"
-    close="view.deleteAlert(key)"
-    dismiss-on-timeout="{{view.alertDismiss}}"
-    type="{{alert.type}}">
-    <div ng-bind="alert.message"></div>
-  </uib-alert>
+<div class="container alerts">
+  <div class="alerts-float container">
+    <div class="alerts-float-wrapper">
+      <alert
+        *ngFor="let alert of getAlerts(); let idx = index"
+        (close)="deleteAlert(idx)"
+        dismissible="true"
+        [dismissOnTimeout]="alertDismiss"
+        [type]="alert.type">
+        {{ alert?.message }}
+      </alert>
+    </div>
+  </div>
 </div>
-</div>
-</div>
--->

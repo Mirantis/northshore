@@ -150,7 +150,6 @@ Angular application developers rely on the _npm_ package manager to install the 
   ```
   apm install atom-typescript
   apm install linter
-  apm install editorconfig
   ```
 
 * Adding the libraries and packages we need with _npm_
