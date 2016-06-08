@@ -1,0 +1,33 @@
+version: 1
+type: pipeline
+name: bp_name
+provisioner: docker
+stages:
+    gerrit:
+      image: openfrontier/gerrit
+      description: 42
+      ports:
+        - fromPort: 8080
+          toPort: 8080
+        - fromPort: 29418
+          toPort: 29418
+      variables:
+        - NAME: value
+          NAME2: value2
+    jenkins:
+      image: jenkins
+      ports:
+        - fromPort: 8080
+          toPort: 8088
+        - fromPort: 50000
+          toPort: 50000
+    artifactory:
+      image: artifactory-oss:latest
+      ports:
+        - fromPort: 8081
+          toPort: 8081
+    spinnaker:
+      image: compose-file
+      ports:
+        - fromPort: 9000
+          toPort: 9000
