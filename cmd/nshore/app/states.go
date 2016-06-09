@@ -156,11 +156,6 @@ func (pl *BlueprintPipeline) afterInactivate(e *fsm.Event) {
 }
 
 func (pl *BlueprintPipeline) afterStart(e *fsm.Event) {
-	for stage := range pl.StagesStates {
-		log.Printf("#BlueprintPipeline,#afterStart Create stage %s", stage)
-		// Call to DockerEng
-		pl.StagesStates[stage] = StageStateCreated
-	}
 	pl.State = BlueprintStateProvision
 }
 
