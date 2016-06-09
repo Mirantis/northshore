@@ -76,6 +76,10 @@
 			"Rev": "bb797dc4fb8320488f47bf11de07a733d7233e1f"
 		},
 		{
+			"ImportPath": "github.com/looplab/fsm",
+			"Rev": "c77ccaafd443c852ceb0b4b0b5258235286e85a0"
+		},
+		{
 			"ImportPath": "github.com/magiconair/properties",
 			"Comment": "v1.6.0-1-gc81f9d7",
 			"Rev": "c81f9d71af8f8cba1466501d30326b99a4e56c19"
