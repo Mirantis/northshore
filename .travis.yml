@@ -15,3 +15,6 @@ install:
 script:
     - go test -v ./...
     - go build -v ./...
+
+notifications:
+  slack: miracloud:5r69ZAasA5mX50aig27LVKrs
