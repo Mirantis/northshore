@@ -15,14 +15,14 @@
 package cmd
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
-	"github.com/spf13/cobra"
-	"github.com/gorilla/mux"
 	"github.com/boltdb/bolt"
+	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
 )
 
 // localCmd represents the local command
@@ -38,9 +38,9 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		r := mux.NewRouter()
 
-		uiApi1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
-		uiApi1.HandleFunc("/", uiApi1RootHandler).Methods("GET")
-		uiApi1.HandleFunc("/action", uiApi1ActionHandler).Methods("GET", "POST")
+		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
+		uiAPI1.HandleFunc("/", uiAPI1RootHandler).Methods("GET")
+		uiAPI1.HandleFunc("/action", uiAPI1ActionHandler).Methods("GET", "POST")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
@@ -100,19 +100,19 @@ to quickly create a Cobra application.`,
 	},
 }
 
-func uiApi1ActionHandler(w http.ResponseWriter, r *http.Request) {
+func uiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-  json.NewEncoder(w).Encode(map[string]interface{}{"message": "Api1ActionHandler"})
+	json.NewEncoder(w).Encode(map[string]interface{}{"message": "Api1ActionHandler"})
 }
 
-func uiApi1RootHandler(w http.ResponseWriter, r *http.Request) {
+func uiAPI1RootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-  json.NewEncoder(w).Encode(map[string]interface{}{"version": 1})
+	json.NewEncoder(w).Encode(map[string]interface{}{"version": 1})
 }
 
 func uiIndexHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("#uiIndexHandler")
-  http.ServeFile(w, r, "ui/index.html")
+	http.ServeFile(w, r, "ui/index.html")
 }
 
 func init() {
@@ -128,7 +128,6 @@ func init() {
 	// is called directly, e.g.:
 	// localCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
 
 // package main
 //
