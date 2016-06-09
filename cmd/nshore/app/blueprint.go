@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var path string
@@ -28,7 +29,42 @@ var blueprintCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Blueprint was runned.")
 		fmt.Printf("PATH -> %s \n", path)
+		pipeline, err := ParseBlueprint(path)
+		if err != nil {
+			fmt.Printf("Parsing error: %s \n", err)
+		}
+		fmt.Printf("PIPELINE -> %+v \n", pipeline)
 	},
+}
+
+type Stage struct {
+	Image       string
+	Description string
+	Ports       []map[string]int
+	Variables   map[string]string
+}
+
+type Pipeline struct {
+	Version     string
+	Type        string
+	Name        string
+	Provisioner string
+	Stages      map[string]Stage
+}
+
+func ParseBlueprint(path string) (pipeline Pipeline, err error) {
+	viper.SetConfigName("pipeline")
+	viper.AddConfigPath(path)
+	err = viper.ReadInConfig()
+	if err != nil {
+		return pipeline, fmt.Errorf("Config not found. %s \n", err)
+	}
+
+	err = viper.Unmarshal(&pipeline)
+	if err != nil {
+		return pipeline, fmt.Errorf("Unable to decode into struct, %v", err)
+	}
+	return pipeline, nil
 }
 
 func init() {
