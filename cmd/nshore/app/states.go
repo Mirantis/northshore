@@ -20,22 +20,35 @@ import (
 	"github.com/looplab/fsm"
 )
 
+// BlueprintState represents a state of the Blueprint
 type BlueprintState byte
+
+// StageState represents a state of the Stage
 type StageState byte
 
 const (
+	// BlueprintStateNew is default state of the Blueprint
 	BlueprintStateNew BlueprintState = iota
+	// BlueprintStateProvision is the Blueprint status while provisioning
 	BlueprintStateProvision
+	// BlueprintStateActive is the Blueprint status when all Stages are up and ready
 	BlueprintStateActive
+	// BlueprintStateInactive is the Blueprint status when some Stage is down
 	BlueprintStateInactive
 )
 
 const (
+	// StageStateNew is default state of the Stage
 	StageStateNew StageState = iota
+	// StageStateCreated indicates that container is created
 	StageStateCreated
+	// StageStateRunning indicates that container is running
 	StageStateRunning
+	// StageStatePaused indicates that container is paused
 	StageStatePaused
+	// StageStateStoped indicates that container is stoped
 	StageStateStoped
+	// StageStateDeleted indicates that container is deleted
 	StageStateDeleted
 )
 
@@ -61,12 +74,17 @@ func (state StageState) String() string {
 	return states[state]
 }
 
+// BlueprintPipeline represents a Blueprint Pipeline
 type BlueprintPipeline struct {
-	State        BlueprintState
+	// State is current Pipeline status
+	State BlueprintState
+	// StagesStates represents statuses of Pipeline Stages
 	StagesStates map[string]StageState
-	fSM          *fsm.FSM
+	// fSM is the finite state machine of Pipeline
+	fSM *fsm.FSM
 }
 
+// NewBlueprintPipeline constructs a Blueprint Pipeline with Stages
 func NewBlueprintPipeline(stages []string) *BlueprintPipeline {
 	plStages := map[string]StageState{}
 	for _, v := range stages {
@@ -79,6 +97,7 @@ func NewBlueprintPipeline(stages []string) *BlueprintPipeline {
 		nil,
 	}
 
+	// https://godoc.org/github.com/looplab/fsm#NewFSM
 	pl.fSM = fsm.NewFSM(
 		"new",
 		fsm.Events{
@@ -145,10 +164,12 @@ func (pl *BlueprintPipeline) afterStart(e *fsm.Event) {
 	pl.State = BlueprintStateProvision
 }
 
+// Start creates and runs Stages in Blueprint Pipeline
 func (pl *BlueprintPipeline) Start() {
 	pl.fSM.Event("start")
 }
 
+// Update updates current Blueprint Pipeline status with Stages
 func (pl *BlueprintPipeline) Update(stagesStates map[string]StageState) {
 	for _, v := range stagesStates {
 		switch v {
