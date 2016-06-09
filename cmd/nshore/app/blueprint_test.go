@@ -15,40 +15,40 @@
 package cmd
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestParseBlueprint(t *testing.T) {
-	var expected Pipeline = Pipeline {
-		Version: "1",
-		Type: "pipeline",
-		Name: "bp_name",
+	var expected Blueprint = Blueprint{
+		Version:     "1",
+		Type:        "pipeline",
+		Name:        "bp_name",
 		Provisioner: "docker",
 		Stages: map[string]Stage{
 			"gerrit": Stage{
-				Image: "openfrontier/gerrit",
+				Image:       "openfrontier/gerrit",
 				Description: "42",
-				Ports: []map[string]int{map[string]int{"fromPort":8080, "toPort":8080},
-							map[string]int{"fromPort":29418, "toPort":29418}},
-				Variables: map[string]string{"NAME":"value", "NAME2":"value2"},
+				Ports: []map[string]int{map[string]int{"fromPort": 8080, "toPort": 8080},
+					map[string]int{"fromPort": 29418, "toPort": 29418}},
+				Variables: map[string]string{"NAME": "value", "NAME2": "value2"},
 			},
 			"jenkins": Stage{
-				Image: "jenkins",
+				Image:       "jenkins",
 				Description: "",
-				Ports: []map[string]int{map[string]int{"fromPort":8080, "toPort":8088},
-							map[string]int{"fromPort":50000, "toPort":50000}},
-				Variables: map[string]string{"NAME":"v"},
+				Ports: []map[string]int{map[string]int{"fromPort": 8080, "toPort": 8088},
+					map[string]int{"fromPort": 50000, "toPort": 50000}},
+				Variables: map[string]string{"NAME": "v"},
 			},
 			"artifactory": Stage{
-				Image: "artifactory-oss:latest",
+				Image:       "artifactory-oss:latest",
 				Description: "",
-				Ports: []map[string]int{map[string]int{"fromPort":8081, "toPort":8081}},
+				Ports:       []map[string]int{map[string]int{"fromPort": 8081, "toPort": 8081}},
 			},
 			"spinnaker": Stage{
-				Image: "compose-file",
+				Image:       "compose-file",
 				Description: "",
-				Ports: []map[string]int{map[string]int{"fromPort":9000, "toPort":9000}},
+				Ports:       []map[string]int{map[string]int{"fromPort": 9000, "toPort": 9000}},
 			},
 		},
 	}
