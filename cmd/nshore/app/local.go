@@ -25,6 +25,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// demofsmCmd represents the "demofsm" command
+var demofsmCmd = &cobra.Command{
+	Use:   "demofsm",
+	Short: "Demo FSM",
+	Long:  `Runs the Blueprint Pipeline thru states`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		stages := []string{"Stage A", "Stage B"}
+		pl := NewBlueprintPipeline(stages)
+
+		pl.Start()
+		pl.Update(map[string]StageState{"Stage B": StageStateRunning})
+		pl.Update(map[string]StageState{"Stage A": StageStateRunning, "Stage B": StageStatePaused})
+		pl.Update(map[string]StageState{"Stage B": StageStateRunning})
+
+	},
+}
+
 // localCmd represents the local command
 var localCmd = &cobra.Command{
 	Use:   "local",
@@ -116,6 +134,7 @@ func uiIndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
+	runCmd.AddCommand(demofsmCmd)
 	runCmd.AddCommand(localCmd)
 
 	// Here you will define your flags and configuration settings.
