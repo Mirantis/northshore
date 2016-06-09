@@ -12,8 +12,8 @@ stages:
         - fromPort: 29418
           toPort: 29418
       variables:
-        - NAME: value
-          NAME2: value2
+        NAME: value
+        NAME2: value2
     jenkins:
       image: jenkins
       ports:
@@ -21,6 +21,8 @@ stages:
           toPort: 8088
         - fromPort: 50000
           toPort: 50000
+      variables:
+        NAME: v
     artifactory:
       image: artifactory-oss:latest
       ports:
