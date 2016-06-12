@@ -40,7 +40,6 @@ to quickly create a Cobra application.`,
 
 		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
 		uiAPI1.HandleFunc("/", uiAPI1RootHandler).Methods("GET")
-		uiAPI1.HandleFunc("/action", uiAPI1ActionHandler).Methods("GET", "POST")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
@@ -98,11 +97,6 @@ to quickly create a Cobra application.`,
 		log.Println("Listening at port 8998")
 		http.ListenAndServe(":8998", r)
 	},
-}
-
-func uiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{"message": "Api1ActionHandler"})
 }
 
 func uiAPI1RootHandler(w http.ResponseWriter, r *http.Request) {

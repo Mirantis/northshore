@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,6 +26,7 @@ import (
 )
 
 var demoBlueprintPath string
+var demoBpPl *BlueprintPipeline
 
 // demoBlueprintCmd represents the "demo-blueprint" command
 var demoBlueprintCmd = &cobra.Command{
@@ -92,29 +94,27 @@ var demoCmd = &cobra.Command{
 			{stages[1]: StageStateRunning},
 		}
 
-		var pl *BlueprintPipeline
-
 		go func() {
 			for {
-				pl = NewBlueprintPipeline(stages)
-				pl.Start()
+				demoBpPl = NewBlueprintPipeline(stages)
+				demoBpPl.Start()
 
 				for _, s := range stages {
 					time.Sleep(time.Second * 1)
 					v := map[string]StageState{s: StageStateCreated}
 					log.Println("#pl-update", v)
-					pl.Update(v)
+					demoBpPl.Update(v)
 				}
 				for _, s := range stages {
 					time.Sleep(time.Second * 1)
 					v := map[string]StageState{s: StageStateRunning}
 					log.Println("#pl-update", v)
-					pl.Update(v)
+					demoBpPl.Update(v)
 				}
 				for _, v := range ss {
 					time.Sleep(time.Second * 3)
 					log.Println("#pl-update", v)
-					pl.Update(v)
+					demoBpPl.Update(v)
 				}
 			}
 		}()
@@ -171,7 +171,9 @@ var demoCmd = &cobra.Command{
 
 		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
 		uiAPI1.HandleFunc("/", uiAPI1RootHandler).Methods("GET")
-		uiAPI1.HandleFunc("/action", uiAPI1ActionHandler).Methods("GET", "POST")
+
+		uiAPI1.HandleFunc("/action", demouiAPI1ActionHandler).Methods("GET", "POST")
+		uiAPI1.HandleFunc("/status", demouiAPI1StatusHandler).Methods("GET")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
@@ -204,4 +206,14 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// localCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"message": "demouiAPI1ActionHandler"})
+}
+
+func demouiAPI1StatusHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(demoBpPl)
 }

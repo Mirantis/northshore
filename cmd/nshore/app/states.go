@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"errors"
 	"log"
 
 	"github.com/looplab/fsm"
@@ -52,17 +53,17 @@ const (
 	StageStateDeleted
 )
 
-func (state BlueprintState) String() string {
+func (s BlueprintState) String() string {
 	states := []string{
 		"new",
 		"provision",
 		"active",
 		"inactive",
 	}
-	return states[state]
+	return states[s]
 }
 
-func (state StageState) String() string {
+func (s StageState) String() string {
 	states := []string{
 		"new",
 		"created",
@@ -71,15 +72,25 @@ func (state StageState) String() string {
 		"stoped",
 		"deleted",
 	}
-	return states[state]
+	return states[s]
+}
+
+// MarshalText implements TextMarshaler interface
+func (s BlueprintState) MarshalText() ([]byte, error) {
+	return []byte(s.String()), nil
+}
+
+// MarshalText implements TextMarshaler interface
+func (s StageState) MarshalText() ([]byte, error) {
+	return []byte(s.String()), nil
 }
 
 // BlueprintPipeline represents a Blueprint Pipeline
 type BlueprintPipeline struct {
 	// State is current Pipeline status
-	State BlueprintState
+	State BlueprintState `json:"state"`
 	// StagesStates represents statuses of Pipeline Stages
-	StagesStates map[string]StageState
+	StagesStates map[string]StageState `json:"stagesStates"`
 	// fSM is the finite state machine of Pipeline
 	fSM *fsm.FSM
 }
@@ -136,7 +147,7 @@ func (pl *BlueprintPipeline) afterEvent(e *fsm.Event) {
 func (pl *BlueprintPipeline) beforeActivate(e *fsm.Event) {
 	for _, v := range pl.StagesStates {
 		if v != StageStateRunning {
-			e.Cancel()
+			e.Cancel(errors.New("Some stage isn't running"))
 		}
 	}
 }
