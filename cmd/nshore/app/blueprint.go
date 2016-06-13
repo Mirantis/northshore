@@ -17,8 +17,13 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/docker/engine-api/client"
+	"github.com/docker/engine-api/types"
+	"github.com/docker/engine-api/types/container"
+	"github.com/docker/go-connections/nat"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/net/context"
 )
 
 var path string
@@ -35,6 +40,8 @@ var blueprintCmd = &cobra.Command{
 			return
 		}
 		fmt.Printf("BLUEPRINT -> %+v \n", bp)
+		fmt.Println("Running...............")
+		RunBlueprint(bp)
 	},
 }
 
@@ -75,6 +82,50 @@ func ParseBlueprint(path string) (bp Blueprint, err error) {
 		return bp, fmt.Errorf("Unable to decode into struct, %v", err)
 	}
 	return bp, nil
+}
+
+func RunBlueprint(bp Blueprint) {
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		panic(err)
+	}
+
+	for name, stage := range bp.Stages {
+		bindings := make(map[nat.Port][]nat.PortBinding)
+		for _, ports := range stage.Ports {
+			port, _ := nat.NewPort("tcp", ports["fromPort"])
+			bindings[port] = []nat.PortBinding{nat.PortBinding{HostIP: "0.0.0.0", HostPort: ports["toPort"]}}
+		}
+
+		hostConfig := container.HostConfig{
+			PortBindings: bindings,
+		}
+
+		config := container.Config{
+			Image: bp.Stages[name].Image,
+		}
+		fmt.Printf("%s -> Config was built. \n", name)
+
+		r, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, nil, name)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		fmt.Printf("%s -> Container was created. \n", name)
+
+		err = cli.ContainerStart(
+			context.Background(),
+			r.ID,
+			types.ContainerStartOptions{})
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		fmt.Printf("%s -> Container was started. \n", name)
+		fmt.Printf("%s -> Container ID  %s \n", name, r.ID)
+		fmt.Printf("%s -> Warnings: %s \n", name, r.Warnings)
+		fmt.Println("======= \t ======= \t ======= \t ======= \t ======= \t ======= \t =======")
+	}
 }
 
 func init() {
