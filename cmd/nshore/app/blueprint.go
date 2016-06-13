@@ -38,27 +38,30 @@ var blueprintCmd = &cobra.Command{
 	},
 }
 
+// Stage represents a Blueprint Stage
 type Stage struct {
 	//Docker image for bootstrap stage
-	Image       string
-	Description string
+	Image       string `json:"image"`
+	Description string `json:"description"`
 	//Ports for exposing to host
-	Ports []map[string]string
+	Ports []map[string]string `json:"ports"`
 	//Environment variables
-	Variables map[string]string
+	Variables map[string]string `json:"variables"`
 }
 
+// Blueprint represents a Blueprint
 type Blueprint struct {
 	//API version for processing blueprint
-	Version string
+	Version string `json:"version"`
 	//Type of blueprint (pipeline/application)
-	Type string
-	Name string
+	Type string `json:"type"`
+	Name string `json:"name"`
 	//Provisioner type (docker/...)
-	Provisioner string
-	Stages      map[string]Stage
+	Provisioner string           `json:"provisioner"`
+	Stages      map[string]Stage `json:"stages"`
 }
 
+// ParseBlueprint parses and validates the incoming data
 func ParseBlueprint(path string) (bp Blueprint, err error) {
 	viper.SetConfigName("pipeline")
 	viper.AddConfigPath(path)
