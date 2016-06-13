@@ -1,4 +1,21 @@
 <h3>Dashboard</h3>
 <div class="grid grid-pad">
 
+<button (click)="getBlueprints()" >get Blueprints</button>
+
+<hr>
+<ul>
+  <li *ngFor="let blueprint of blueprints">
+    <ul>
+      <li>{{blueprint.name}}</li>
+      <li>{{blueprint.provisioner}}</li>
+      <li>{{blueprint.stages}}</li>
+      <li>{{blueprint.state}}</li>
+      <li>{{blueprint.stateStages}}</li>
+      <li>{{blueprint.type}}</li>
+      <li>{{blueprint.version}}</li>
+    </ul>
+  </li>
+</ul>
+
 </div>

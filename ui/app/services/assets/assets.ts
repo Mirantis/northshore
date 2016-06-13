@@ -3,7 +3,10 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class AssetsService {
 
-  _assets = {
+  private assets = {
+    api: {
+      blueprints: 'api/v1/blueprints',
+    },
     alerts: {
       AlertsService: {
         error: "There are some internal issues while trying to process your request.",
@@ -23,7 +26,7 @@ export class AssetsService {
   };
 
   asset(key: string): any {
-    return this._assets[key];
+    return this.assets[key];
   }
 
 }
