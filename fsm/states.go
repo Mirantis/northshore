@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package fsm
 
 import (
 	"errors"
@@ -47,8 +47,8 @@ const (
 	StageStateRunning
 	// StageStatePaused indicates that container is paused
 	StageStatePaused
-	// StageStateStoped indicates that container is stoped
-	StageStateStoped
+	// StageStateStopped indicates that container is stopped
+	StageStateStopped
 	// StageStateDeleted indicates that container is deleted
 	StageStateDeleted
 )
@@ -69,7 +69,7 @@ func (s StageState) String() string {
 		"created",
 		"running",
 		"paused",
-		"stoped",
+		"stopped",
 		"deleted",
 	}
 	return states[s]
@@ -177,7 +177,7 @@ func (pl *BlueprintPipeline) Update(stagesStates map[string]StageState) {
 		switch v {
 		case
 			StageStatePaused,
-			StageStateStoped,
+			StageStateStopped,
 			StageStateDeleted:
 			event = "inactivate"
 		}

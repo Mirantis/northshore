@@ -21,12 +21,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Mirantis/northshore/fsm"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 )
 
 var demoBlueprintPath string
-var demoBpPl *BlueprintPipeline
+var demoBpPl *fsm.BlueprintPipeline
 
 // demoBlueprintCmd represents the "demo-blueprint" command
 var demoBlueprintCmd = &cobra.Command{
@@ -53,12 +54,12 @@ var demoFSMCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		stages := []string{"Stage A", "Stage B"}
-		pl := NewBlueprintPipeline(stages)
+		pl := fsm.NewBlueprintPipeline(stages)
 
 		pl.Start()
-		pl.Update(map[string]StageState{"Stage B": StageStateRunning})
-		pl.Update(map[string]StageState{"Stage A": StageStateRunning, "Stage B": StageStatePaused})
-		pl.Update(map[string]StageState{"Stage B": StageStateRunning})
+		pl.Update(map[string]fsm.StageState{"Stage B": fsm.StageStateRunning})
+		pl.Update(map[string]fsm.StageState{"Stage A": fsm.StageStateRunning, "Stage B": fsm.StageStatePaused})
+		pl.Update(map[string]fsm.StageState{"Stage B": fsm.StageStateRunning})
 
 	},
 }
@@ -67,10 +68,10 @@ var demoFSMCmd = &cobra.Command{
 var demoCmd = &cobra.Command{
 	Use:   "demo",
 	Short: "Run demo",
-	Long: `Run demo on local server
+	Long: `Run demo on local server.
 
-	The local server binds localhost:8998.
-	Demo Blueprint Pipeline goes thru states`,
+The local server binds localhost:8998.
+Demo Blueprint Pipeline goes thru states.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		/* Run Blueprint */
@@ -90,26 +91,26 @@ var demoCmd = &cobra.Command{
 			stages = append(stages, k)
 		}
 
-		ss := []map[string]StageState{
-			{stages[0]: StageStatePaused},
-			{stages[0]: StageStateRunning, stages[1]: StageStatePaused},
-			{stages[1]: StageStateRunning},
+		ss := []map[string]fsm.StageState{
+			{stages[0]: fsm.StageStatePaused},
+			{stages[0]: fsm.StageStateRunning, stages[1]: fsm.StageStatePaused},
+			{stages[1]: fsm.StageStateRunning},
 		}
 
 		go func() {
 			for {
-				demoBpPl = NewBlueprintPipeline(stages)
+				demoBpPl = fsm.NewBlueprintPipeline(stages)
 				demoBpPl.Start()
 
 				for _, s := range stages {
 					time.Sleep(time.Second * 1)
-					v := map[string]StageState{s: StageStateCreated}
+					v := map[string]fsm.StageState{s: fsm.StageStateCreated}
 					log.Println("#pl-update", v)
 					demoBpPl.Update(v)
 				}
 				for _, s := range stages {
 					time.Sleep(time.Second * 1)
-					v := map[string]StageState{s: StageStateRunning}
+					v := map[string]fsm.StageState{s: fsm.StageStateRunning}
 					log.Println("#pl-update", v)
 					demoBpPl.Update(v)
 				}
@@ -120,52 +121,6 @@ var demoCmd = &cobra.Command{
 				}
 			}
 		}()
-
-		/* Run DB */
-		/*
-			db, err := bolt.Open("my.db", 0600, nil)
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer db.Close()
-
-			bname := []byte("MyBucket")
-			key := []byte("answer")
-			value := []byte("42")
-			err = db.Update(func(tx *bolt.Tx) error {
-				b, err := tx.CreateBucketIfNotExists(bname)
-				if err != nil {
-					return fmt.Errorf("Create bucket: %s", err)
-				}
-				log.Printf("Bucket \"%s\" created\n", bname)
-				err = b.Put(key, value)
-				if err != nil {
-					return err
-				}
-				log.Printf("Info puted with key \"%s\"\n", key)
-				return nil
-			})
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			err = db.View(func(tx *bolt.Tx) error {
-				bucket := tx.Bucket(bname)
-				if bucket == nil {
-					return fmt.Errorf("Bucket %s not found", bname)
-				}
-
-				v := bucket.Get(key)
-				log.Printf("Get value by key \"%s\": v => \"%s\" \n", key, v)
-
-				return nil
-			})
-
-			if err != nil {
-				log.Fatal(err)
-			}
-		*/
 
 		/* Run local server */
 		log.Println("#run_local_server")
