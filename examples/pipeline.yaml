@@ -24,12 +24,7 @@ stages:
       variables:
         NAME: v
     artifactory:
-      image: artifactory-oss:latest
+      image: jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest
       ports:
         - fromPort: 8081
           toPort: 8081
-    spinnaker:
-      image: compose-file
-      ports:
-        - fromPort: 9000
-          toPort: 9000
