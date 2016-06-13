@@ -35,10 +35,11 @@ var demoBlueprintCmd = &cobra.Command{
 	Long:  `This command read, parse and process blueprint.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Run Blueprint")
-		fmt.Printf("PATH -> %s \n", path)
-		bp, err := ParseBlueprint(path)
+		fmt.Printf("PATH -> %s \n", demoBlueprintPath)
+		bp, err := ParseBlueprint(demoBlueprintPath)
 		if err != nil {
 			fmt.Printf("Parsing error: %s \n", err)
+			return
 		}
 		fmt.Printf("BLUEPRINT -> %+v \n", bp)
 	},
@@ -74,10 +75,11 @@ var demoCmd = &cobra.Command{
 
 		/* Run Blueprint */
 		log.Println("#run_blueprint")
-		log.Printf("PATH -> %s \n", path)
-		bp, err := ParseBlueprint(path)
+		log.Printf("PATH -> %s \n", demoBlueprintPath)
+		bp, err := ParseBlueprint(demoBlueprintPath)
 		if err != nil {
 			log.Printf("Parsing error: %s \n", err)
+			return
 		}
 		log.Printf("BLUEPRINT -> %+v \n", bp)
 
@@ -193,19 +195,10 @@ var demoCmd = &cobra.Command{
 
 func init() {
 	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", ".", "Path to blueprint yaml")
+	demoCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", ".", "Path to blueprint yaml")
 	runCmd.AddCommand(demoBlueprintCmd)
 	runCmd.AddCommand(demoFSMCmd)
 	runCmd.AddCommand(demoCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// localCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// localCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
