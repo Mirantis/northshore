@@ -32,6 +32,7 @@ var blueprintCmd = &cobra.Command{
 		bp, err := ParseBlueprint(path)
 		if err != nil {
 			fmt.Printf("Parsing error: %s \n", err)
+			return
 		}
 		fmt.Printf("BLUEPRINT -> %+v \n", bp)
 	},
@@ -42,7 +43,7 @@ type Stage struct {
 	Image       string
 	Description string
 	//Ports for exposing to host
-	Ports []map[string]int
+	Ports []map[string]string
 	//Environment variables
 	Variables map[string]string
 }

@@ -29,30 +29,25 @@ func TestParseBlueprint(t *testing.T) {
 			"gerrit": Stage{
 				Image:       "openfrontier/gerrit",
 				Description: "42",
-				Ports: []map[string]int{map[string]int{"fromPort": 8080, "toPort": 8080},
-					map[string]int{"fromPort": 29418, "toPort": 29418}},
+				Ports: []map[string]string{{"fromPort": "8080", "toPort": "8080"},
+					{"fromPort": "29418", "toPort": "29418"}},
 				Variables: map[string]string{"NAME": "value", "NAME2": "value2"},
 			},
 			"jenkins": Stage{
 				Image:       "jenkins",
 				Description: "",
-				Ports: []map[string]int{map[string]int{"fromPort": 8080, "toPort": 8088},
-					map[string]int{"fromPort": 50000, "toPort": 50000}},
+				Ports: []map[string]string{{"fromPort": "8080", "toPort": "8088"},
+					{"fromPort": "50000", "toPort": "50000"}},
 				Variables: map[string]string{"NAME": "v"},
 			},
 			"artifactory": Stage{
-				Image:       "artifactory-oss:latest",
+				Image:       "jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest",
 				Description: "",
-				Ports:       []map[string]int{map[string]int{"fromPort": 8081, "toPort": 8081}},
-			},
-			"spinnaker": Stage{
-				Image:       "compose-file",
-				Description: "",
-				Ports:       []map[string]int{map[string]int{"fromPort": 9000, "toPort": 9000}},
+				Ports:       []map[string]string{{"fromPort": "8081", "toPort": "8081"}},
 			},
 		},
 	}
-	actual, _ := ParseBlueprint("../../../")
+	actual, _ := ParseBlueprint("../../../examples")
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatal("Pipelines are not equal!")
 	}
