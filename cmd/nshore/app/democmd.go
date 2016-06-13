@@ -27,6 +27,7 @@ import (
 )
 
 var demoBlueprintPath string
+var demoBp Blueprint
 var demoBpPl *fsm.BlueprintPipeline
 
 // demoBlueprintCmd represents the "demo-blueprint" command
@@ -77,17 +78,18 @@ Demo Blueprint Pipeline goes thru states.`,
 		/* Run Blueprint */
 		log.Println("#run_blueprint")
 		log.Printf("PATH -> %s \n", demoBlueprintPath)
-		bp, err := ParseBlueprint(demoBlueprintPath)
+		var err error
+		demoBp, err = ParseBlueprint(demoBlueprintPath)
 		if err != nil {
 			log.Printf("Parsing error: %s \n", err)
 			return
 		}
-		log.Printf("BLUEPRINT -> %+v \n", bp)
+		log.Printf("BLUEPRINT -> %+v \n", demoBp)
 
 		/* Run States */
 		log.Println("#run_states")
 		var stages []string
-		for k := range bp.Stages {
+		for k := range demoBp.Stages {
 			stages = append(stages, k)
 		}
 
@@ -102,14 +104,16 @@ Demo Blueprint Pipeline goes thru states.`,
 				demoBpPl = fsm.NewBlueprintPipeline(stages)
 				demoBpPl.Start()
 
+				time.Sleep(time.Second * 9)
+
 				for _, s := range stages {
-					time.Sleep(time.Second * 1)
+					time.Sleep(time.Second * 3)
 					v := map[string]fsm.StageState{s: fsm.StageStateCreated}
 					log.Println("#pl-update", v)
 					demoBpPl.Update(v)
 				}
 				for _, s := range stages {
-					time.Sleep(time.Second * 1)
+					time.Sleep(time.Second * 3)
 					v := map[string]fsm.StageState{s: fsm.StageStateRunning}
 					log.Println("#pl-update", v)
 					demoBpPl.Update(v)
@@ -130,7 +134,8 @@ Demo Blueprint Pipeline goes thru states.`,
 		uiAPI1.HandleFunc("/", uiAPI1RootHandler).Methods("GET")
 
 		uiAPI1.HandleFunc("/action", demouiAPI1ActionHandler).Methods("GET", "POST")
-		uiAPI1.HandleFunc("/status", demouiAPI1StatusHandler).Methods("GET")
+		uiAPI1.HandleFunc("/blueprints", demouiAPI1BlueprintsHandler).Methods("GET", "POST")
+		uiAPI1.HandleFunc("/errors", demouiAPI1ErrorsHandler).Methods("GET", "POST")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
@@ -157,11 +162,62 @@ func init() {
 }
 
 func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{"message": "demouiAPI1ActionHandler"})
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+
+	o := map[string]interface{}{
+		"data": []map[string]interface{}{
+			{"details": "Details 1"},
+			{"details": "Details 2"},
+		},
+		"meta": map[string]interface{}{
+			"info": "demouiAPI1ActionHandler",
+		},
+	}
+
+	json.NewEncoder(w).Encode(o)
 }
 
-func demouiAPI1StatusHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(demoBpPl)
+func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+
+	type BP struct {
+		Blueprint
+		*fsm.BlueprintPipeline
+	}
+
+	o := map[string]interface{}{
+		"data": []BP{
+			{demoBp, demoBpPl},
+		},
+		"meta": map[string]interface{}{
+			"info": "demouiAPI1BlueprintsHandler",
+		},
+	}
+
+	json.NewEncoder(w).Encode(o)
+}
+
+func demouiAPI1ErrorsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+
+	o := map[string]interface{}{
+		"data": []map[string]interface{}{},
+		"errors": []map[string]interface{}{
+			{
+				"details": "Error details 1",
+				"title":   "Error title 1",
+			},
+			{
+				"details": "Details of Error 2",
+				"meta": map[string]interface{}{
+					"info": "meta info of Error 2",
+				},
+			},
+		},
+		"meta": map[string]interface{}{
+			"info": "demouiAPI1ErrorsHandler",
+		},
+	}
+
+	json.NewEncoder(w).Encode(o)
 }
