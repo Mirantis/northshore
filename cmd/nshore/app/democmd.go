@@ -26,9 +26,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// BP represents a combined data of the Blueprint with States
+// TODO: refactor Blueprint to integrate State info
+// the State should be updated on changing the stages via stages setter
+type BP struct {
+	*Blueprint
+	*fsm.BlueprintPipeline
+}
+
 var demoBlueprintPath string
-var demoBp Blueprint
-var demoBpPl *fsm.BlueprintPipeline
+var demoBp BP
 
 // demoBlueprintCmd represents the "demo-blueprint" command
 var demoBlueprintCmd = &cobra.Command{
@@ -78,8 +85,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		/* Run Blueprint */
 		log.Println("#run_blueprint")
 		log.Printf("PATH -> %s \n", demoBlueprintPath)
-		var err error
-		demoBp, err = ParseBlueprint(demoBlueprintPath)
+		bp, err := ParseBlueprint(demoBlueprintPath)
 		if err != nil {
 			log.Printf("Parsing error: %s \n", err)
 			return
@@ -89,7 +95,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		/* Run States */
 		log.Println("#run_states")
 		var stages []string
-		for k := range demoBp.Stages {
+		for k := range bp.Stages {
 			stages = append(stages, k)
 		}
 
@@ -101,8 +107,9 @@ Demo Blueprint Pipeline goes thru states.`,
 
 		go func() {
 			for {
-				demoBpPl = fsm.NewBlueprintPipeline(stages)
-				demoBpPl.Start()
+				pl := fsm.NewBlueprintPipeline(stages)
+				demoBp = BP{&bp, pl}
+				demoBp.Start()
 
 				time.Sleep(time.Second * 9)
 
@@ -110,18 +117,18 @@ Demo Blueprint Pipeline goes thru states.`,
 					time.Sleep(time.Second * 3)
 					v := map[string]fsm.StageState{s: fsm.StageStateCreated}
 					log.Println("#pl-update", v)
-					demoBpPl.Update(v)
+					demoBp.Update(v)
 				}
 				for _, s := range stages {
 					time.Sleep(time.Second * 3)
 					v := map[string]fsm.StageState{s: fsm.StageStateRunning}
 					log.Println("#pl-update", v)
-					demoBpPl.Update(v)
+					demoBp.Update(v)
 				}
 				for _, v := range ss {
 					time.Sleep(time.Second * 3)
 					log.Println("#pl-update", v)
-					demoBpPl.Update(v)
+					demoBp.Update(v)
 				}
 			}
 		}()
@@ -180,14 +187,9 @@ func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	type BP struct {
-		Blueprint
-		*fsm.BlueprintPipeline
-	}
-
 	o := map[string]interface{}{
 		"data": []BP{
-			{demoBp, demoBpPl},
+			demoBp,
 		},
 		"meta": map[string]interface{}{
 			"info": "demouiAPI1BlueprintsHandler",
