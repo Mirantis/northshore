@@ -20,6 +20,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Mirantis/northshore/fsm"
 	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
@@ -93,6 +94,13 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal(err)
 		}
+		db.Close()
+
+		//Update frequency for watcher in seconds
+		period := 3
+		go func() {
+			fsm.Watch(period)
+		}()
 
 		log.Println("Listening at port 8998")
 		http.ListenAndServe(":8998", r)
