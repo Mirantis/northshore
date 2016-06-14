@@ -36,15 +36,14 @@ var blueprintCmd = &cobra.Command{
 	Short: "Run execution of blueprint",
 	Long:  `This command read, parse and process blueprint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Blueprint was runned.")
-		fmt.Printf("PATH -> %s \n", path)
+		log.Println("Blueprint was runned.")
+		log.Printf("PATH -> %s", path)
 		bp, err := ParseBlueprint(path)
 		if err != nil {
-			fmt.Printf("Parsing error: %s \n", err)
-			return
+			log.Fatalf("Parsing error: %s \n", err)
 		}
-		fmt.Printf("BLUEPRINT -> %+v \n", bp)
-		fmt.Println("Running...............")
+		log.Printf("BLUEPRINT -> %+v", bp)
+		log.Println("Running............")
 		RunBlueprint(bp)
 	},
 }
@@ -78,7 +77,7 @@ func ParseBlueprint(path string) (bp Blueprint, err error) {
 	viper.AddConfigPath(path)
 	err = viper.ReadInConfig()
 	if err != nil {
-		return bp, fmt.Errorf("Config not found. %s \n", err)
+		return bp, fmt.Errorf("Config not found. %s", err)
 	}
 
 	err = viper.Unmarshal(&bp)
@@ -109,14 +108,14 @@ func RunBlueprint(bp Blueprint) {
 		config := container.Config{
 			Image: bp.Stages[name].Image,
 		}
-		fmt.Printf("%s -> Config was built. \n", name)
+		log.Printf("%s -> Config was built.", name)
 
 		r, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, nil, name)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			continue
 		}
-		fmt.Printf("%s -> Container was created. \n", name)
+		log.Printf("%s -> Container was created.", name)
 		ids = append(ids, r.ID)
 
 		err = cli.ContainerStart(
@@ -124,15 +123,16 @@ func RunBlueprint(bp Blueprint) {
 			r.ID,
 			types.ContainerStartOptions{})
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			continue
 		}
-		fmt.Printf("%s -> Container was started. \n", name)
-		fmt.Printf("%s -> Container ID  %s \n", name, r.ID)
-		fmt.Printf("%s -> Warnings: %s \n", name, r.Warnings)
-		fmt.Println("======= \t ======= \t ======= \t ======= \t ======= \t ======= \t =======")
+		log.Printf("%s -> Container was started.", name)
+		log.Printf("%s -> Container ID  %s", name, r.ID)
+		log.Printf("%s -> Warnings: %s", name, r.Warnings)
 	}
-	updateIDs(strings.Join(ids[:], ","))
+	if len(ids) > 0 {
+		updateIDs(strings.Join(ids[:], ","))
+	}
 }
 
 //Update list of containers in DB

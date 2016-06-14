@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -36,14 +35,13 @@ var demoBlueprintCmd = &cobra.Command{
 	Short: "Run execution of blueprint",
 	Long:  `This command read, parse and process blueprint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Run Blueprint")
-		fmt.Printf("PATH -> %s \n", demoBlueprintPath)
+		log.Println("Run Blueprint")
+		log.Printf("PATH -> %s", demoBlueprintPath)
 		bp, err := ParseBlueprint(demoBlueprintPath)
 		if err != nil {
-			fmt.Printf("Parsing error: %s \n", err)
-			return
+			log.Fatalf("Parsing error: %s", err)
 		}
-		fmt.Printf("BLUEPRINT -> %+v \n", bp)
+		log.Printf("BLUEPRINT -> %+v", bp)
 	},
 }
 
