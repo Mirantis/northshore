@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/http', 'rxjs/add/operator/toPromise', '../alerts/alerts', '../assets/assets'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/http', 'rxjs/Observable', 'rxjs/add/observable/throw', 'rxjs/add/operator/catch', 'rxjs/add/operator/map', '../alerts/alerts', '../assets/assets'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '@angular/http', 'rxjs/add/operator/toPromise'
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, http_1, alerts_1, assets_1;
+    var core_1, http_1, Observable_1, alerts_1, assets_1;
     var Blueprint, BlueprintsService;
     return {
         setters:[
@@ -20,7 +20,12 @@ System.register(['@angular/core', '@angular/http', 'rxjs/add/operator/toPromise'
             function (http_1_1) {
                 http_1 = http_1_1;
             },
+            function (Observable_1_1) {
+                Observable_1 = Observable_1_1;
+            },
             function (_1) {},
+            function (_2) {},
+            function (_3) {},
             function (alerts_1_1) {
                 alerts_1 = alerts_1_1;
             },
@@ -41,15 +46,21 @@ System.register(['@angular/core', '@angular/http', 'rxjs/add/operator/toPromise'
                     this.http = http;
                     this.blueprintsUrl = this.assetsService.asset('api').blueprints;
                 }
+                BlueprintsService.prototype.extractData = function (res) {
+                    var body = res.json();
+                    return body.data || {};
+                };
                 BlueprintsService.prototype.handleError = function (error) {
                     console.error('#BlueprintsService,#Error', error);
-                    this.alertsService.alertError('Some error alert here');
-                    return Promise.reject(error.message || error);
+                    // TODO: Solve an issue
+                    // platform-browser.umd.js:962 EXCEPTION: TypeError: Cannot read property 'alertError' of undefined
+                    // this.alertsService.alertError('Some error alert here');
+                    return Observable_1.Observable.throw(error.message || error);
                 };
                 BlueprintsService.prototype.getBlueprints = function () {
+                    // this.alertsService.alert('#getBlueprints');
                     return this.http.get(this.blueprintsUrl)
-                        .toPromise()
-                        .then(function (response) { return response.json().data; })
+                        .map(this.extractData)
                         .catch(this.handleError);
                 };
                 BlueprintsService = __decorate([

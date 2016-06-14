@@ -30,10 +30,8 @@ System.register(['@angular/core', '../../services/blueprints/blueprints'], funct
                 };
                 DashboardComponent.prototype.getBlueprints = function () {
                     var _this = this;
-                    this.blueprintsService
-                        .getBlueprints()
-                        .then(function (blueprints) { return _this.blueprints = blueprints; })
-                        .catch(function (error) { return _this.error = error; }); // TODO: Display error message
+                    this.blueprintsService.getBlueprints()
+                        .subscribe(function (blueprints) { return _this.blueprints = blueprints; });
                 };
                 DashboardComponent = __decorate([
                     core_1.Component({

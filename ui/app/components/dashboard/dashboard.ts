@@ -23,10 +23,8 @@ export class DashboardComponent implements OnInit {
   }
 
   getBlueprints() {
-    this.blueprintsService
-      .getBlueprints()
-      .then(blueprints => this.blueprints = blueprints)
-      .catch(error => this.error = error); // TODO: Display error message
+    this.blueprintsService.getBlueprints()
+      .subscribe(blueprints => this.blueprints = blueprints)
   }
- 
+
 }
