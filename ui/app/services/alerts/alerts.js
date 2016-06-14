@@ -24,31 +24,33 @@ System.register(['@angular/core', '../assets/assets'], function(exports_1, conte
             AlertsService = (function () {
                 function AlertsService(assetsService) {
                     this.assetsService = assetsService;
-                    this._assetAlerts = this.assetsService.asset('alerts');
-                    this._alerts = [];
+                    this.alerts = [];
+                    this.assetAlerts = this.assetsService.asset('alerts');
                 }
                 AlertsService.prototype.alert = function (message, type) {
-                    this._alerts.push({
-                        message: message,
-                        type: (type && this._assetAlerts.uibAlertTypes[type])
-                            ? this._assetAlerts.uibAlertTypes[type]
-                            : this._assetAlerts.uibAlertTypes.default,
+                    this.alerts.push({
+                        message: message
+                            ? message
+                            : this.assetAlerts.AlertsService.notImplemented,
+                        type: (type && this.assetAlerts.uibAlertTypes[type])
+                            ? this.assetAlerts.uibAlertTypes[type]
+                            : this.assetAlerts.uibAlertTypes.default,
                     });
                 };
                 AlertsService.prototype.alertError = function (message) {
-                    this.alert(message ? message : this._assetAlerts.AlertsService.error, 'error');
+                    this.alert(message ? message : this.assetAlerts.AlertsService.error, 'error');
                 };
                 AlertsService.prototype.alertSuccess = function (message) {
                     this.alert(message, 'success');
                 };
                 AlertsService.prototype.clearAlerts = function () {
-                    this._alerts.length = 0;
+                    this.alerts.length = 0;
                 };
                 AlertsService.prototype.deleteAlert = function (idx) {
-                    this._alerts.splice(idx, 1);
+                    this.alerts.splice(idx, 1);
                 };
                 AlertsService.prototype.getAlerts = function () {
-                    return this._alerts;
+                    return this.alerts;
                 };
                 AlertsService = __decorate([
                     core_1.Injectable(), 
