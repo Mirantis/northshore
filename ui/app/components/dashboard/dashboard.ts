@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 
 import { Blueprint, BlueprintsService } from '../../services/blueprints/blueprints';
+import { IterateMapPipe, KeysPipe } from '../../pipes/iterate';
 
 @Component({
   selector: 'my-dashboard',
+   pipes: [IterateMapPipe, KeysPipe],
   providers: [BlueprintsService],
   styleUrls: ['app/components/dashboard/dashboard.css'],
   templateUrl: 'app/components/dashboard/dashboard.html',
