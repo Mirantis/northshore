@@ -45,11 +45,25 @@ export class BlueprintsService {
   }
 
   getBlueprints(): Observable<Blueprint[]> {
-    // this.alertsService.alert('#getBlueprints');
-
     return this.http.get(this.blueprintsUrl)
       .map(this.extractData)
-      .catch(this.handleError);
+      // TODO: move to some generic handler
+      // .catch(this.handleError);
+      .catch((error: any) => {
+        console.error('#BlueprintsService,#Error', error);
+        try {
+          // handle JSONAPI Errors
+          let o = error.json()
+          if (o && o.errors) {
+            for (let i in o.errors) {
+              this.alertsService.alertError(o.errors[i].details);
+            }
+          }
+        } catch (e) {
+          this.alertsService.alertError();
+        }
+        return Observable.throw(error);
+      });
   }
 
 }

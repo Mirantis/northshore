@@ -58,10 +58,25 @@ System.register(['@angular/core', '@angular/http', 'rxjs/Observable', 'rxjs/add/
                     return Observable_1.Observable.throw(error.message || error);
                 };
                 BlueprintsService.prototype.getBlueprints = function () {
-                    // this.alertsService.alert('#getBlueprints');
+                    var _this = this;
                     return this.http.get(this.blueprintsUrl)
                         .map(this.extractData)
-                        .catch(this.handleError);
+                        .catch(function (error) {
+                        console.error('#BlueprintsService,#Error', error);
+                        try {
+                            // handle JSONAPI Errors
+                            var o = error.json();
+                            if (o && o.errors) {
+                                for (var i in o.errors) {
+                                    _this.alertsService.alertError(o.errors[i].details);
+                                }
+                            }
+                        }
+                        catch (e) {
+                            _this.alertsService.alertError();
+                        }
+                        return Observable_1.Observable.throw(error);
+                    });
                 };
                 BlueprintsService = __decorate([
                     core_1.Injectable(), 
