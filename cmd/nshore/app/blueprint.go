@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strings"
 
@@ -111,6 +112,21 @@ func RunBlueprint(bp Blueprint) {
 		log.Printf("%s -> Config was built.", name)
 
 		r, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, nil, name)
+		if err != nil && strings.Contains(err.Error(), "No such image") {
+			log.Println(err)
+			log.Println("Start pulling process...")
+			rc, e := cli.ImagePull(context.Background(), config.Image, types.ImagePullOptions{})
+			if e != nil {
+				log.Println(e)
+			}
+			//TODO: add pretty print of pulling process
+			_, re := ioutil.ReadAll(rc)
+			if re != nil {
+				log.Println(re)
+			}
+			rc.Close()
+			r, err = cli.ContainerCreate(context.Background(), &config, &hostConfig, nil, name)
+		}
 		if err != nil {
 			log.Println(err)
 			continue
