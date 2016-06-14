@@ -16,9 +16,18 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"strings"
 
+	"github.com/boltdb/bolt"
+	"github.com/docker/engine-api/client"
+	"github.com/docker/engine-api/types"
+	"github.com/docker/engine-api/types/container"
+	"github.com/docker/go-connections/nat"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"golang.org/x/net/context"
 )
 
 var path string
@@ -27,14 +36,15 @@ var blueprintCmd = &cobra.Command{
 	Short: "Run execution of blueprint",
 	Long:  `This command read, parse and process blueprint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Blueprint was runned.")
-		fmt.Printf("PATH -> %s \n", path)
+		log.Println("Blueprint was runned.")
+		log.Printf("PATH -> %s", path)
 		bp, err := ParseBlueprint(path)
 		if err != nil {
-			fmt.Printf("Parsing error: %s \n", err)
-			return
+			log.Fatalf("Parsing error: %s \n", err)
 		}
-		fmt.Printf("BLUEPRINT -> %+v \n", bp)
+		log.Printf("BLUEPRINT -> %+v", bp)
+		log.Println("Running............")
+		RunBlueprint(bp)
 	},
 }
 
@@ -67,7 +77,7 @@ func ParseBlueprint(path string) (bp Blueprint, err error) {
 	viper.AddConfigPath(path)
 	err = viper.ReadInConfig()
 	if err != nil {
-		return bp, fmt.Errorf("Config not found. %s \n", err)
+		return bp, fmt.Errorf("Config not found. %s", err)
 	}
 
 	err = viper.Unmarshal(&bp)
@@ -75,6 +85,85 @@ func ParseBlueprint(path string) (bp Blueprint, err error) {
 		return bp, fmt.Errorf("Unable to decode into struct, %v", err)
 	}
 	return bp, nil
+}
+
+func RunBlueprint(bp Blueprint) {
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		panic(err)
+	}
+	ids := []string{}
+
+	for name, stage := range bp.Stages {
+		bindings := make(map[nat.Port][]nat.PortBinding)
+		for _, ports := range stage.Ports {
+			port, _ := nat.NewPort("tcp", ports["fromPort"])
+			bindings[port] = []nat.PortBinding{nat.PortBinding{HostIP: "0.0.0.0", HostPort: ports["toPort"]}}
+		}
+
+		hostConfig := container.HostConfig{
+			PortBindings: bindings,
+		}
+
+		config := container.Config{
+			Image: bp.Stages[name].Image,
+		}
+		log.Printf("%s -> Config was built.", name)
+
+		r, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, nil, name)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Printf("%s -> Container was created.", name)
+		ids = append(ids, r.ID)
+
+		err = cli.ContainerStart(
+			context.Background(),
+			r.ID,
+			types.ContainerStartOptions{})
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Printf("%s -> Container was started.", name)
+		log.Printf("%s -> Container ID  %s", name, r.ID)
+		log.Printf("%s -> Warnings: %s", name, r.Warnings)
+	}
+	if len(ids) > 0 {
+		updateIDs(strings.Join(ids[:], ","))
+	}
+}
+
+//Update list of containers in DB
+//TODO add ability to add one container
+func updateIDs(ids string) {
+	db, err := bolt.Open("my.db", 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	bname := []byte("Northshore")
+	key := []byte("containers")
+	value := []byte(ids)
+	err = db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists(bname)
+		if err != nil {
+			return fmt.Errorf("Create bucket: %s", err)
+		}
+		log.Printf("Bucket \"%s\" created\n", bname)
+		err = b.Put(key, value)
+		if err != nil {
+			return err
+		}
+		log.Printf("Info puted with key \"%s\"\n", key)
+		return nil
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func init() {
