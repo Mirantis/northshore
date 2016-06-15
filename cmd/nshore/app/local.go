@@ -24,7 +24,11 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
+	"time"
 )
+
+var bpPath string
+var bpl BP
 
 // localCmd represents the local command
 var localCmd = &cobra.Command{
@@ -36,6 +40,8 @@ var localCmd = &cobra.Command{
 
 		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
 		uiAPI1.HandleFunc("/", uiAPI1RootHandler).Methods("GET")
+
+		uiAPI1.HandleFunc("/blueprints", blueprints).Methods("GET", "POST")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
@@ -91,11 +97,60 @@ var localCmd = &cobra.Command{
 		}
 		db.Close()
 
+		//TODO: draft for demo
+		states := make(chan map[string]string, 3)
+
+		bp, err := ParseBlueprint(bpPath)
+		if err != nil {
+			log.Fatalf("Parsing error: %s \n", err)
+		}
+
+		var stages []string
+		for k := range bp.Stages {
+			stages = append(stages, k)
+		}
+
+		go func(c chan map[string]string) {
+			pl := fsm.NewBlueprintPipeline(stages)
+			bpl = BP{&bp, pl}
+			bpl.Start()
+
+			time.Sleep(time.Second * 9)
+
+			for _, s := range stages {
+				time.Sleep(time.Second * 3)
+				v := map[string]fsm.StageState{s: fsm.StageStateCreated}
+				log.Println("#PL_UPDATE (INITIALIZATION STATE CREATED)!!!", v)
+				bpl.Update(v)
+			}
+
+			for {
+				state := <- c
+				log.Printf("CHANNEL IN FSM GOROUTINE -> %v", state)
+
+				for k, v := range state {
+					switch v {
+					case "running":
+						vv := map[string]fsm.StageState{k: fsm.StageStateRunning}
+						log.Println("#PL_UPDATE!!!", vv)
+						bpl.Update(vv)
+					case "exited":
+						vv := map[string]fsm.StageState{k: fsm.StageStateStopped}
+						log.Println("#PL_UPDATE!!!", vv)
+						bpl.Update(vv)
+					default:
+						log.Println("DEFAULT CASE IN SWITCH!!!")
+					}
+				}
+			}
+		}(states)
+
+
 		//Update frequency for watcher in seconds
 		period := 3
-		go func() {
-			fsm.Watch(period)
-		}()
+		go func(c chan map[string]string) {
+			fsm.Watch(period, c)
+		}(states)
 
 		log.Println("Listening at port 8998")
 		http.ListenAndServe(":8998", r)
@@ -112,6 +167,22 @@ func uiIndexHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "ui/index.html")
 }
 
+func blueprints(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+
+	o := map[string]interface{}{
+		"data": []BP{
+			bpl,
+		},
+		"meta": map[string]interface{}{
+			"info": "blueprints",
+		},
+	}
+
+	json.NewEncoder(w).Encode(o)
+}
+
 func init() {
+	localCmd.Flags().StringVarP(&bpPath, "file", "f", ".", "Path to blueprint yaml")
 	runCmd.AddCommand(localCmd)
 }
