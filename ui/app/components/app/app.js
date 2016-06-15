@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', '@angular/router-deprecated', 'ng2-bootstrap/components/alert', 'ng2-bootstrap/components/collapse', '../../services/alerts/alerts', '../../services/assets/assets', '../dashboard/dashboard', '../home/home'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', '@angular/router', 'ng2-bootstrap/components/alert', 'ng2-bootstrap/components/collapse', '../../services/alerts/alerts', '../../services/assets/assets'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '@angular/common', '@angular/router-deprecated
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, router_deprecated_1, alert_1, collapse_1, alerts_1, assets_1, dashboard_1, home_1;
+    var core_1, common_1, router_1, alert_1, collapse_1, alerts_1, assets_1;
     var AppComponent;
     return {
         setters:[
@@ -20,8 +20,8 @@ System.register(['@angular/core', '@angular/common', '@angular/router-deprecated
             function (common_1_1) {
                 common_1 = common_1_1;
             },
-            function (router_deprecated_1_1) {
-                router_deprecated_1 = router_deprecated_1_1;
+            function (router_1_1) {
+                router_1 = router_1_1;
             },
             function (alert_1_1) {
                 alert_1 = alert_1_1;
@@ -34,19 +34,12 @@ System.register(['@angular/core', '@angular/common', '@angular/router-deprecated
             },
             function (assets_1_1) {
                 assets_1 = assets_1_1;
-            },
-            function (dashboard_1_1) {
-                dashboard_1 = dashboard_1_1;
-            },
-            function (home_1_1) {
-                home_1 = home_1_1;
             }],
         execute: function() {
             AppComponent = (function () {
-                function AppComponent(alertsService, assetsService, router) {
+                function AppComponent(alertsService, assetsService) {
                     this.alertsService = alertsService;
                     this.assetsService = assetsService;
-                    this.router = router;
                     this.title = 'NorthShore: A Pipeline Generator';
                     this.alertDismiss = this.assetsService.asset('timers').alertDismiss;
                 }
@@ -62,30 +55,16 @@ System.register(['@angular/core', '@angular/common', '@angular/router-deprecated
                             alert_1.AlertComponent,
                             collapse_1.CollapseDirective,
                             common_1.CORE_DIRECTIVES,
-                            router_deprecated_1.ROUTER_DIRECTIVES,
+                            router_1.ROUTER_DIRECTIVES,
                         ],
                         providers: [
                             alerts_1.AlertsService,
                             assets_1.AssetsService,
-                            router_deprecated_1.ROUTER_PROVIDERS,
                         ],
                         selector: 'my-app',
                         templateUrl: 'app/components/app/app.html',
-                    }),
-                    router_deprecated_1.RouteConfig([
-                        {
-                            path: '/',
-                            name: 'Home',
-                            component: home_1.HomeComponent,
-                            useAsDefault: true
-                        },
-                        {
-                            path: '/dashboard',
-                            name: 'Dashboard',
-                            component: dashboard_1.DashboardComponent,
-                        },
-                    ]), 
-                    __metadata('design:paramtypes', [alerts_1.AlertsService, assets_1.AssetsService, router_deprecated_1.Router])
+                    }), 
+                    __metadata('design:paramtypes', [alerts_1.AlertsService, assets_1.AssetsService])
                 ], AppComponent);
                 return AppComponent;
             }());

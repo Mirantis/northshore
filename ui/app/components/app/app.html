@@ -7,12 +7,13 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" [routerLink]="['Home']">NorthShore</a>
+      <a class="navbar-brand" [routerLink]="['/']">NorthShore</a>
     </div>
     <div class="navbar-collapse collapse" [collapse]="!toggleNavbar">
       <ul class="nav navbar-nav navbar-left">
-        <li [class.active]="router.isRouteActive(router.generate(['Dashboard']))">
-          <a [routerLink]="['Dashboard']">Dashboard</a>
+        <!-- <li [class.active]="router.isRouteActive(router.generate(['Blueprints']))"> -->
+        <li >
+          <a [routerLink]="['/blueprints']">Blueprints</a>
         </li>
       </ul>
     </div>

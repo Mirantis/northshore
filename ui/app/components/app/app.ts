@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { CORE_DIRECTIVES } from '@angular/common';
-import { Router, RouteConfig, ROUTER_DIRECTIVES, ROUTER_PROVIDERS } from '@angular/router-deprecated';
+import { ROUTER_DIRECTIVES } from '@angular/router';
 import { AlertComponent } from 'ng2-bootstrap/components/alert';
 import { CollapseDirective } from 'ng2-bootstrap/components/collapse';
 
 import { AlertsService } from '../../services/alerts/alerts';
 import { AssetsService } from '../../services/assets/assets';
-import { DashboardComponent } from '../dashboard/dashboard';
+import { BlueprintsComponent } from '../blueprints/blueprints';
 import { HomeComponent } from '../home/home';
 
 @Component({
@@ -19,25 +19,10 @@ import { HomeComponent } from '../home/home';
   providers: [
     AlertsService,
     AssetsService,
-    ROUTER_PROVIDERS,
   ],
   selector: 'my-app',
   templateUrl: 'app/components/app/app.html',
 })
-
-@RouteConfig([
-  {
-    path: '/',
-    name: 'Home',
-    component: HomeComponent,
-    useAsDefault: true
-  },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: DashboardComponent,
-  },
-])
 
 export class AppComponent {
   title = 'NorthShore: A Pipeline Generator';
@@ -45,8 +30,7 @@ export class AppComponent {
 
   constructor(
     private alertsService: AlertsService,
-    private assetsService: AssetsService,
-    private router: Router
+    private assetsService: AssetsService
   ) { }
 
   deleteAlert(idx: number): void {
