@@ -4,25 +4,26 @@ import { AssetsService } from '../assets/assets';
 @Injectable()
 export class AlertsService {
 
-  _alerts: Array<Object>;
-  _assetAlerts = this.assetsService.asset('alerts');
+  private alerts: Array<Object> = [];
+  private assetAlerts = this.assetsService.asset('alerts');
 
   constructor(private assetsService: AssetsService) {
-    this._alerts = [];
   }
 
-  alert(message: string, type?: string): void {
-    this._alerts.push({
-      message: message,
-      type: (type && this._assetAlerts.uibAlertTypes[type])
-        ? this._assetAlerts.uibAlertTypes[type]
-        : this._assetAlerts.uibAlertTypes.default,
+  alert(message?: string, type?: string): void {
+    this.alerts.push({
+      message: message
+        ? message
+        : this.assetAlerts.AlertsService.notImplemented,
+      type: (type && this.assetAlerts.uibAlertTypes[type])
+        ? this.assetAlerts.uibAlertTypes[type]
+        : this.assetAlerts.uibAlertTypes.default,
     });
   }
 
-  alertError(message: string): void {
+  alertError(message?: string): void {
     this.alert(
-      message ? message : this._assetAlerts.AlertsService.error,
+      message ? message : this.assetAlerts.AlertsService.error,
       'error'
     );
   }
@@ -32,15 +33,15 @@ export class AlertsService {
   }
 
   clearAlerts(): void {
-    this._alerts.length = 0;
+    this.alerts.length = 0;
   }
 
   deleteAlert(idx: number): void {
-    this._alerts.splice(idx, 1);
+    this.alerts.splice(idx, 1);
   }
 
   getAlerts(): Array<Object> {
-    return this._alerts;
+    return this.alerts;
   }
 
 }

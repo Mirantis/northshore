@@ -20,7 +20,10 @@ System.register(['@angular/core'], function(exports_1, context_1) {
         execute: function() {
             AssetsService = (function () {
                 function AssetsService() {
-                    this._assets = {
+                    this.assets = {
+                        api: {
+                            blueprints: 'api/v1/blueprints',
+                        },
                         alerts: {
                             AlertsService: {
                                 error: "There are some internal issues while trying to process your request.",
@@ -40,7 +43,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                     };
                 }
                 AssetsService.prototype.asset = function (key) {
-                    return this._assets[key];
+                    return this.assets[key];
                 };
                 AssetsService = __decorate([
                     core_1.Injectable(), 

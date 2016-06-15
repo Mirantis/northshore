@@ -199,6 +199,7 @@ func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 
 func demouiAPI1ErrorsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(500)
 
 	o := map[string]interface{}{
 		"data": []map[string]interface{}{},

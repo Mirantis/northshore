@@ -20,5 +20,8 @@
     "tabSize": 2,
     "convertTabsToSpaces": true,
     "newLineCharacter": "\n"
+  },
+  "atom": {
+    "formatOnSave": true
   }
 }
