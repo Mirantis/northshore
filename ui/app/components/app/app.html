@@ -11,8 +11,7 @@
     </div>
     <div class="navbar-collapse collapse" [collapse]="!toggleNavbar">
       <ul class="nav navbar-nav navbar-left">
-        <!-- <li [class.active]="router.isRouteActive(router.generate(['Blueprints']))"> -->
-        <li >
+        <li routerLinkActive="active">
           <a [routerLink]="['/blueprints']">Blueprints</a>
         </li>
       </ul>

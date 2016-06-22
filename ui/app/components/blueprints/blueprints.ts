@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, ROUTER_DIRECTIVES } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { Blueprint, BlueprintsService } from '../../services/blueprints/blueprints';
 import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-details';
@@ -7,8 +7,7 @@ import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-detail
 @Component({
   selector: 'my-dashboard',
   directives: [
-    ROUTER_DIRECTIVES,
-    BlueprintDetailsComponent
+    BlueprintDetailsComponent,
   ],
   providers: [
     BlueprintsService,

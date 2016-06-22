@@ -65,8 +65,7 @@ System.register(['@angular/core', '@angular/router', '../../services/blueprints/
                     core_1.Component({
                         selector: 'my-dashboard',
                         directives: [
-                            router_1.ROUTER_DIRECTIVES,
-                            blueprint_details_1.BlueprintDetailsComponent
+                            blueprint_details_1.BlueprintDetailsComponent,
                         ],
                         providers: [
                             blueprints_1.BlueprintsService,

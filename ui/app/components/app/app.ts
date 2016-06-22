@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { CORE_DIRECTIVES } from '@angular/common';
-import { ROUTER_DIRECTIVES } from '@angular/router';
 import { AlertComponent } from 'ng2-bootstrap/components/alert';
 import { CollapseDirective } from 'ng2-bootstrap/components/collapse';
 
@@ -14,7 +13,6 @@ import { HomeComponent } from '../home/home';
     AlertComponent,
     CollapseDirective,
     CORE_DIRECTIVES,
-    ROUTER_DIRECTIVES,
   ],
   providers: [
     AlertsService,

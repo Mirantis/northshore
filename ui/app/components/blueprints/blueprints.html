@@ -5,7 +5,7 @@
 
         <ul class="list-unstyled">
             <li *ngFor="let blueprint of blueprints">
-                <a  [routerLink]="['/blueprints', blueprint.name]">
+                <a [routerLink]="['/blueprints', blueprint.name]" routerLinkActive="active">
                     {{blueprint.name}} <i class="fa fa-info-circle"></i>
                 </a>
             </li>

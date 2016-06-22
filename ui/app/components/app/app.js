@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', '@angular/router', 'ng2-bootstrap/components/alert', 'ng2-bootstrap/components/collapse', '../../services/alerts/alerts', '../../services/assets/assets'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', 'ng2-bootstrap/components/alert', 'ng2-bootstrap/components/collapse', '../../services/alerts/alerts', '../../services/assets/assets'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '@angular/common', '@angular/router', 'ng2-boo
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, router_1, alert_1, collapse_1, alerts_1, assets_1;
+    var core_1, common_1, alert_1, collapse_1, alerts_1, assets_1;
     var AppComponent;
     return {
         setters:[
@@ -19,9 +19,6 @@ System.register(['@angular/core', '@angular/common', '@angular/router', 'ng2-boo
             },
             function (common_1_1) {
                 common_1 = common_1_1;
-            },
-            function (router_1_1) {
-                router_1 = router_1_1;
             },
             function (alert_1_1) {
                 alert_1 = alert_1_1;
@@ -55,7 +52,6 @@ System.register(['@angular/core', '@angular/common', '@angular/router', 'ng2-boo
                             alert_1.AlertComponent,
                             collapse_1.CollapseDirective,
                             common_1.CORE_DIRECTIVES,
-                            router_1.ROUTER_DIRECTIVES,
                         ],
                         providers: [
                             alerts_1.AlertsService,
