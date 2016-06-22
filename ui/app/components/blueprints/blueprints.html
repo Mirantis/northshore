@@ -1,0 +1,20 @@
+<div class="row">
+    <div class="col-md-4">
+
+        <h3> Saved Blueprints </h3>
+
+        <ul class="list-unstyled">
+            <li *ngFor="let blueprint of blueprints">
+                <a [routerLink]="['/blueprints', blueprint.name]" routerLinkActive="active">
+                    {{blueprint.name}} <i class="fa fa-info-circle"></i>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+    <div class="col-md-8">
+
+        <blueprint-details [blueprint]="bpSelected"></blueprint-details>
+
+    </div>
+</div>
