@@ -20,17 +20,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/blueprint"
+	"github.com/Mirantis/northshore/fsm"
+	"github.com/Mirantis/northshore/server"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
-	"github.com/Mirantis/northshore/server"
 )
 
 // BP represents a combined data of the Blueprint with States
 // TODO: refactor Blueprint to integrate State info
 // the State should be updated on changing the stages via stages setter
-
 
 var demoBlueprintPath string
 var demoBp blueprint.BP
@@ -158,8 +157,8 @@ Demo Blueprint Pipeline goes thru states.`,
 }
 
 func init() {
-	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", ".", "Path to blueprint yaml")
-	demoCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", ".", "Path to blueprint yaml")
+	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
+	demoCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
 	runCmd.AddCommand(demoBlueprintCmd)
 	runCmd.AddCommand(demoFSMCmd)
 	runCmd.AddCommand(demoCmd)

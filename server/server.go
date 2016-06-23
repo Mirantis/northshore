@@ -14,20 +14,21 @@
 package server
 
 import (
-	"log"
-	"fmt"
-	"time"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
+	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/boltdb/bolt"
-	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/blueprint"
+	"github.com/Mirantis/northshore/fsm"
+	"github.com/boltdb/bolt"
+	"github.com/gorilla/mux"
 )
 
 var bpl blueprint.BP
-func Run(bpPath string)  {
+
+func Run(bpPath string) {
 	r := mux.NewRouter()
 
 	uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
@@ -117,7 +118,7 @@ func Run(bpPath string)  {
 		}
 
 		for {
-			state := <- c
+			state := <-c
 			log.Printf("CHANNEL IN FSM GOROUTINE -> %v", state)
 
 			for k, v := range state {
@@ -136,7 +137,6 @@ func Run(bpPath string)  {
 			}
 		}
 	}(states)
-
 
 	//Update frequency for watcher in seconds
 	period := 3

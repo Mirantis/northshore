@@ -14,18 +14,18 @@
 package blueprint
 
 import (
-	"log"
 	"fmt"
-	"strings"
 	"io/ioutil"
+	"log"
+	"strings"
 
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/boltdb/bolt"
-	"github.com/spf13/viper"
-	"github.com/docker/go-connections/nat"
-	"github.com/docker/engine-api/types/container"
 	"github.com/docker/engine-api/client"
 	"github.com/docker/engine-api/types"
+	"github.com/docker/engine-api/types/container"
+	"github.com/docker/go-connections/nat"
+	"github.com/spf13/viper"
 
 	"golang.org/x/net/context"
 )
@@ -60,8 +60,7 @@ type Blueprint struct {
 
 // ParseBlueprint parses and validates the incoming data
 func ParseBlueprint(path string) (bp Blueprint, err error) {
-	viper.SetConfigName("pipeline")
-	viper.AddConfigPath(path)
+	viper.SetConfigFile(path)
 	err = viper.ReadInConfig()
 	if err != nil {
 		return bp, fmt.Errorf("Config not found. %s", err)

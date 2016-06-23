@@ -17,8 +17,8 @@ package cmd
 import (
 	"log"
 
-	"github.com/spf13/cobra"
 	"github.com/Mirantis/northshore/blueprint"
+	"github.com/spf13/cobra"
 )
 
 var path string
@@ -40,6 +40,6 @@ var blueprintCmd = &cobra.Command{
 }
 
 func init() {
-	blueprintCmd.Flags().StringVarP(&path, "file", "f", ".", "Path to blueprint yaml")
+	blueprintCmd.Flags().StringVarP(&path, "file", "f", "", "Path to blueprint yaml")
 	runCmd.AddCommand(blueprintCmd)
 }

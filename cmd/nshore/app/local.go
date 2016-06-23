@@ -15,11 +15,12 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/Mirantis/northshore/server"
+	"github.com/spf13/cobra"
 )
 
 var bpPath string
+
 // localCmd represents the local command
 var localCmd = &cobra.Command{
 	Use:   "local",
@@ -31,6 +32,6 @@ var localCmd = &cobra.Command{
 }
 
 func init() {
-	localCmd.Flags().StringVarP(&bpPath, "file", "f", ".", "Path to blueprint yaml")
+	localCmd.Flags().StringVarP(&bpPath, "file", "f", "", "Path to blueprint yaml")
 	runCmd.AddCommand(localCmd)
 }
