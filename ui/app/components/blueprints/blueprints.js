@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/router', '../../services/blueprints/blueprints', '../blueprint-details/blueprint-details'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/router', '../../services/api/api', '../blueprint-details/blueprint-details'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '@angular/router', '../../services/blueprints/
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, router_1, blueprints_1, blueprint_details_1;
+    var core_1, router_1, api_1, blueprint_details_1;
     var BlueprintsComponent;
     return {
         setters:[
@@ -20,16 +20,16 @@ System.register(['@angular/core', '@angular/router', '../../services/blueprints/
             function (router_1_1) {
                 router_1 = router_1_1;
             },
-            function (blueprints_1_1) {
-                blueprints_1 = blueprints_1_1;
+            function (api_1_1) {
+                api_1 = api_1_1;
             },
             function (blueprint_details_1_1) {
                 blueprint_details_1 = blueprint_details_1_1;
             }],
         execute: function() {
             BlueprintsComponent = (function () {
-                function BlueprintsComponent(blueprintsService, route) {
-                    this.blueprintsService = blueprintsService;
+                function BlueprintsComponent(apiService, route) {
+                    this.apiService = apiService;
                     this.route = route;
                     this.blueprints = [];
                     this.subscriptions = [];
@@ -53,7 +53,7 @@ System.register(['@angular/core', '@angular/router', '../../services/blueprints/
                 };
                 BlueprintsComponent.prototype.getBlueprints = function () {
                     var _this = this;
-                    var sub = this.blueprintsService.getBlueprints()
+                    var sub = this.apiService.getBlueprints()
                         .subscribe(function (blueprints) {
                         _this.blueprints = blueprints;
                         _this.getSelected();
@@ -77,11 +77,11 @@ System.register(['@angular/core', '@angular/router', '../../services/blueprints/
                             blueprint_details_1.BlueprintDetailsComponent,
                         ],
                         providers: [
-                            blueprints_1.BlueprintsService,
+                            api_1.APIService,
                         ],
                         templateUrl: 'app/components/blueprints/blueprints.html',
                     }), 
-                    __metadata('design:paramtypes', [blueprints_1.BlueprintsService, router_1.ActivatedRoute])
+                    __metadata('design:paramtypes', [api_1.APIService, router_1.ActivatedRoute])
                 ], BlueprintsComponent);
                 return BlueprintsComponent;
             }());

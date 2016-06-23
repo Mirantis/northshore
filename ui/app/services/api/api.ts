@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Headers, Http, Response } from '@angular/http';
+import { Http, Response } from '@angular/http';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/throw';
@@ -20,7 +20,7 @@ export class Blueprint {
 }
 
 @Injectable()
-export class BlueprintsService {
+export class APIService {
 
   private blueprintsUrl = this.assetsService.asset('api').blueprints;
 
@@ -35,35 +35,27 @@ export class BlueprintsService {
     return body.data || {};
   }
 
-  private handleError(error: any) {
-    console.error('#BlueprintsService,#Error', error);
-    // TODO: Solve an issue
-    // platform-browser.umd.js:962 EXCEPTION: TypeError: Cannot read property 'alertError' of undefined
-    // this.alertsService.alertError('Some error alert here');
+  private handleError(error: any, logTags?: string) {
+    console.error(logTags ? logTags : '#APIService,#Error', error);
+    // handle JSONAPI Errors
+    try {
+      let o = error.json()
+      if (o && o.errors) {
+        for (let i in o.errors) {
+          this.alertsService.alertError(o.errors[i].details);
+        }
+      }
+    } catch (e) {
+      this.alertsService.alertError();
+    }
 
-    return Observable.throw(error.message || error);
+    return Observable.throw(error);
   }
 
   getBlueprints(): Observable<Blueprint[]> {
     return this.http.get(this.blueprintsUrl)
       .map(this.extractData)
-      // TODO: move to some generic handler
-      // .catch(this.handleError);
-      .catch((error: any) => {
-        console.error('#BlueprintsService,#Error', error);
-        try {
-          // handle JSONAPI Errors
-          let o = error.json()
-          if (o && o.errors) {
-            for (let i in o.errors) {
-              this.alertsService.alertError(o.errors[i].details);
-            }
-          }
-        } catch (e) {
-          this.alertsService.alertError();
-        }
-        return Observable.throw(error);
-      });
+      .catch(error => this.handleError(error, '#APIService.getBlueprints,#Error'));
   }
 
 }

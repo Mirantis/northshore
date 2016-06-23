@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Blueprint, BlueprintsService } from '../../services/blueprints/blueprints';
+import { Blueprint, APIService } from '../../services/api/api';
 import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-details';
 
 @Component({
@@ -10,7 +10,7 @@ import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-detail
     BlueprintDetailsComponent,
   ],
   providers: [
-    BlueprintsService,
+    APIService,
   ],
   templateUrl: 'app/components/blueprints/blueprints.html',
 })
@@ -23,7 +23,7 @@ export class BlueprintsComponent implements OnDestroy, OnInit {
   private subscriptions: any[] = [];
 
   constructor(
-    private blueprintsService: BlueprintsService,
+    private apiService: APIService,
     private route: ActivatedRoute
   ) { }
 
@@ -45,7 +45,7 @@ export class BlueprintsComponent implements OnDestroy, OnInit {
   }
 
   private getBlueprints() {
-    let sub = this.blueprintsService.getBlueprints()
+    let sub = this.apiService.getBlueprints()
       .subscribe(blueprints => {
         this.blueprints = blueprints;
         this.getSelected();

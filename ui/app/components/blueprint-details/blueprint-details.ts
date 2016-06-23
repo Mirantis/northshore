@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { Blueprint } from '../../services/blueprints/blueprints';
+import { Blueprint } from '../../services/api/api';
 
 @Component({
   selector: 'blueprint-details',
