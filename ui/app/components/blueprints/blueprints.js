@@ -32,24 +32,33 @@ System.register(['@angular/core', '@angular/router', '../../services/blueprints/
                     this.blueprintsService = blueprintsService;
                     this.route = route;
                     this.blueprints = [];
+                    this.subscriptions = [];
                 }
+                BlueprintsComponent.prototype.ngOnDestroy = function () {
+                    for (var _i = 0, _a = this.subscriptions; _i < _a.length; _i++) {
+                        var sub = _a[_i];
+                        sub.unsubscribe();
+                    }
+                };
                 BlueprintsComponent.prototype.ngOnInit = function () {
                     var _this = this;
                     this.getBlueprints();
-                    this.route.params
+                    var sub = this.route.params
                         .map(function (params) { return params['name']; })
                         .subscribe(function (name) {
                         _this.bpSelectedName = name;
                         _this.getSelected();
                     });
+                    this.subscriptions.push(sub);
                 };
                 BlueprintsComponent.prototype.getBlueprints = function () {
                     var _this = this;
-                    this.blueprintsService.getBlueprints()
+                    var sub = this.blueprintsService.getBlueprints()
                         .subscribe(function (blueprints) {
                         _this.blueprints = blueprints;
                         _this.getSelected();
                     });
+                    this.subscriptions.push(sub);
                 };
                 BlueprintsComponent.prototype.getSelected = function () {
                     if (this.bpSelectedName) {
