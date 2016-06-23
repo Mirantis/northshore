@@ -21,20 +21,19 @@ import (
 	"time"
 
 	"github.com/Mirantis/northshore/fsm"
+	"github.com/Mirantis/northshore/blueprint"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
+	"github.com/Mirantis/northshore/server"
 )
 
 // BP represents a combined data of the Blueprint with States
 // TODO: refactor Blueprint to integrate State info
 // the State should be updated on changing the stages via stages setter
-type BP struct {
-	*Blueprint
-	*fsm.BlueprintPipeline
-}
+
 
 var demoBlueprintPath string
-var demoBp BP
+var demoBp blueprint.BP
 
 // demoBlueprintCmd represents the "demo-blueprint" command
 var demoBlueprintCmd = &cobra.Command{
@@ -44,7 +43,7 @@ var demoBlueprintCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Println("Run Blueprint")
 		log.Printf("PATH -> %s", demoBlueprintPath)
-		bp, err := ParseBlueprint(demoBlueprintPath)
+		bp, err := blueprint.ParseBlueprint(demoBlueprintPath)
 		if err != nil {
 			log.Fatalf("Parsing error: %s", err)
 		}
@@ -83,7 +82,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		/* Run Blueprint */
 		log.Println("#run_blueprint")
 		log.Printf("PATH -> %s \n", demoBlueprintPath)
-		bp, err := ParseBlueprint(demoBlueprintPath)
+		bp, err := blueprint.ParseBlueprint(demoBlueprintPath)
 		if err != nil {
 			log.Printf("Parsing error: %s \n", err)
 			return
@@ -106,7 +105,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		go func() {
 			for {
 				pl := fsm.NewBlueprintPipeline(stages)
-				demoBp = BP{&bp, pl}
+				demoBp = blueprint.BP{&bp, pl}
 				demoBp.Start()
 
 				time.Sleep(time.Second * 9)
@@ -136,7 +135,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		r := mux.NewRouter()
 
 		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
-		uiAPI1.HandleFunc("/", uiAPI1RootHandler).Methods("GET")
+		uiAPI1.HandleFunc("/", server.UiAPI1RootHandler).Methods("GET")
 
 		uiAPI1.HandleFunc("/action", demouiAPI1ActionHandler).Methods("GET", "POST")
 		uiAPI1.HandleFunc("/blueprints", demouiAPI1BlueprintsHandler).Methods("GET", "POST")
@@ -144,8 +143,8 @@ Demo Blueprint Pipeline goes thru states.`,
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
-		ui.HandleFunc("/{s}", uiIndexHandler)
-		ui.HandleFunc("/", uiIndexHandler)
+		ui.HandleFunc("/{s}", server.UiIndexHandler)
+		ui.HandleFunc("/", server.UiIndexHandler)
 
 		// with 'nshore run local', you can got to http://localhost:8998/ and see a list of
 		// what is in static ... if you put index.html in there, it'll be returned.
@@ -186,7 +185,7 @@ func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
 	o := map[string]interface{}{
-		"data": []BP{
+		"data": []blueprint.BP{
 			demoBp,
 		},
 		"meta": map[string]interface{}{
