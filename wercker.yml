@@ -76,6 +76,12 @@ build:
         name: check output
         code: ls -alh $WERCKER_OUTPUT_DIR
 
+  after-steps:
+    - install-packages:
+        packages: ruby
+    - wantedly/pretty-slack-notify:
+        webhook_url: $SLACK_WEBHOOK_URL
+
 push:
   steps:
     # Check current
@@ -88,3 +94,9 @@ push:
         name: push artifact
         code: |
           curl -T nshore -H "X-Bintray-Publish: 1" -uoleksandr-minakov:$BINTRAY_TOKEN https://api.bintray.com/content/oleksandr-minakov/generic/NorthShore/$(cat version)/nshore-lin-$(cat version)
+
+  after-steps:
+    - install-packages:
+        packages: ruby
+    - wantedly/pretty-slack-notify:
+        webhook_url: $SLACK_WEBHOOK_URL

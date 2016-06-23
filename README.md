@@ -1,5 +1,6 @@
 # NorthShore: A Pipeline Generator
 [![Build Status](https://travis-ci.org/Mirantis/northshore.svg)][travis]
+[![wercker status](https://app.wercker.com/status/52c743f4f63ec61f47fbf7417f47661a/m/master "wercker status")](https://app.wercker.com/project/bykey/52c743f4f63ec61f47fbf7417f47661a)
 
 NorthShore is just getting started. We anticipate a 0.1 Release by the of Q2 2016.
 
