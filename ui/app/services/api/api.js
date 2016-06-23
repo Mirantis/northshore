@@ -11,7 +11,7 @@ System.register(['@angular/core', '@angular/http', 'rxjs/Observable', 'rxjs/add/
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
     var core_1, http_1, Observable_1, alerts_1, assets_1;
-    var Blueprint, BlueprintsService;
+    var Blueprint, APIService;
     return {
         setters:[
             function (core_1_1) {
@@ -39,53 +39,47 @@ System.register(['@angular/core', '@angular/http', 'rxjs/Observable', 'rxjs/add/
                 return Blueprint;
             }());
             exports_1("Blueprint", Blueprint);
-            BlueprintsService = (function () {
-                function BlueprintsService(alertsService, assetsService, http) {
+            APIService = (function () {
+                function APIService(alertsService, assetsService, http) {
                     this.alertsService = alertsService;
                     this.assetsService = assetsService;
                     this.http = http;
                     this.blueprintsUrl = this.assetsService.asset('api').blueprints;
                 }
-                BlueprintsService.prototype.extractData = function (res) {
+                APIService.prototype.extractData = function (res) {
                     var body = res.json();
                     return body.data || {};
                 };
-                BlueprintsService.prototype.handleError = function (error) {
-                    console.error('#BlueprintsService,#Error', error);
-                    // TODO: Solve an issue
-                    // platform-browser.umd.js:962 EXCEPTION: TypeError: Cannot read property 'alertError' of undefined
-                    // this.alertsService.alertError('Some error alert here');
-                    return Observable_1.Observable.throw(error.message || error);
+                APIService.prototype.handleError = function (error, logTags) {
+                    console.error(logTags ? logTags : '#APIService,#Error', error);
+                    // handle JSONAPI Errors
+                    try {
+                        var o = error.json();
+                        if (o && o.errors) {
+                            for (var i in o.errors) {
+                                this.alertsService.alertError(o.errors[i].details);
+                            }
+                        }
+                    }
+                    catch (e) {
+                        this.alertsService.alertError();
+                    }
+                    return Observable_1.Observable.throw(error);
                 };
-                BlueprintsService.prototype.getBlueprints = function () {
+                APIService.prototype.getBlueprints = function () {
                     var _this = this;
                     return this.http.get(this.blueprintsUrl)
                         .map(this.extractData)
-                        .catch(function (error) {
-                        console.error('#BlueprintsService,#Error', error);
-                        try {
-                            // handle JSONAPI Errors
-                            var o = error.json();
-                            if (o && o.errors) {
-                                for (var i in o.errors) {
-                                    _this.alertsService.alertError(o.errors[i].details);
-                                }
-                            }
-                        }
-                        catch (e) {
-                            _this.alertsService.alertError();
-                        }
-                        return Observable_1.Observable.throw(error);
-                    });
+                        .catch(function (error) { return _this.handleError(error, '#APIService.getBlueprints,#Error'); });
                 };
-                BlueprintsService = __decorate([
+                APIService = __decorate([
                     core_1.Injectable(), 
                     __metadata('design:paramtypes', [alerts_1.AlertsService, assets_1.AssetsService, http_1.Http])
-                ], BlueprintsService);
-                return BlueprintsService;
+                ], APIService);
+                return APIService;
             }());
-            exports_1("BlueprintsService", BlueprintsService);
+            exports_1("APIService", APIService);
         }
     }
 });
-//# sourceMappingURL=blueprints.js.map
+//# sourceMappingURL=api.js.map

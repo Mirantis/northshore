@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Blueprint, BlueprintsService } from '../../services/blueprints/blueprints';
+import { Blueprint, APIService } from '../../services/api/api';
 import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-details';
 
 @Component({
@@ -10,38 +10,47 @@ import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-detail
     BlueprintDetailsComponent,
   ],
   providers: [
-    BlueprintsService,
+    APIService,
   ],
   templateUrl: 'app/components/blueprints/blueprints.html',
 })
 
-export class BlueprintsComponent implements OnInit {
+export class BlueprintsComponent implements OnDestroy, OnInit {
 
   blueprints: Blueprint[] = [];
   bpSelected: Blueprint;
   private bpSelectedName: String;
+  private subscriptions: any[] = [];
 
   constructor(
-    private blueprintsService: BlueprintsService,
+    private apiService: APIService,
     private route: ActivatedRoute
   ) { }
 
+  ngOnDestroy() {
+    for (let sub of this.subscriptions) {
+      sub.unsubscribe();
+    }
+  }
+
   ngOnInit() {
     this.getBlueprints();
-    this.route.params
+    let sub = this.route.params
       .map(params => params['name'])
       .subscribe(name => {
         this.bpSelectedName = name;
         this.getSelected();
       });
+    this.subscriptions.push(sub);
   }
 
   private getBlueprints() {
-    this.blueprintsService.getBlueprints()
+    let sub = this.apiService.getBlueprints()
       .subscribe(blueprints => {
         this.blueprints = blueprints;
         this.getSelected();
       });
+    this.subscriptions.push(sub);
   }
 
   private getSelected() {

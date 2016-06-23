@@ -1,4 +1,4 @@
-System.register(['@angular/core', '../../services/blueprints/blueprints'], function(exports_1, context_1) {
+System.register(['@angular/core', '../../services/api/api'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,15 +10,15 @@ System.register(['@angular/core', '../../services/blueprints/blueprints'], funct
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, blueprints_1;
+    var core_1, api_1;
     var BlueprintDetailsComponent;
     return {
         setters:[
             function (core_1_1) {
                 core_1 = core_1_1;
             },
-            function (blueprints_1_1) {
-                blueprints_1 = blueprints_1_1;
+            function (api_1_1) {
+                api_1 = api_1_1;
             }],
         execute: function() {
             BlueprintDetailsComponent = (function () {
@@ -26,7 +26,7 @@ System.register(['@angular/core', '../../services/blueprints/blueprints'], funct
                 }
                 __decorate([
                     core_1.Input(), 
-                    __metadata('design:type', blueprints_1.Blueprint)
+                    __metadata('design:type', api_1.Blueprint)
                 ], BlueprintDetailsComponent.prototype, "blueprint", void 0);
                 BlueprintDetailsComponent = __decorate([
                     core_1.Component({
