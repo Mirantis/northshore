@@ -22,7 +22,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 function AssetsService() {
                     this.assets = {
                         api: {
-                            blueprints: 'ui/api/v1/blueprints',
+                            blueprintsUrl: 'ui/api/v1/blueprints',
                         },
                         alerts: {
                             AlertsService: {
@@ -38,6 +38,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                         },
                         timers: {
                             alertDismiss: 9000,
+                            blueprintsInterval: 5000,
                             fadeOut: 1000,
                         }
                     };
