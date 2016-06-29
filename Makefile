@@ -29,8 +29,10 @@
 GO_CMD=go
 GO_BUILD=$(GO_CMD) build -v
 GO_INSTALL=$(GO_CMD) install -v
-GO_CLEAN=$(GO_CMD) clean -i
-GO_DEPS=$(GO_CMD) get -v
+GO_CLEAN=$(GO_CMD) clean
+GO_DEPS=$(GO_CMD) get -d -v
+GO_OS=`uname -s | tr A-Z a-z`
+PIPELINE=examples/pipeline.yaml
 
 PACKAGE := github.com/Mirantis/northshore
 
@@ -42,25 +44,25 @@ BINARY=northshore
 all: run
 
 build:
-	$(info ************ Build $(BINARY) ************)
-	$(GO_BUILD) -o $(BINARY)
+	@echo "************ Build $(BINARY) ************"
+	GOOS=$(GO_OS) $(GO_BUILD) -o $(BINARY)
 
 run:build
-	$(info ************** Run $(BINARY) ************)
-	./$(BINARY) run local
+	@echo "************** Run $(BINARY) ************"
+	./$(BINARY) run local -f $(PIPELINE)
 
 install:
-	$(info ************ Install $(BINARY) **********)
+	@echo "************ Install $(BINARY) **********"
 	$(GO_INSTALL) $(PACKAGE)
 
 uninstall:
-	$(info ********** Uninstall $(BINARY) **********)
-	$(GO_CLEAN) $(PACKAGE)
+	@echo "********** Uninstall $(BINARY) **********"
+	$(GO_CLEAN) -i $(PACKAGE)
 
 deps:
-	$(info ***** Get dependencies for $(BINARY) ****)
-	$(GO_DEPS) github.com/tools/godep
+	@echo "***** Get dependencies for $(BINARY) ****"
+	$(GO_DEPS) ./...
 
 clean:
-	$(info ************ Clean $(BINARY) ************)
-	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
+	@echo "************ Clean $(BINARY) ************"
+	$(GO_CLEAN)
