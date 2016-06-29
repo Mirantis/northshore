@@ -15,20 +15,11 @@
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
-
-	"github.com/Mirantis/northshore/fsm"
-	"github.com/boltdb/bolt"
-	"github.com/gorilla/mux"
+	"github.com/Mirantis/northshore/server"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 var bpPath string
-var bpl BP
 
 // localCmd represents the local command
 var localCmd = &cobra.Command{
@@ -36,153 +27,11 @@ var localCmd = &cobra.Command{
 	Short: "Run NorthShore local",
 	Long:  `Run local HTTP server with BoltDB and watcher for Docker.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		r := mux.NewRouter()
-
-		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
-		uiAPI1.HandleFunc("/", uiAPI1RootHandler).Methods("GET")
-
-		uiAPI1.HandleFunc("/blueprints", blueprints).Methods("GET", "POST")
-
-		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
-		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
-		ui.HandleFunc("/{s}", uiIndexHandler)
-		ui.HandleFunc("/", uiIndexHandler)
-
-		// with 'nshore run local', you can got to http://localhost:8998/ and see a list of
-		// what is in static ... if you put index.html in there, it'll be returned.
-		// NB: do not put /static in the path, that'll get you a 404.
-		r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("static/"))))
-
-		db, err := bolt.Open("my.db", 0600, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer db.Close()
-
-		bname := []byte("MyBucket")
-		key := []byte("answer")
-		value := []byte("42")
-		err = db.Update(func(tx *bolt.Tx) error {
-			b, err := tx.CreateBucketIfNotExists(bname)
-			if err != nil {
-				return fmt.Errorf("Create bucket: %s", err)
-			}
-			log.Printf("Bucket \"%s\" created\n", bname)
-			err = b.Put(key, value)
-			if err != nil {
-				return err
-			}
-			log.Printf("Info puted with key \"%s\"\n", key)
-			return nil
-		})
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = db.View(func(tx *bolt.Tx) error {
-			bucket := tx.Bucket(bname)
-			if bucket == nil {
-				return fmt.Errorf("Bucket %s not found", bname)
-			}
-
-			v := bucket.Get(key)
-			log.Printf("Get value by key \"%s\": v => \"%s\" \n", key, v)
-
-			return nil
-		})
-
-		if err != nil {
-			log.Fatal(err)
-		}
-		db.Close()
-
-		//TODO: draft for demo
-		states := make(chan map[string]string, 3)
-
-		bp, err := ParseBlueprint(bpPath)
-		if err != nil {
-			log.Fatalf("Parsing error: %s \n", err)
-		}
-
-		var stages []string
-		for k := range bp.Stages {
-			stages = append(stages, k)
-		}
-
-		go func(c chan map[string]string) {
-			pl := fsm.NewBlueprintPipeline(stages)
-			bpl = BP{&bp, pl}
-			bpl.Start()
-
-			time.Sleep(time.Second * 9)
-
-			for _, s := range stages {
-				time.Sleep(time.Second * 3)
-				v := map[string]fsm.StageState{s: fsm.StageStateCreated}
-				log.Println("#PL_UPDATE (INITIALIZATION STATE CREATED)!!!", v)
-				bpl.Update(v)
-			}
-
-			for {
-				state := <- c
-				log.Printf("CHANNEL IN FSM GOROUTINE -> %v", state)
-
-				for k, v := range state {
-					switch v {
-					case "running":
-						vv := map[string]fsm.StageState{k: fsm.StageStateRunning}
-						log.Println("#PL_UPDATE!!!", vv)
-						bpl.Update(vv)
-					case "exited":
-						vv := map[string]fsm.StageState{k: fsm.StageStateStopped}
-						log.Println("#PL_UPDATE!!!", vv)
-						bpl.Update(vv)
-					default:
-						log.Println("DEFAULT CASE IN SWITCH!!!")
-					}
-				}
-			}
-		}(states)
-
-
-		//Update frequency for watcher in seconds
-		period := 3
-		go func(c chan map[string]string) {
-			fsm.Watch(period, c)
-		}(states)
-
-		log.Println("Listening at port 8998")
-		http.ListenAndServe(":8998", r)
+		server.Run(bpPath)
 	},
 }
 
-func uiAPI1RootHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{"version": 1})
-}
-
-func uiIndexHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("#uiIndexHandler")
-	http.ServeFile(w, r, "ui/index.html")
-}
-
-func blueprints(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	o := map[string]interface{}{
-		"data": []BP{
-			bpl,
-		},
-		"meta": map[string]interface{}{
-			"info": "blueprints",
-		},
-	}
-
-	json.NewEncoder(w).Encode(o)
-}
-
 func init() {
-	localCmd.Flags().StringVarP(&bpPath, "file", "f", ".", "Path to blueprint yaml")
+	localCmd.Flags().StringVarP(&bpPath, "file", "f", "", "Path to blueprint yaml")
 	runCmd.AddCommand(localCmd)
 }
