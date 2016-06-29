@@ -14,7 +14,7 @@ install:
 
 script:
     - go test -v ./cmd/...
-    - go build -v ./cmd/nshore/
+    - go build -v
 
 notifications:
   slack: miracloud:5r69ZAasA5mX50aig27LVKrs

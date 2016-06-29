@@ -10,9 +10,8 @@ NorthShore is just getting started. We anticipate a 0.1 Release by the of Q2 201
 ## Install
 TBD .. for more information, please visit the doc directory.
 * If you have a GOLANG environment, and $GOPATH/bin in your PATH you could run:
-  * `go get github.com/Mirantis/northshore/cmd/nshore`
-  * `nshore`
-  * `nshore run local`
+  * `go get github.com/Mirantis/northshore`
+  * `northshore run --help`
 
 ## Develop
 TBD .. for more information, please visit the doc directory.

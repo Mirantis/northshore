@@ -49,7 +49,7 @@ func TestParseBlueprint(t *testing.T) {
 			},
 		},
 	}
-	actual, _ := bp.ParseBlueprint("../../../examples/pipeline.yaml")
+	actual, _ := bp.ParseBlueprint("../examples/pipeline.yaml")
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatal("Pipelines are not equal!")
 	}

@@ -22,13 +22,9 @@
 
 # Build code.
 #
-# Args:
-#   PACKAGE: Directory name to build. If not specified, "cmd/nshore" will be built.
-#
 # Example:
 #   make
 #   make build
-#   make build PACKAGE=cmd/nshore
 
 GO_CMD=go
 GO_BUILD=$(GO_CMD) build -v
@@ -36,19 +32,18 @@ GO_INSTALL=$(GO_CMD) install -v
 GO_CLEAN=$(GO_CMD) clean -i
 GO_DEPS=$(GO_CMD) get -v
 
-PACKAGE=cmd/nshore
-TOP_PACKAGE_DIR := github.com/Mirantis/northshore
+PACKAGE := github.com/Mirantis/northshore
 
 .PHONY: all build run install uninstall deps clean
 
 #Name of final binary file
-BINARY=nshore
+BINARY=northshore
 
 all: run
 
 build:
 	$(info ************ Build $(BINARY) ************)
-	$(GO_BUILD) -o $(BINARY) $(PACKAGE)/nshore.go
+	$(GO_BUILD) -o $(BINARY)
 
 run:build
 	$(info ************** Run $(BINARY) ************)
@@ -56,11 +51,11 @@ run:build
 
 install:
 	$(info ************ Install $(BINARY) **********)
-	$(GO_INSTALL) $(TOP_PACKAGE_DIR)/$(PACKAGE)
+	$(GO_INSTALL) $(PACKAGE)
 
 uninstall:
 	$(info ********** Uninstall $(BINARY) **********)
-	$(GO_CLEAN) $(TOP_PACKAGE_DIR)/$(PACKAGE)
+	$(GO_CLEAN) $(PACKAGE)
 
 deps:
 	$(info ***** Get dependencies for $(BINARY) ****)
