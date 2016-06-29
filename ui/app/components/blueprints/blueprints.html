@@ -3,10 +3,10 @@
 
         <h3> Saved Blueprints </h3>
 
-        <ul class="list-unstyled">
-            <li *ngFor="let blueprint of blueprints">
-                <a [routerLink]="['/blueprints', blueprint.name]" routerLinkActive="active">
-                    {{blueprint.name}} <i class="fa fa-info-circle"></i>
+        <ul class="nav nav-pills nav-stacked">
+            <li *ngFor="let blueprint of blueprints" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                <a [routerLink]="['/blueprints', blueprint.name]">
+                    {{blueprint.name}}
                 </a>
             </li>
         </ul>
