@@ -7,6 +7,17 @@
             <li *ngFor="let blueprint of blueprints" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
                 <a [routerLink]="['/blueprints', blueprint.name]">
                     {{blueprint.name}}
+                    <span class="pull-right">
+                        <span class="badge badge-box badge-orange"
+                            title="new stages"
+                            [innerHTML]="blueprint.stagesStates | sumIfValue:{filter:['new','created'], hideZero:true}"></span>
+                        <span class="badge badge-box badge-grey"
+                            title="inactive stages"
+                            [innerHTML]="blueprint.stagesStates | sumIfValue:{filter:['deleted','paused','stopped'], hideZero:true}"></span>
+                        <span class="badge badge-box badge-green"
+                            title="active stages"
+                            [innerHTML]="blueprint.stagesStates | sumIfValue:{filter:['running'], hideZero:true}"></span>
+                    </span>
                 </a>
             </li>
         </ul>

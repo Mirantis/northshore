@@ -23,3 +23,29 @@
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25);
 }
 /* </editor-fold> */
+
+/* <editor-fold desc="Badges"> */
+.badge-box {
+  border: solid 1px dimgrey;
+  border-radius: 0;
+  float: left;
+}
+.badge-box:first-child {
+  border-bottom-left-radius: 2px;
+  border-top-left-radius: 2px;
+}
+.badge-box:last-child {
+  border-bottom-right-radius: 2px;
+  border-top-right-radius: 2px;
+}
+
+.badge-green {
+  background-color: green;
+}
+.badge-grey {
+  background-color: grey;
+}
+.badge-orange {
+  background-color: orange;
+}
+/* </editor-fold> */

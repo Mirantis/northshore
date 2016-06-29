@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/router', '../../services/api/api', '../blueprint-details/blueprint-details'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/router', '../../pipes/iterate', '../../services/api/api', '../blueprint-details/blueprint-details'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '@angular/router', '../../services/api/api', '
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, router_1, api_1, blueprint_details_1;
+    var core_1, router_1, iterate_1, api_1, blueprint_details_1;
     var BlueprintsComponent;
     return {
         setters:[
@@ -19,6 +19,9 @@ System.register(['@angular/core', '@angular/router', '../../services/api/api', '
             },
             function (router_1_1) {
                 router_1 = router_1_1;
+            },
+            function (iterate_1_1) {
+                iterate_1 = iterate_1_1;
             },
             function (api_1_1) {
                 api_1 = api_1_1;
@@ -75,6 +78,9 @@ System.register(['@angular/core', '@angular/router', '../../services/api/api', '
                         selector: 'my-dashboard',
                         directives: [
                             blueprint_details_1.BlueprintDetailsComponent,
+                        ],
+                        pipes: [
+                            iterate_1.SumIfValuePipe,
                         ],
                         providers: [
                             api_1.APIService,
