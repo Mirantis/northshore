@@ -17,37 +17,39 @@ package cmd
 import (
 	"reflect"
 	"testing"
+
+	bp "github.com/Mirantis/northshore/blueprint"
 )
 
 func TestParseBlueprint(t *testing.T) {
-	var expected Blueprint = Blueprint{
+	var expected bp.Blueprint = bp.Blueprint{
 		Version:     "1",
 		Type:        "pipeline",
 		Name:        "bp_name",
 		Provisioner: "docker",
-		Stages: map[string]Stage{
-			"gerrit": Stage{
+		Stages: map[string]bp.Stage{
+			"gerrit": bp.Stage{
 				Image:       "openfrontier/gerrit",
 				Description: "42",
 				Ports: []map[string]string{{"fromPort": "8080", "toPort": "8080"},
 					{"fromPort": "29418", "toPort": "29418"}},
 				Variables: map[string]string{"NAME": "value", "NAME2": "value2"},
 			},
-			"jenkins": Stage{
+			"jenkins": bp.Stage{
 				Image:       "jenkins",
 				Description: "",
 				Ports: []map[string]string{{"fromPort": "8080", "toPort": "8088"},
 					{"fromPort": "50000", "toPort": "50000"}},
 				Variables: map[string]string{"NAME": "v"},
 			},
-			"artifactory": Stage{
+			"artifactory": bp.Stage{
 				Image:       "jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest",
 				Description: "",
 				Ports:       []map[string]string{{"fromPort": "8081", "toPort": "8081"}},
 			},
 		},
 	}
-	actual, _ := ParseBlueprint("../../../examples")
+	actual, _ := bp.ParseBlueprint("../../../examples/pipeline.yaml")
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatal("Pipelines are not equal!")
 	}
