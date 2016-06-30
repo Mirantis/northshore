@@ -36,20 +36,10 @@ build:
         name: go env
         code: go env
 
-    # Gets the dependencies
+    # Test and build the project
     - script:
-        name: go get
-        code: go get -d -v ./...
-
-    # Build the project
-    - script:
-        name: go build
-        code: go build -v ./cmd/nshore
-
-    # Test the project
-    - script:
-        name: go test
-        code: go test -v ./cmd/...
+        name: make build
+        code: make build
 
     # Version name
     - script:
@@ -64,7 +54,7 @@ build:
     # Move artifact
     - script:
         name: move artifact
-        code: mv nshore $WERCKER_OUTPUT_DIR
+        code: mv northshore $WERCKER_OUTPUT_DIR
 
     # Move version
     - script:
@@ -93,7 +83,7 @@ push:
     - script:
         name: push artifact
         code: |
-          curl -T nshore -H "X-Bintray-Publish: 1" -uoleksandr-minakov:$BINTRAY_TOKEN https://api.bintray.com/content/oleksandr-minakov/generic/NorthShore/$(cat version)/nshore-lin-$(cat version)
+          curl -T northshore -H "X-Bintray-Publish: 1" -uoleksandr-minakov:$BINTRAY_TOKEN https://api.bintray.com/content/oleksandr-minakov/generic/NorthShore/$(cat version)/northshore-lin-$(cat version)
 
   after-steps:
     - install-packages:

@@ -22,50 +22,53 @@
 
 # Build code.
 #
-# Args:
-#   PACKAGE: Directory name to build. If not specified, "cmd/nshore" will be built.
-#
 # Example:
 #   make
 #   make build
-#   make build PACKAGE=cmd/nshore
 
 GO_CMD=go
 GO_BUILD=$(GO_CMD) build -v
+GO_TEST=$(GO_CMD) test -v
 GO_INSTALL=$(GO_CMD) install -v
-GO_CLEAN=$(GO_CMD) clean -i
-GO_DEPS=$(GO_CMD) get -v
+GO_CLEAN=$(GO_CMD) clean
+GO_DEPS=$(GO_CMD) get -d -v
+GO_OS=`uname -s | tr A-Z a-z`
+PIPELINE=examples/pipeline.yaml
 
-PACKAGE=cmd/nshore
-TOP_PACKAGE_DIR := github.com/Mirantis/northshore
+PACKAGE := github.com/Mirantis/northshore
+PKGS=`go list ./... | grep -v /vendor/`
 
 .PHONY: all build run install uninstall deps clean
 
 #Name of final binary file
-BINARY=nshore
+BINARY=northshore
 
 all: run
 
-build:
-	$(info ************ Build $(BINARY) ************)
-	$(GO_BUILD) -o $(BINARY) $(PACKAGE)/nshore.go
+build:test
+	@echo "************ Build $(BINARY) ************"
+	GOOS=$(GO_OS) $(GO_BUILD) -o $(BINARY)
 
 run:build
-	$(info ************** Run $(BINARY) ************)
-	./$(BINARY) run local
+	@echo "************** Run $(BINARY) ************"
+	./$(BINARY) run local -f $(PIPELINE)
+
+test:
+	@echo "************** Test $(BINARY) ************"
+	$(GO_TEST) $(PKGS)
 
 install:
-	$(info ************ Install $(BINARY) **********)
-	$(GO_INSTALL) $(TOP_PACKAGE_DIR)/$(PACKAGE)
+	@echo "************ Install $(BINARY) **********"
+	$(GO_INSTALL) $(PACKAGE)
 
 uninstall:
-	$(info ********** Uninstall $(BINARY) **********)
-	$(GO_CLEAN) $(TOP_PACKAGE_DIR)/$(PACKAGE)
+	@echo "********** Uninstall $(BINARY) **********"
+	$(GO_CLEAN) -i $(PACKAGE)
 
 deps:
-	$(info ***** Get dependencies for $(BINARY) ****)
-	$(GO_DEPS) github.com/tools/godep
+	@echo "***** Get dependencies for $(BINARY) ****"
+	$(GO_DEPS) ./...
 
 clean:
-	$(info ************ Clean $(BINARY) ************)
-	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
+	@echo "************ Clean $(BINARY) ************"
+	$(GO_CLEAN)

@@ -25,7 +25,7 @@ var cfgFile string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "nshore",
+	Use:   "northshore",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
@@ -53,7 +53,7 @@ func init() {
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nshore.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.northshore.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -62,7 +62,7 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	}
 
-	viper.SetConfigName(".nshore") // name of config file (without extension)
+	viper.SetConfigName(".northshore") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")   // adding home directory as first search path
 	viper.AutomaticEnv()           // read in environment variables that match
 

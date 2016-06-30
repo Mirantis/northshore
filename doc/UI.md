@@ -105,7 +105,7 @@ Local Environment
 * Run local Backend server
 
         cd ${GOPATH}/src/github.com/Mirantis/northshore
-        go run cmd/nshore/nshore.go run local
+        go run main.go run local
 
 * Run browser http://localhost:8998/ui
 

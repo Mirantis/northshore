@@ -41,7 +41,7 @@ func Run(bpPath string) {
 	ui.HandleFunc("/{s}", UiIndexHandler)
 	ui.HandleFunc("/", UiIndexHandler)
 
-	// with 'nshore run local', you can got to http://localhost:8998/ and see a list of
+	// with 'northshore run local', you can got to http://localhost:8998/ and see a list of
 	// what is in static ... if you put index.html in there, it'll be returned.
 	// NB: do not put /static in the path, that'll get you a 404.
 	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("static/"))))
