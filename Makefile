@@ -28,6 +28,7 @@
 
 GO_CMD=go
 GO_BUILD=$(GO_CMD) build -v
+GO_TEST=$(GO_CMD) test -v
 GO_INSTALL=$(GO_CMD) install -v
 GO_CLEAN=$(GO_CMD) clean
 GO_DEPS=$(GO_CMD) get -d -v
@@ -35,6 +36,7 @@ GO_OS=`uname -s | tr A-Z a-z`
 PIPELINE=examples/pipeline.yaml
 
 PACKAGE := github.com/Mirantis/northshore
+PKGS=`go list ./... | grep -v /vendor/`
 
 .PHONY: all build run install uninstall deps clean
 
@@ -43,13 +45,17 @@ BINARY=northshore
 
 all: run
 
-build:
+build:test
 	@echo "************ Build $(BINARY) ************"
 	GOOS=$(GO_OS) $(GO_BUILD) -o $(BINARY)
 
 run:build
 	@echo "************** Run $(BINARY) ************"
 	./$(BINARY) run local -f $(PIPELINE)
+
+test:
+	@echo "************** Test $(BINARY) ************"
+	$(GO_TEST) $(PKGS)
 
 install:
 	@echo "************ Install $(BINARY) **********"
