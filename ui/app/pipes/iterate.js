@@ -11,7 +11,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
     var core_1;
-    var IterateMapPipe, KeysPipe;
+    var IterateMapPipe, KeysPipe, SumIfValuePipeOptions, SumIfValuePipe;
     return {
         setters:[
             function (core_1_1) {
@@ -36,19 +36,11 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 return IterateMapPipe;
             }());
             exports_1("IterateMapPipe", IterateMapPipe);
-            // http://stackoverflow.com/a/35536052
             KeysPipe = (function () {
                 function KeysPipe() {
                 }
-                KeysPipe.prototype.transform = function (map, args) {
-                    if (args === void 0) { args = null; }
-                    if (!map)
-                        return null;
-                    var keys = [];
-                    for (var key in map) {
-                        keys.push(key);
-                    }
-                    return keys;
+                KeysPipe.prototype.transform = function (map) {
+                    return Object.keys(map);
                 };
                 KeysPipe = __decorate([
                     core_1.Pipe({ name: 'keys' }), 
@@ -57,6 +49,33 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 return KeysPipe;
             }());
             exports_1("KeysPipe", KeysPipe);
+            SumIfValuePipeOptions = (function () {
+                function SumIfValuePipeOptions() {
+                    this.filter = [];
+                    this.hideZero = false;
+                }
+                return SumIfValuePipeOptions;
+            }());
+            SumIfValuePipe = (function () {
+                function SumIfValuePipe() {
+                }
+                SumIfValuePipe.prototype.transform = function (map, options) {
+                    var sum = 0;
+                    // ES7 Array.prototype.includes() missing in TypeScript #2340
+                    for (var key in map) {
+                        if (options.filter.indexOf(map[key]) > -1) {
+                            sum++;
+                        }
+                    }
+                    return (sum === 0 && options.hideZero) ? null : sum;
+                };
+                SumIfValuePipe = __decorate([
+                    core_1.Pipe({ name: 'sumIfValue' }), 
+                    __metadata('design:paramtypes', [])
+                ], SumIfValuePipe);
+                return SumIfValuePipe;
+            }());
+            exports_1("SumIfValuePipe", SumIfValuePipe);
         }
     }
 });

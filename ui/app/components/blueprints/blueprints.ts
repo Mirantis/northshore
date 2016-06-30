@@ -1,6 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { SumIfValuePipe } from '../../pipes/iterate';
+
 import { Blueprint, APIService } from '../../services/api/api';
 import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-details';
 
@@ -8,6 +10,9 @@ import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-detail
   selector: 'my-dashboard',
   directives: [
     BlueprintDetailsComponent,
+  ],
+  pipes: [
+    SumIfValuePipe,
   ],
   providers: [
     APIService,

@@ -5,7 +5,7 @@ export class AssetsService {
 
   private assets = {
     api: {
-      blueprints: 'ui/api/v1/blueprints',
+      blueprintsUrl: 'ui/api/v1/blueprints',
     },
     alerts: {
       AlertsService: {
@@ -21,6 +21,7 @@ export class AssetsService {
     },
     timers: {
       alertDismiss: 9000,
+      blueprintsInterval: 5000,
       fadeOut: 1000,
     }
   };

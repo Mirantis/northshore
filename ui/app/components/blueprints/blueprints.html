@@ -7,6 +7,17 @@
             <li *ngFor="let blueprint of blueprints" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
                 <a [routerLink]="['/blueprints', blueprint.name]">
                     {{blueprint.name}}
+                    <span class="pull-right">
+                        <span class="badge badge-box badge-orange"
+                            title="new stages"
+                            [innerHTML]="(blueprint.ui.stagesStatesBages.orange > 0) ? blueprint.ui.stagesStatesBages.orange : ''"></span>
+                        <span class="badge badge-box badge-grey"
+                            title="inactive stages"
+                            [innerHTML]="(blueprint.ui.stagesStatesBages.grey > 0) ? blueprint.ui.stagesStatesBages.grey : ''"></span>
+                        <span class="badge badge-box badge-green"
+                            title="active stages"
+                            [innerHTML]="(blueprint.ui.stagesStatesBages.green > 0) ? blueprint.ui.stagesStatesBages.green : ''"></span>
+                    </span>
                 </a>
             </li>
         </ul>
