@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', 'ng2-bootstrap/components/alert', 'ng2-bootstrap/components/collapse', '../../services/alerts/alerts', '../../services/assets/assets'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', 'ng2-bootstrap/components/alert', 'ng2-bootstrap/components/collapse', '../../services/alerts/alerts', '../../services/assets/assets', '../blueprints/blueprints', '../home/home'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '@angular/common', 'ng2-bootstrap/components/a
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, alert_1, collapse_1, alerts_1, assets_1;
+    var core_1, common_1, alert_1, collapse_1, alerts_1, assets_1, blueprints_1, home_1;
     var AppComponent;
     return {
         setters:[
@@ -31,6 +31,12 @@ System.register(['@angular/core', '@angular/common', 'ng2-bootstrap/components/a
             },
             function (assets_1_1) {
                 assets_1 = assets_1_1;
+            },
+            function (blueprints_1_1) {
+                blueprints_1 = blueprints_1_1;
+            },
+            function (home_1_1) {
+                home_1 = home_1_1;
             }],
         execute: function() {
             AppComponent = (function () {
@@ -52,6 +58,10 @@ System.register(['@angular/core', '@angular/common', 'ng2-bootstrap/components/a
                             alert_1.AlertComponent,
                             collapse_1.CollapseDirective,
                             common_1.CORE_DIRECTIVES,
+                        ],
+                        precompile: [
+                            blueprints_1.BlueprintsComponent,
+                            home_1.HomeComponent,
                         ],
                         providers: [
                             alerts_1.AlertsService,

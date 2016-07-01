@@ -14,6 +14,10 @@ import { HomeComponent } from '../home/home';
     CollapseDirective,
     CORE_DIRECTIVES,
   ],
+  precompile: [
+    BlueprintsComponent,
+    HomeComponent,
+  ],
   providers: [
     AlertsService,
     AssetsService,
