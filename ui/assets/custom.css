@@ -27,16 +27,13 @@
 /* <editor-fold desc="Badges"> */
 .badge-box {
   border: solid 1px dimgrey;
-  border-radius: 0;
+  border-radius: 2px;
+  float: right;
+}
+.badge-spacer {
   float: left;
-}
-.badge-box:first-child {
-  border-bottom-left-radius: 2px;
-  border-top-left-radius: 2px;
-}
-.badge-box:last-child {
-  border-bottom-right-radius: 2px;
-  border-top-right-radius: 2px;
+  padding-right: 8px;
+  width: 80px;
 }
 
 .badge-green {
