@@ -22,7 +22,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 function AssetsService() {
                     this.assets = {
                         api: {
-                            blueprintsUrl: 'ui/api/v1/blueprints',
+                            blueprintsUrl: 'api/v1/blueprints',
                         },
                         alerts: {
                             AlertsService: {
