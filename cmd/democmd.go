@@ -141,7 +141,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		uiAPI1.HandleFunc("/errors", demouiAPI1ErrorsHandler).Methods("GET", "POST")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
-		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
+		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", server.NoDirListing(http.FileServer(http.Dir("ui/")))))
 		ui.HandleFunc("/{_:.*}", server.UiIndexHandler)
 
 		r.HandleFunc("/{_:.*}", server.UiIndexHandler)
