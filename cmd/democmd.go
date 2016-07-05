@@ -27,10 +27,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// BP represents a combined data of the Blueprint with States
-// TODO: refactor Blueprint to integrate State info
-// the State should be updated on changing the stages via stages setter
-
 var demoBlueprintPath string
 var demoBp blueprint.BP
 
