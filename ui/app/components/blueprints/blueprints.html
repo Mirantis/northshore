@@ -4,10 +4,9 @@
         <h3> Saved Blueprints </h3>
 
         <ul class="nav nav-pills nav-stacked">
-            <li *ngFor="let blueprint of blueprints" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <li *ngFor="let blueprint of blueprints" routerLinkActive="active">
                 <a [routerLink]="['/blueprints', blueprint.name]">
-                    {{blueprint.name}}
-                    <span class="pull-right">
+                    <span class="badge-spacer">
                         <span class="badge badge-box badge-orange"
                             title="new stages"
                             [innerHTML]="(blueprint.ui.stagesStatesBages.orange > 0) ? blueprint.ui.stagesStatesBages.orange : ''"></span>
@@ -18,6 +17,7 @@
                             title="active stages"
                             [innerHTML]="(blueprint.ui.stagesStatesBages.green > 0) ? blueprint.ui.stagesStatesBages.green : ''"></span>
                     </span>
+                    {{blueprint.name}}
                 </a>
             </li>
         </ul>

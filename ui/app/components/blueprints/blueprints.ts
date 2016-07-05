@@ -1,8 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { SumIfValuePipe } from '../../pipes/iterate';
-
 import { Blueprint, APIService } from '../../services/api/api';
 import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-details';
 
@@ -13,9 +11,6 @@ declare var __moduleName: string;
     BlueprintDetailsComponent,
   ],
   moduleId: __moduleName,
-  pipes: [
-    SumIfValuePipe,
-  ],
   providers: [
     APIService,
   ],
