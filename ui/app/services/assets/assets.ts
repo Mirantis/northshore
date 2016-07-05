@@ -5,7 +5,7 @@ export class AssetsService {
 
   private assets = {
     api: {
-      blueprintsUrl: 'api/v1/blueprints',
+      blueprintsUrl: 'ui/api/v1/blueprints',
     },
     alerts: {
       AlertsService: {

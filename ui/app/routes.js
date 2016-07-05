@@ -25,6 +25,10 @@ System.register(['./components/blueprints/blueprints', './components/home/home']
                     path: 'blueprints/:name',
                     component: blueprints_1.BlueprintsComponent,
                 },
+                {
+                    path: '**',
+                    redirectTo: '',
+                },
             ]);
         }
     }
