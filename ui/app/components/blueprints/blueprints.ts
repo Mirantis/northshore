@@ -6,18 +6,21 @@ import { SumIfValuePipe } from '../../pipes/iterate';
 import { Blueprint, APIService } from '../../services/api/api';
 import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-details';
 
+declare var __moduleName: string;
+
 @Component({
-  selector: 'my-dashboard',
   directives: [
     BlueprintDetailsComponent,
   ],
+  moduleId: __moduleName,
   pipes: [
     SumIfValuePipe,
   ],
   providers: [
     APIService,
   ],
-  templateUrl: 'app/components/blueprints/blueprints.html',
+  selector: 'blueprints',
+  templateUrl: 'blueprints.html',
 })
 
 export class BlueprintsComponent implements OnDestroy, OnInit {

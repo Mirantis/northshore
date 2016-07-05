@@ -23,8 +23,9 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 }
                 HomeComponent = __decorate([
                     core_1.Component({
-                        selector: 'my-home',
-                        templateUrl: 'app/components/home/home.html',
+                        moduleId: __moduleName,
+                        selector: 'home',
+                        templateUrl: 'home.html',
                     }), 
                     __metadata('design:paramtypes', [])
                 ], HomeComponent);
