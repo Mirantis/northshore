@@ -24,6 +24,7 @@ import (
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/server"
 	"github.com/gorilla/mux"
+	"github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
 )
 
@@ -98,9 +99,10 @@ Demo Blueprint Pipeline goes thru states.`,
 		}
 
 		go func() {
+			uuid := uuid.NewV4()
 			for {
 				pl := fsm.NewBlueprintPipeline(stages)
-				demoBp = blueprint.BP{&bp, pl}
+				demoBp = blueprint.BP{&bp, pl, uuid}
 				demoBp.Start()
 
 				time.Sleep(time.Second * 9)

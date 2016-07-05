@@ -25,6 +25,7 @@ import (
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
+	"github.com/satori/go.uuid"
 )
 
 var bpl blueprint.BP
@@ -102,7 +103,7 @@ func Run(bpPath string) {
 
 	go func(c chan map[string]string) {
 		pl := fsm.NewBlueprintPipeline(stages)
-		bpl = blueprint.BP{&bp, pl}
+		bpl = blueprint.BP{&bp, pl, uuid.NewV4()}
 		bpl.Start()
 
 		time.Sleep(time.Second * 9)

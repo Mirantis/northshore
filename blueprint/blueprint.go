@@ -25,6 +25,7 @@ import (
 	"github.com/docker/engine-api/types"
 	"github.com/docker/engine-api/types/container"
 	"github.com/docker/go-connections/nat"
+	"github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 
 	"golang.org/x/net/context"
@@ -36,6 +37,7 @@ import (
 type BP struct {
 	*Blueprint
 	*fsm.BlueprintPipeline
+	UUID uuid.UUID `json:"uuid"`
 }
 
 // Stage represents a Blueprint Stage
