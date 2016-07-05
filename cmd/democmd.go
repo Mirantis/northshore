@@ -82,7 +82,7 @@ Demo Blueprint Pipeline goes thru states.`,
 			log.Printf("Parsing error: %s \n", err)
 			return
 		}
-		log.Printf("BLUEPRINT -> %+v \n", demoBp)
+		log.Printf("BLUEPRINT -> %+v \n", bp)
 
 		/* Run States */
 		log.Println("#run_states")
