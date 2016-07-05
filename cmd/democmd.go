@@ -24,12 +24,9 @@ import (
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/server"
 	"github.com/gorilla/mux"
+	"github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
 )
-
-// BP represents a combined data of the Blueprint with States
-// TODO: refactor Blueprint to integrate State info
-// the State should be updated on changing the stages via stages setter
 
 var demoBlueprintPath string
 var demoBp blueprint.BP
@@ -86,7 +83,7 @@ Demo Blueprint Pipeline goes thru states.`,
 			log.Printf("Parsing error: %s \n", err)
 			return
 		}
-		log.Printf("BLUEPRINT -> %+v \n", demoBp)
+		log.Printf("BLUEPRINT -> %+v \n", bp)
 
 		/* Run States */
 		log.Println("#run_states")
@@ -102,9 +99,10 @@ Demo Blueprint Pipeline goes thru states.`,
 		}
 
 		go func() {
+			uuid := uuid.NewV4()
 			for {
 				pl := fsm.NewBlueprintPipeline(stages)
-				demoBp = blueprint.BP{&bp, pl}
+				demoBp = blueprint.BP{&bp, pl, uuid}
 				demoBp.Start()
 
 				time.Sleep(time.Second * 9)
@@ -134,7 +132,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		r := mux.NewRouter()
 
 		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
-		uiAPI1.HandleFunc("/", server.UiAPI1RootHandler).Methods("GET")
+		uiAPI1.HandleFunc("/", server.UIAPI1RootHandler).Methods("GET")
 
 		uiAPI1.HandleFunc("/action", demouiAPI1ActionHandler).Methods("GET", "POST")
 		uiAPI1.HandleFunc("/blueprints", demouiAPI1BlueprintsHandler).Methods("GET", "POST")
@@ -142,9 +140,9 @@ Demo Blueprint Pipeline goes thru states.`,
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", server.NoDirListing(http.FileServer(http.Dir("ui/")))))
-		ui.HandleFunc("/{_:.*}", server.UiIndexHandler)
+		ui.HandleFunc("/{_:.*}", server.UIIndexHandler)
 
-		r.HandleFunc("/{_:.*}", server.UiIndexHandler)
+		r.HandleFunc("/{_:.*}", server.UIIndexHandler)
 
 		log.Println("Listening at port 8998")
 		http.ListenAndServe(":8998", r)

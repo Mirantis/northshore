@@ -25,14 +25,19 @@ import (
 	"github.com/docker/engine-api/types"
 	"github.com/docker/engine-api/types/container"
 	"github.com/docker/go-connections/nat"
+	"github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 
 	"golang.org/x/net/context"
 )
 
+// BP represents a combined data of the Blueprint with States
+// TODO: refactor Blueprint to integrate State info
+// the State should be updated on changing the stages via stages setter
 type BP struct {
 	*Blueprint
 	*fsm.BlueprintPipeline
+	UUID uuid.UUID `json:"uuid"`
 }
 
 // Stage represents a Blueprint Stage
@@ -73,6 +78,7 @@ func ParseBlueprint(path string) (bp Blueprint, err error) {
 	return bp, nil
 }
 
+// RunBlueprint creates and starts Docker containers
 func RunBlueprint(bp Blueprint) {
 	cli, err := client.NewEnvClient()
 	if err != nil {
