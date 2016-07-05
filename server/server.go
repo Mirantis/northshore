@@ -33,15 +33,15 @@ func Run(bpPath string) {
 	r := mux.NewRouter()
 
 	uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
-	uiAPI1.HandleFunc("/", UiAPI1RootHandler).Methods("GET")
+	uiAPI1.HandleFunc("/", UIAPI1RootHandler).Methods("GET")
 
 	uiAPI1.HandleFunc("/blueprints", blueprints).Methods("GET", "POST")
 
 	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 	ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", NoDirListing(http.FileServer(http.Dir("ui/")))))
-	ui.HandleFunc("/{_:.*}", UiIndexHandler)
+	ui.HandleFunc("/{_:.*}", UIIndexHandler)
 
-	r.HandleFunc("/{_:.*}", UiIndexHandler)
+	r.HandleFunc("/{_:.*}", UIIndexHandler)
 
 	db, err := bolt.Open("my.db", 0600, nil)
 	if err != nil {
@@ -145,6 +145,7 @@ func Run(bpPath string) {
 	http.ListenAndServe(":8998", r)
 }
 
+// NoDirListing returns 404 instead of directory listing with http.FileServer
 func NoDirListing(h http.Handler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/") {
@@ -155,12 +156,14 @@ func NoDirListing(h http.Handler) http.HandlerFunc {
 	})
 }
 
-func UiAPI1RootHandler(w http.ResponseWriter, r *http.Request) {
+// UIAPI1RootHandler returns UI API version
+func UIAPI1RootHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{"version": 1})
 }
 
-func UiIndexHandler(w http.ResponseWriter, r *http.Request) {
+// UIIndexHandler returns UI index file
+func UIIndexHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("#uiIndexHandler")
 	http.ServeFile(w, r, "ui/index.html")
 }

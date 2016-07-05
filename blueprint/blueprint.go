@@ -76,6 +76,7 @@ func ParseBlueprint(path string) (bp Blueprint, err error) {
 	return bp, nil
 }
 
+// RunBlueprint creates and starts Docker containers
 func RunBlueprint(bp Blueprint) {
 	cli, err := client.NewEnvClient()
 	if err != nil {

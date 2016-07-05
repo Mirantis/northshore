@@ -130,7 +130,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		r := mux.NewRouter()
 
 		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
-		uiAPI1.HandleFunc("/", server.UiAPI1RootHandler).Methods("GET")
+		uiAPI1.HandleFunc("/", server.UIAPI1RootHandler).Methods("GET")
 
 		uiAPI1.HandleFunc("/action", demouiAPI1ActionHandler).Methods("GET", "POST")
 		uiAPI1.HandleFunc("/blueprints", demouiAPI1BlueprintsHandler).Methods("GET", "POST")
@@ -138,9 +138,9 @@ Demo Blueprint Pipeline goes thru states.`,
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", server.NoDirListing(http.FileServer(http.Dir("ui/")))))
-		ui.HandleFunc("/{_:.*}", server.UiIndexHandler)
+		ui.HandleFunc("/{_:.*}", server.UIIndexHandler)
 
-		r.HandleFunc("/{_:.*}", server.UiIndexHandler)
+		r.HandleFunc("/{_:.*}", server.UIIndexHandler)
 
 		log.Println("Listening at port 8998")
 		http.ListenAndServe(":8998", r)
