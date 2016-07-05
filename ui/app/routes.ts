@@ -16,4 +16,8 @@ export const AppRoutes: RouterConfig = [
     path: 'blueprints/:name',
     component: BlueprintsComponent,
   },
+  {
+    path: '**',
+    redirectTo: '',
+  },
 ];

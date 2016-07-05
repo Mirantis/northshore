@@ -30,8 +30,9 @@ System.register(['@angular/core', '../../services/api/api'], function(exports_1,
                 ], BlueprintDetailsComponent.prototype, "blueprint", void 0);
                 BlueprintDetailsComponent = __decorate([
                     core_1.Component({
+                        moduleId: __moduleName,
                         selector: 'blueprint-details',
-                        templateUrl: 'app/components/blueprint-details/blueprint-details.html',
+                        templateUrl: 'blueprint-details.html',
                     }), 
                     __metadata('design:paramtypes', [])
                 ], BlueprintDetailsComponent);

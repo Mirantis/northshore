@@ -142,13 +142,9 @@ Demo Blueprint Pipeline goes thru states.`,
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 		ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
-		ui.HandleFunc("/{s}", server.UiIndexHandler)
-		ui.HandleFunc("/", server.UiIndexHandler)
+		ui.HandleFunc("/{_:.*}", server.UiIndexHandler)
 
-		// with 'northshore run local', you can got to http://localhost:8998/ and see a list of
-		// what is in static ... if you put index.html in there, it'll be returned.
-		// NB: do not put /static in the path, that'll get you a 404.
-		r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("static/"))))
+		r.HandleFunc("/{_:.*}", server.UiIndexHandler)
 
 		log.Println("Listening at port 8998")
 		http.ListenAndServe(":8998", r)

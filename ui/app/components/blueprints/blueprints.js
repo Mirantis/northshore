@@ -75,17 +75,18 @@ System.register(['@angular/core', '@angular/router', '../../pipes/iterate', '../
                 };
                 BlueprintsComponent = __decorate([
                     core_1.Component({
-                        selector: 'my-dashboard',
                         directives: [
                             blueprint_details_1.BlueprintDetailsComponent,
                         ],
+                        moduleId: __moduleName,
                         pipes: [
                             iterate_1.SumIfValuePipe,
                         ],
                         providers: [
                             api_1.APIService,
                         ],
-                        templateUrl: 'app/components/blueprints/blueprints.html',
+                        selector: 'blueprints',
+                        templateUrl: 'blueprints.html',
                     }), 
                     __metadata('design:paramtypes', [api_1.APIService, router_1.ActivatedRoute])
                 ], BlueprintsComponent);

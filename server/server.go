@@ -38,13 +38,9 @@ func Run(bpPath string) {
 
 	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 	ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", http.FileServer(http.Dir("ui/"))))
-	ui.HandleFunc("/{s}", UiIndexHandler)
-	ui.HandleFunc("/", UiIndexHandler)
+	ui.HandleFunc("/{_:.*}", UiIndexHandler)
 
-	// with 'northshore run local', you can got to http://localhost:8998/ and see a list of
-	// what is in static ... if you put index.html in there, it'll be returned.
-	// NB: do not put /static in the path, that'll get you a 404.
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("static/"))))
+	r.HandleFunc("/{_:.*}", UiIndexHandler)
 
 	db, err := bolt.Open("my.db", 0600, nil)
 	if err != nil {

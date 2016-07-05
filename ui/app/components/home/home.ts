@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 
+declare var __moduleName: string;
+
 @Component({
-  selector: 'my-home',
-  templateUrl: 'app/components/home/home.html',
+  moduleId: __moduleName,
+  selector: 'home',
+  templateUrl: 'home.html',
 })
 
 export class HomeComponent {

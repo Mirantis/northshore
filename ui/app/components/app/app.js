@@ -59,6 +59,7 @@ System.register(['@angular/core', '@angular/common', 'ng2-bootstrap/components/a
                             collapse_1.CollapseDirective,
                             common_1.CORE_DIRECTIVES,
                         ],
+                        moduleId: __moduleName,
                         precompile: [
                             blueprints_1.BlueprintsComponent,
                             home_1.HomeComponent,
@@ -68,7 +69,7 @@ System.register(['@angular/core', '@angular/common', 'ng2-bootstrap/components/a
                             assets_1.AssetsService,
                         ],
                         selector: 'my-app',
-                        templateUrl: 'app/components/app/app.html',
+                        templateUrl: 'app.html',
                     }), 
                     __metadata('design:paramtypes', [alerts_1.AlertsService, assets_1.AssetsService])
                 ], AppComponent);
