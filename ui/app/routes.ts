@@ -13,7 +13,7 @@ export const AppRoutes: RouterConfig = [
     component: BlueprintsComponent,
   },
   {
-    path: 'blueprints/:name',
+    path: 'blueprints/:uuid',
     component: BlueprintsComponent,
   },
   {

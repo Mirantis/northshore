@@ -22,8 +22,8 @@ export class BlueprintsComponent implements OnDestroy, OnInit {
 
   blueprints: Blueprint[] = [];
   bpSelected: Blueprint;
-  private bpSelectedName: String;
   private subscriptions: any[] = [];
+  private uuidSelected: String;
 
   constructor(
     private apiService: APIService,
@@ -39,9 +39,9 @@ export class BlueprintsComponent implements OnDestroy, OnInit {
   ngOnInit() {
     this.getBlueprints();
     let sub = this.route.params
-      .map(params => params['name'])
-      .subscribe(name => {
-        this.bpSelectedName = name;
+      .map(params => params['uuid'])
+      .subscribe(uuid => {
+        this.uuidSelected = uuid;
         this.getSelected();
       });
     this.subscriptions.push(sub);
@@ -57,9 +57,9 @@ export class BlueprintsComponent implements OnDestroy, OnInit {
   }
 
   private getSelected() {
-    if (this.bpSelectedName) {
+    if (this.uuidSelected) {
       for (let bp of this.blueprints) {
-        if (bp.name == this.bpSelectedName) {
+        if (bp.uuid == this.uuidSelected) {
           this.bpSelected = bp;
         }
       }
