@@ -61,11 +61,11 @@ var demoBlueprintCmd = &cobra.Command{
 var demoFSMCmd = &cobra.Command{
 	Use:   "demo-fsm",
 	Short: "Demo FSM",
-	Long:  `Run the Blueprint Pipeline thru states`,
+	Long:  `Run the Blueprint FSM thru states`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		stages := []string{"Stage A", "Stage B"}
-		pl := fsm.NewBlueprintPipeline(stages)
+		pl := fsm.NewBlueprintFSM(stages)
 
 		pl.Start()
 		pl.Update(map[string]fsm.StageState{"Stage B": fsm.StageStateRunning})
@@ -130,8 +130,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		go func() {
 			uuid := uuid.NewV4()
 			for {
-				pl := fsm.NewBlueprintPipeline(stages)
-				demoBp := blueprint.BP{&bp, pl, uuid}
+				demoBp := blueprint.BP{&bp, fsm.NewBlueprintFSM(stages), uuid}
 				demoBp.Start()
 				demoBpStore(demoBp)
 

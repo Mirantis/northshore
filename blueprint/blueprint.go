@@ -36,7 +36,7 @@ import (
 // the State should be updated on changing the stages via stages setter
 type BP struct {
 	*Blueprint
-	*fsm.BlueprintPipeline
+	*fsm.BlueprintFSM
 	UUID uuid.UUID `json:"uuid"`
 }
 

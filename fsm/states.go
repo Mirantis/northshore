@@ -53,31 +53,31 @@ const (
 	StageStateDeleted StageState = "deleted"
 )
 
-// BlueprintPipeline represents a Blueprint Pipeline
-type BlueprintPipeline struct {
-	// State is current Pipeline status
+// BlueprintFSM represents a finite state machine of Blueprint
+type BlueprintFSM struct {
+	// State is current Blueprint status
 	State BlueprintState `json:"state"`
-	// StagesStates represents statuses of Pipeline Stages
+	// StagesStates represents statuses of Blueprint Stages
 	StagesStates map[string]StageState `json:"stagesStates"`
-	// FSM is the finite state machine of Pipeline
+	// FSM is the finite state machine
 	FSM *fsm.FSM `json:"-"`
 }
 
-// NewBlueprintPipeline constructs a Blueprint Pipeline with Stages
-func NewBlueprintPipeline(stages []string) *BlueprintPipeline {
-	plStages := map[string]StageState{}
+// NewBlueprintFSM constructs a Blueprint states data
+func NewBlueprintFSM(stages []string) *BlueprintFSM {
+	stagesStates := map[string]StageState{}
 	for _, v := range stages {
-		plStages[v] = StageStateNew
+		stagesStates[v] = StageStateNew
 	}
 
-	pl := &BlueprintPipeline{
+	bpFSM := &BlueprintFSM{
 		BlueprintStateNew,
-		plStages,
+		stagesStates,
 		nil,
 	}
 
 	// https://godoc.org/github.com/looplab/fsm#NewFSM
-	pl.FSM = fsm.NewFSM(
+	bpFSM.FSM = fsm.NewFSM(
 		string(BlueprintStateNew),
 		fsm.Events{
 			{
@@ -97,51 +97,51 @@ func NewBlueprintPipeline(stages []string) *BlueprintPipeline {
 			},
 		},
 		fsm.Callbacks{
-			"before_activate": func(e *fsm.Event) { pl.beforeActivate(e) },
-			"after_event":     func(e *fsm.Event) { pl.afterEvent(e) },
-			"activate":        func(e *fsm.Event) { pl.afterActivate(e) },
-			"inactivate":      func(e *fsm.Event) { pl.afterInactivate(e) },
-			"start":           func(e *fsm.Event) { pl.afterStart(e) },
+			"before_activate": func(e *fsm.Event) { bpFSM.beforeActivate(e) },
+			"after_event":     func(e *fsm.Event) { bpFSM.afterEvent(e) },
+			"activate":        func(e *fsm.Event) { bpFSM.afterActivate(e) },
+			"inactivate":      func(e *fsm.Event) { bpFSM.afterInactivate(e) },
+			"start":           func(e *fsm.Event) { bpFSM.afterStart(e) },
 		},
 	)
 
-	return pl
+	return bpFSM
 }
 
-func (pl *BlueprintPipeline) afterEvent(e *fsm.Event) {
-	log.Printf("#BlueprintPipeline,#afterEvent %+v %+v", e, pl)
+func (bpFSM *BlueprintFSM) afterEvent(e *fsm.Event) {
+	log.Printf("#BlueprintFSM,#afterEvent %+v %+v", e, bpFSM)
 }
 
-func (pl *BlueprintPipeline) beforeActivate(e *fsm.Event) {
-	for _, v := range pl.StagesStates {
+func (bpFSM *BlueprintFSM) beforeActivate(e *fsm.Event) {
+	for _, v := range bpFSM.StagesStates {
 		if v != StageStateRunning {
 			e.Cancel(errors.New("Some stage isn't running"))
 		}
 	}
 }
 
-func (pl *BlueprintPipeline) afterActivate(e *fsm.Event) {
-	pl.State = BlueprintStateActive
+func (bpFSM *BlueprintFSM) afterActivate(e *fsm.Event) {
+	bpFSM.State = BlueprintStateActive
 }
 
-func (pl *BlueprintPipeline) afterInactivate(e *fsm.Event) {
-	pl.State = BlueprintStateInactive
+func (bpFSM *BlueprintFSM) afterInactivate(e *fsm.Event) {
+	bpFSM.State = BlueprintStateInactive
 }
 
-func (pl *BlueprintPipeline) afterStart(e *fsm.Event) {
-	pl.State = BlueprintStateProvision
+func (bpFSM *BlueprintFSM) afterStart(e *fsm.Event) {
+	bpFSM.State = BlueprintStateProvision
 }
 
 // Start creates and runs Stages in Blueprint Pipeline
-func (pl *BlueprintPipeline) Start() {
-	pl.FSM.Event("start")
+func (bpFSM *BlueprintFSM) Start() {
+	bpFSM.FSM.Event("start")
 }
 
 // Update updates current Blueprint Pipeline status with Stages
-func (pl *BlueprintPipeline) Update(stagesStates map[string]StageState) {
+func (bpFSM *BlueprintFSM) Update(stagesStates map[string]StageState) {
 	event := "activate"
 	for k, v := range stagesStates {
-		pl.StagesStates[k] = v
+		bpFSM.StagesStates[k] = v
 		switch v {
 		case
 			StageStatePaused,
@@ -151,8 +151,8 @@ func (pl *BlueprintPipeline) Update(stagesStates map[string]StageState) {
 		}
 	}
 
-	err := pl.FSM.Event(event, stagesStates)
+	err := bpFSM.FSM.Event(event, stagesStates)
 	if err != nil {
-		log.Println("#BlueprintPipeline,#Update,#Error", err)
+		log.Println("#BlueprintFSM,#Update,#Error", err)
 	}
 }
