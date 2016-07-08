@@ -18,18 +18,28 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/server"
+	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
 	"github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
 )
 
-var demoBlueprintPath string
-var demoBp blueprint.BP
+type demoStore struct {
+	db *bolt.DB
+}
+
+const dbBucketBlueprints = "blueprints"
+
+var (
+	demoBlueprintPath string
+	store             demoStore
+)
 
 // demoBlueprintCmd represents the "demo-blueprint" command
 var demoBlueprintCmd = &cobra.Command{
@@ -75,6 +85,25 @@ The local server binds localhost:8998.
 Demo Blueprint Pipeline goes thru states.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		/* Init DB */
+		db, err := bolt.Open("demo.db", 0600, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+		defer os.Remove(db.Path())
+
+		if err = db.Update(func(tx *bolt.Tx) error {
+			_, err = tx.CreateBucketIfNotExists([]byte(dbBucketBlueprints))
+			if err != nil {
+				return err
+			}
+			return nil
+		}); err != nil {
+			log.Fatal(err)
+		}
+		store = demoStore{db}
+
 		/* Run Blueprint */
 		log.Println("#run_blueprint")
 		log.Printf("PATH -> %s \n", demoBlueprintPath)
@@ -102,8 +131,9 @@ Demo Blueprint Pipeline goes thru states.`,
 			uuid := uuid.NewV4()
 			for {
 				pl := fsm.NewBlueprintPipeline(stages)
-				demoBp = blueprint.BP{&bp, pl, uuid}
+				demoBp := blueprint.BP{&bp, pl, uuid}
 				demoBp.Start()
+				demoBpStore(demoBp)
 
 				time.Sleep(time.Second * 9)
 
@@ -112,17 +142,20 @@ Demo Blueprint Pipeline goes thru states.`,
 					v := map[string]fsm.StageState{s: fsm.StageStateCreated}
 					log.Println("#pl-update", v)
 					demoBp.Update(v)
+					demoBpStore(demoBp)
 				}
 				for _, s := range stages {
 					time.Sleep(time.Second * 3)
 					v := map[string]fsm.StageState{s: fsm.StageStateRunning}
 					log.Println("#pl-update", v)
 					demoBp.Update(v)
+					demoBpStore(demoBp)
 				}
 				for _, v := range ss {
 					time.Sleep(time.Second * 3)
 					log.Println("#pl-update", v)
 					demoBp.Update(v)
+					demoBpStore(demoBp)
 				}
 			}
 		}()
@@ -158,6 +191,40 @@ func init() {
 	runCmd.AddCommand(demoCmd)
 }
 
+func demoBpLoadAll() ([]blueprint.BP, error) {
+	var bps []blueprint.BP
+	err := store.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(dbBucketBlueprints))
+		b.ForEach(func(k, v []byte) error {
+			var bp blueprint.BP
+			err := json.Unmarshal(v, &bp)
+			if err != nil {
+				log.Println("#demoBpLoadAll,#Error", err)
+			}
+			bps = append(bps, bp)
+			return nil
+		})
+
+		return nil
+	})
+	return bps, err
+}
+
+func demoBpStore(bp blueprint.BP) error {
+	err := store.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(dbBucketBlueprints))
+		bpEncoded, err := json.Marshal(bp)
+		if err != nil {
+			return err
+		}
+		if err := b.Put([]byte(bp.Name), bpEncoded); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
 func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
@@ -177,13 +244,32 @@ func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
+	var data []map[string]interface{}
+	err := store.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(dbBucketBlueprints))
+		b.ForEach(func(k, v []byte) error {
+			var item map[string]interface{}
+			if err := json.Unmarshal(v, &item); err != nil {
+				log.Println("#Error", err)
+				return err
+			}
+			data = append(data, item)
+			return nil
+		})
+		return nil
+	})
+
 	o := map[string]interface{}{
-		"data": []blueprint.BP{
-			demoBp,
-		},
+		"data": data,
 		"meta": map[string]interface{}{
 			"info": "demouiAPI1BlueprintsHandler",
 		},
+	}
+
+	if err != nil {
+		o["errors"] = map[string]interface{}{
+			"details": err,
+		}
 	}
 
 	json.NewEncoder(w).Encode(o)
