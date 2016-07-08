@@ -99,9 +99,6 @@ func NewBlueprintFSM(stages []string) *BlueprintFSM {
 		fsm.Callbacks{
 			"before_activate": func(e *fsm.Event) { bpFSM.beforeActivate(e) },
 			"after_event":     func(e *fsm.Event) { bpFSM.afterEvent(e) },
-			"activate":        func(e *fsm.Event) { bpFSM.afterActivate(e) },
-			"inactivate":      func(e *fsm.Event) { bpFSM.afterInactivate(e) },
-			"start":           func(e *fsm.Event) { bpFSM.afterStart(e) },
 		},
 	)
 
@@ -109,7 +106,7 @@ func NewBlueprintFSM(stages []string) *BlueprintFSM {
 }
 
 func (bpFSM *BlueprintFSM) afterEvent(e *fsm.Event) {
-	log.Printf("#BlueprintFSM,#afterEvent %+v %+v", e, bpFSM)
+	bpFSM.State = BlueprintState(bpFSM.FSM.Current())
 }
 
 func (bpFSM *BlueprintFSM) beforeActivate(e *fsm.Event) {
@@ -118,18 +115,6 @@ func (bpFSM *BlueprintFSM) beforeActivate(e *fsm.Event) {
 			e.Cancel(errors.New("Some stage isn't running"))
 		}
 	}
-}
-
-func (bpFSM *BlueprintFSM) afterActivate(e *fsm.Event) {
-	bpFSM.State = BlueprintStateActive
-}
-
-func (bpFSM *BlueprintFSM) afterInactivate(e *fsm.Event) {
-	bpFSM.State = BlueprintStateInactive
-}
-
-func (bpFSM *BlueprintFSM) afterStart(e *fsm.Event) {
-	bpFSM.State = BlueprintStateProvision
 }
 
 // Start creates and runs Stages in Blueprint Pipeline
