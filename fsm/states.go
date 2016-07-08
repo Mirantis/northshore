@@ -22,68 +22,36 @@ import (
 )
 
 // BlueprintState represents a state of the Blueprint
-type BlueprintState byte
+type BlueprintState string
 
 // StageState represents a state of the Stage
-type StageState byte
+type StageState string
 
 const (
 	// BlueprintStateNew is default state of the Blueprint
-	BlueprintStateNew BlueprintState = iota
+	BlueprintStateNew BlueprintState = "new"
 	// BlueprintStateProvision is the Blueprint status while provisioning
-	BlueprintStateProvision
+	BlueprintStateProvision BlueprintState = "provision"
 	// BlueprintStateActive is the Blueprint status when all Stages are up and ready
-	BlueprintStateActive
+	BlueprintStateActive BlueprintState = "active"
 	// BlueprintStateInactive is the Blueprint status when some Stage is down
-	BlueprintStateInactive
+	BlueprintStateInactive BlueprintState = "inactive"
 )
 
 const (
 	// StageStateNew is default state of the Stage
-	StageStateNew StageState = iota
+	StageStateNew StageState = "new"
 	// StageStateCreated indicates that container is created
-	StageStateCreated
+	StageStateCreated StageState = "created"
 	// StageStateRunning indicates that container is running
-	StageStateRunning
+	StageStateRunning StageState = "running"
 	// StageStatePaused indicates that container is paused
-	StageStatePaused
+	StageStatePaused StageState = "paused"
 	// StageStateStopped indicates that container is stopped
-	StageStateStopped
+	StageStateStopped StageState = "stopped"
 	// StageStateDeleted indicates that container is deleted
-	StageStateDeleted
+	StageStateDeleted StageState = "deleted"
 )
-
-func (s BlueprintState) String() string {
-	states := []string{
-		"new",
-		"provision",
-		"active",
-		"inactive",
-	}
-	return states[s]
-}
-
-func (s StageState) String() string {
-	states := []string{
-		"new",
-		"created",
-		"running",
-		"paused",
-		"stopped",
-		"deleted",
-	}
-	return states[s]
-}
-
-// MarshalText implements TextMarshaler interface
-func (s BlueprintState) MarshalText() ([]byte, error) {
-	return []byte(s.String()), nil
-}
-
-// MarshalText implements TextMarshaler interface
-func (s StageState) MarshalText() ([]byte, error) {
-	return []byte(s.String()), nil
-}
 
 // BlueprintPipeline represents a Blueprint Pipeline
 type BlueprintPipeline struct {
@@ -91,8 +59,8 @@ type BlueprintPipeline struct {
 	State BlueprintState `json:"state"`
 	// StagesStates represents statuses of Pipeline Stages
 	StagesStates map[string]StageState `json:"stagesStates"`
-	// fSM is the finite state machine of Pipeline
-	fSM *fsm.FSM
+	// FSM is the finite state machine of Pipeline
+	FSM *fsm.FSM `json:"-"`
 }
 
 // NewBlueprintPipeline constructs a Blueprint Pipeline with Stages
@@ -109,23 +77,23 @@ func NewBlueprintPipeline(stages []string) *BlueprintPipeline {
 	}
 
 	// https://godoc.org/github.com/looplab/fsm#NewFSM
-	pl.fSM = fsm.NewFSM(
-		"new",
+	pl.FSM = fsm.NewFSM(
+		string(BlueprintStateNew),
 		fsm.Events{
 			{
 				Name: "activate",
-				Src:  []string{"inactive", "provision"},
-				Dst:  "active",
+				Src:  []string{string(BlueprintStateInactive), string(BlueprintStateProvision)},
+				Dst:  string(BlueprintStateActive),
 			},
 			{
 				Name: "inactivate",
-				Src:  []string{"active", "provision"},
-				Dst:  "inactive",
+				Src:  []string{string(BlueprintStateActive), string(BlueprintStateProvision)},
+				Dst:  string(BlueprintStateInactive),
 			},
 			{
 				Name: "start",
-				Src:  []string{"new"},
-				Dst:  "provision",
+				Src:  []string{string(BlueprintStateNew)},
+				Dst:  string(BlueprintStateProvision),
 			},
 		},
 		fsm.Callbacks{
@@ -166,7 +134,7 @@ func (pl *BlueprintPipeline) afterStart(e *fsm.Event) {
 
 // Start creates and runs Stages in Blueprint Pipeline
 func (pl *BlueprintPipeline) Start() {
-	pl.fSM.Event("start")
+	pl.FSM.Event("start")
 }
 
 // Update updates current Blueprint Pipeline status with Stages
@@ -183,7 +151,7 @@ func (pl *BlueprintPipeline) Update(stagesStates map[string]StageState) {
 		}
 	}
 
-	err := pl.fSM.Event(event, stagesStates)
+	err := pl.FSM.Event(event, stagesStates)
 	if err != nil {
 		log.Println("#BlueprintPipeline,#Update,#Error", err)
 	}
