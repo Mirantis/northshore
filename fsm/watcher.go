@@ -33,7 +33,7 @@ func Watch(period int, states chan map[string]string) {
 		ids := getIds("my.db")
 		if len(ids) == 0 {
 			log.Println("No containers for watching.")
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Duration(period) * time.Second)
 			continue
 		}
 		for _, id := range ids {
@@ -45,7 +45,7 @@ func Watch(period int, states chan map[string]string) {
 			states <- map[string]string{res.Name[1:]: res.State.Status}
 			log.Printf(`Container "%s" with id "%s" is in status "%s"`, res.Name, id, res.State.Status)
 		}
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Duration(period) * time.Second)
 	}
 }
 
