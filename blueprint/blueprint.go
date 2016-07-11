@@ -19,26 +19,15 @@ import (
 	"log"
 	"strings"
 
-	"github.com/Mirantis/northshore/fsm"
 	"github.com/boltdb/bolt"
 	"github.com/docker/engine-api/client"
 	"github.com/docker/engine-api/types"
 	"github.com/docker/engine-api/types/container"
 	"github.com/docker/go-connections/nat"
-	"github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 
 	"golang.org/x/net/context"
 )
-
-// BP represents a combined data of the Blueprint with States
-// TODO: refactor Blueprint to integrate State info
-// the State should be updated on changing the stages via stages setter
-type BP struct {
-	*Blueprint
-	*fsm.BlueprintFSM
-	UUID uuid.UUID `json:"uuid"`
-}
 
 // Stage represents a Blueprint Stage
 type Stage struct {
