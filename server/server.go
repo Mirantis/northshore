@@ -20,13 +20,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
 )
-
-var bpl blueprint.BP
 
 func Run(bpPath string) {
 	r := mux.NewRouter()
@@ -34,7 +31,7 @@ func Run(bpPath string) {
 	uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
 	uiAPI1.HandleFunc("/", UIAPI1RootHandler).Methods("GET")
 
-	uiAPI1.HandleFunc("/blueprints", blueprints).Methods("GET", "POST")
+	//uiAPI1.HandleFunc("/blueprints", blueprints).Methods("GET", "POST")
 
 	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 	ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", NoDirListing(http.FileServer(http.Dir("ui/")))))
@@ -122,17 +119,17 @@ func UIIndexHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "ui/index.html")
 }
 
-func blueprints(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	o := map[string]interface{}{
-		"data": []blueprint.BP{
-			bpl,
-		},
-		"meta": map[string]interface{}{
-			"info": "blueprints",
-		},
-	}
-
-	json.NewEncoder(w).Encode(o)
-}
+//func blueprints(w http.ResponseWriter, r *http.Request) {
+//	w.Header().Set("Content-Type", "application/vnd.api+json")
+//
+//	o := map[string]interface{}{
+//		"data": []blueprint.BP{
+//			bpl,
+//		},
+//		"meta": map[string]interface{}{
+//			"info": "blueprints",
+//		},
+//	}
+//
+//	json.NewEncoder(w).Encode(o)
+//}
