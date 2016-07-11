@@ -15,13 +15,11 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/Mirantis/northshore/fsm"
-	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
 )
 
@@ -39,51 +37,6 @@ func Run(bpPath string) {
 
 	r.HandleFunc("/{_:.*}", UIIndexHandler)
 
-	db, err := bolt.Open("my.db", 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	bname := []byte("MyBucket")
-	key := []byte("answer")
-	value := []byte("42")
-	err = db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists(bname)
-		if err != nil {
-			return fmt.Errorf("Create bucket: %s", err)
-		}
-		log.Printf("Bucket \"%s\" created\n", bname)
-		err = b.Put(key, value)
-		if err != nil {
-			return err
-		}
-		log.Printf("Info puted with key \"%s\"\n", key)
-		return nil
-	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(bname)
-		if bucket == nil {
-			return fmt.Errorf("Bucket %s not found", bname)
-		}
-
-		v := bucket.Get(key)
-		log.Printf("Get value by key \"%s\": v => \"%s\" \n", key, v)
-
-		return nil
-	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	db.Close()
-
-	//TODO: draft for demo
 	states := make(chan map[string]string, 3)
 
 	//Update frequency for watcher in seconds
