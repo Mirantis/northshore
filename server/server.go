@@ -19,13 +19,11 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
-	"github.com/satori/go.uuid"
 )
 
 var bpl blueprint.BP
@@ -90,51 +88,6 @@ func Run(bpPath string) {
 
 	//TODO: draft for demo
 	states := make(chan map[string]string, 3)
-
-	bp, err := blueprint.ParseBlueprint(bpPath)
-	if err != nil {
-		log.Fatalf("Parsing error: %s \n", err)
-	}
-
-	var stages []string
-	for k := range bp.Stages {
-		stages = append(stages, k)
-	}
-
-	go func(c chan map[string]string) {
-		pl := fsm.NewBlueprintPipeline(stages)
-		bpl = blueprint.BP{&bp, pl, uuid.NewV4()}
-		bpl.Start()
-
-		time.Sleep(time.Second * 9)
-
-		for _, s := range stages {
-			time.Sleep(time.Second * 3)
-			v := map[string]fsm.StageState{s: fsm.StageStateCreated}
-			log.Println("#PL_UPDATE (INITIALIZATION STATE CREATED)!!!", v)
-			bpl.Update(v)
-		}
-
-		for {
-			state := <-c
-			log.Printf("CHANNEL IN FSM GOROUTINE -> %v", state)
-
-			for k, v := range state {
-				switch v {
-				case "running":
-					vv := map[string]fsm.StageState{k: fsm.StageStateRunning}
-					log.Println("#PL_UPDATE!!!", vv)
-					bpl.Update(vv)
-				case "exited":
-					vv := map[string]fsm.StageState{k: fsm.StageStateStopped}
-					log.Println("#PL_UPDATE!!!", vv)
-					bpl.Update(vv)
-				default:
-					log.Println("DEFAULT CASE IN SWITCH!!!")
-				}
-			}
-		}
-	}(states)
 
 	//Update frequency for watcher in seconds
 	period := 3
