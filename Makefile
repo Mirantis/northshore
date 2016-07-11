@@ -55,7 +55,7 @@ build:test
 
 run:build
 	@echo "************** Run $(BINARY) ************"
-	./$(BINARY) run local -f $(PIPELINE)
+	./$(BINARY) run local
 
 test:
 	@echo "************** Test $(BINARY) ************"

@@ -19,7 +19,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var bpPath string
 var port string
 
 // localCmd represents the local command
@@ -33,7 +32,6 @@ var localCmd = &cobra.Command{
 }
 
 func init() {
-	localCmd.Flags().StringVarP(&bpPath, "file", "f", "", "Path to blueprint yaml")
 	localCmd.Flags().StringVarP(&port, "port", "p", "8998", "Port for local server")
 	runCmd.AddCommand(localCmd)
 }
