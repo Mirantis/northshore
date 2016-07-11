@@ -64,34 +64,30 @@ type BlueprintFSM struct {
 }
 
 // NewBlueprintFSM constructs a Blueprint states data
-func NewBlueprintFSM(stages []string) *BlueprintFSM {
-	stagesStates := map[string]StageState{}
-	for _, v := range stages {
-		stagesStates[v] = StageStateNew
-	}
+func NewBlueprintFSM(stagesStates map[string]StageState) *BlueprintFSM {
 
 	bpFSM := &BlueprintFSM{
-		BlueprintStateNew,
+		blueprintState(stagesStates),
 		stagesStates,
 		nil,
 	}
 
 	// https://godoc.org/github.com/looplab/fsm#NewFSM
 	bpFSM.FSM = fsm.NewFSM(
-		string(BlueprintStateNew),
+		string(bpFSM.State),
 		fsm.Events{
 			{
 				Name: "activate",
-				Src:  []string{string(BlueprintStateInactive), string(BlueprintStateProvision)},
+				Src:  []string{string(BlueprintStateInactive), string(BlueprintStateNew), string(BlueprintStateProvision)},
 				Dst:  string(BlueprintStateActive),
 			},
 			{
 				Name: "inactivate",
-				Src:  []string{string(BlueprintStateActive), string(BlueprintStateProvision)},
+				Src:  []string{string(BlueprintStateActive), string(BlueprintStateNew), string(BlueprintStateProvision)},
 				Dst:  string(BlueprintStateInactive),
 			},
 			{
-				Name: "start",
+				Name: "provision",
 				Src:  []string{string(BlueprintStateNew)},
 				Dst:  string(BlueprintStateProvision),
 			},
@@ -117,27 +113,54 @@ func (bpFSM *BlueprintFSM) beforeActivate(e *fsm.Event) {
 	}
 }
 
-// Start creates and runs Stages in Blueprint Pipeline
-func (bpFSM *BlueprintFSM) Start() {
-	bpFSM.FSM.Event("start")
-}
-
-// Update updates current Blueprint Pipeline status with Stages
+// Update updates current Blueprint status with Stages
 func (bpFSM *BlueprintFSM) Update(stagesStates map[string]StageState) {
-	event := "activate"
 	for k, v := range stagesStates {
 		bpFSM.StagesStates[k] = v
-		switch v {
-		case
-			StageStatePaused,
-			StageStateStopped,
-			StageStateDeleted:
-			event = "inactivate"
-		}
 	}
 
-	err := bpFSM.FSM.Event(event, stagesStates)
-	if err != nil {
-		log.Println("#BlueprintFSM,#Update,#Error", err)
+	event := "activate"
+	switch blueprintState(stagesStates) {
+	case
+		BlueprintStateInactive:
+		event = "inactivate"
+		break
+	case
+		BlueprintStateProvision:
+		event = "provision"
+		break
 	}
+
+	if err := bpFSM.FSM.Event(event); err != nil {
+		log.Println("#BlueprintFSM,#Update,#Error", event, err, bpFSM.StagesStates)
+	}
+}
+
+func blueprintState(stagesStates map[string]StageState) BlueprintState {
+	bpState := BlueprintStateNew
+
+	for _, v := range stagesStates {
+		if v == StageStateRunning {
+			bpState = BlueprintStateActive
+			break
+		}
+	}
+	for _, v := range stagesStates {
+		if v == StageStateCreated {
+			bpState = BlueprintStateProvision
+			break
+		}
+	}
+LookInactive:
+	for _, v := range stagesStates {
+		switch v {
+		case
+			StageStateDeleted,
+			StageStatePaused,
+			StageStateStopped:
+			bpState = BlueprintStateInactive
+			break LookInactive
+		}
+	}
+	return bpState
 }
