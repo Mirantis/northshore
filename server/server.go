@@ -23,7 +23,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Run(bpPath string) {
+func Run(port string) {
 	r := mux.NewRouter()
 
 	uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
@@ -45,8 +45,10 @@ func Run(bpPath string) {
 		fsm.Watch(period, c)
 	}(states)
 
-	log.Println("Listening at port 8998")
-	http.ListenAndServe(":8998", r)
+	addr := ":"
+	addr += port
+	log.Printf("Listening at %s", addr)
+	log.Print(http.ListenAndServe(addr, r))
 }
 
 // NoDirListing returns 404 instead of directory listing with http.FileServer
