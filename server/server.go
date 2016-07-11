@@ -19,24 +19,19 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
-	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
-	"github.com/satori/go.uuid"
 )
 
-var bpl blueprint.BP
-
-func Run(bpPath string) {
+func Run(port string) {
 	r := mux.NewRouter()
 
 	uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
 	uiAPI1.HandleFunc("/", UIAPI1RootHandler).Methods("GET")
 
-	uiAPI1.HandleFunc("/blueprints", blueprints).Methods("GET", "POST")
+	//uiAPI1.HandleFunc("/blueprints", blueprints).Methods("GET", "POST")
 
 	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 	ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", NoDirListing(http.FileServer(http.Dir("ui/")))))
@@ -44,106 +39,38 @@ func Run(bpPath string) {
 
 	r.HandleFunc("/{_:.*}", UIIndexHandler)
 
+	//Init DB for watcher
 	db, err := bolt.Open("my.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	bname := []byte("MyBucket")
-	key := []byte("answer")
-	value := []byte("42")
+	bname := []byte("containers")
 	err = db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists(bname)
+		_, err := tx.CreateBucketIfNotExists(bname)
 		if err != nil {
 			return fmt.Errorf("Create bucket: %s", err)
 		}
 		log.Printf("Bucket \"%s\" created\n", bname)
-		err = b.Put(key, value)
-		if err != nil {
-			return err
-		}
-		log.Printf("Info puted with key \"%s\"\n", key)
 		return nil
 	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket(bname)
-		if bucket == nil {
-			return fmt.Errorf("Bucket %s not found", bname)
-		}
-
-		v := bucket.Get(key)
-		log.Printf("Get value by key \"%s\": v => \"%s\" \n", key, v)
-
-		return nil
-	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
 	db.Close()
 
-	//TODO: draft for demo
-	states := make(chan map[string]string, 3)
-
-	bp, err := blueprint.ParseBlueprint(bpPath)
 	if err != nil {
-		log.Fatalf("Parsing error: %s \n", err)
+		log.Fatal(err)
 	}
-
-	var stages []string
-	for k := range bp.Stages {
-		stages = append(stages, k)
-	}
-
-	go func(c chan map[string]string) {
-		pl := fsm.NewBlueprintPipeline(stages)
-		bpl = blueprint.BP{&bp, pl, uuid.NewV4()}
-		bpl.Start()
-
-		time.Sleep(time.Second * 9)
-
-		for _, s := range stages {
-			time.Sleep(time.Second * 3)
-			v := map[string]fsm.StageState{s: fsm.StageStateCreated}
-			log.Println("#PL_UPDATE (INITIALIZATION STATE CREATED)!!!", v)
-			bpl.Update(v)
-		}
-
-		for {
-			state := <-c
-			log.Printf("CHANNEL IN FSM GOROUTINE -> %v", state)
-
-			for k, v := range state {
-				switch v {
-				case "running":
-					vv := map[string]fsm.StageState{k: fsm.StageStateRunning}
-					log.Println("#PL_UPDATE!!!", vv)
-					bpl.Update(vv)
-				case "exited":
-					vv := map[string]fsm.StageState{k: fsm.StageStateStopped}
-					log.Println("#PL_UPDATE!!!", vv)
-					bpl.Update(vv)
-				default:
-					log.Println("DEFAULT CASE IN SWITCH!!!")
-				}
-			}
-		}
-	}(states)
 
 	//Update frequency for watcher in seconds
 	period := 3
-	go func(c chan map[string]string) {
-		fsm.Watch(period, c)
-	}(states)
+	go func() {
+		fsm.Watch(period)
+	}()
 
-	log.Println("Listening at port 8998")
-	http.ListenAndServe(":8998", r)
+	addr := ":"
+	addr += port
+	log.Printf("Listening at %s", addr)
+	log.Print(http.ListenAndServe(addr, r))
 }
 
 // NoDirListing returns 404 instead of directory listing with http.FileServer
@@ -169,17 +96,17 @@ func UIIndexHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "ui/index.html")
 }
 
-func blueprints(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	o := map[string]interface{}{
-		"data": []blueprint.BP{
-			bpl,
-		},
-		"meta": map[string]interface{}{
-			"info": "blueprints",
-		},
-	}
-
-	json.NewEncoder(w).Encode(o)
-}
+//func blueprints(w http.ResponseWriter, r *http.Request) {
+//	w.Header().Set("Content-Type", "application/vnd.api+json")
+//
+//	o := map[string]interface{}{
+//		"data": []blueprint.BP{
+//			bpl,
+//		},
+//		"meta": map[string]interface{}{
+//			"info": "blueprints",
+//		},
+//	}
+//
+//	json.NewEncoder(w).Encode(o)
+//}
