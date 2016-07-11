@@ -15,11 +15,13 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/Mirantis/northshore/fsm"
+	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
 )
 
@@ -37,13 +39,33 @@ func Run(port string) {
 
 	r.HandleFunc("/{_:.*}", UIIndexHandler)
 
-	states := make(chan map[string]string, 3)
+	//Init DB for watcher
+	db, err := bolt.Open("my.db", 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	bname := []byte("containers")
+	err = db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists(bname)
+		if err != nil {
+			return fmt.Errorf("Create bucket: %s", err)
+		}
+		log.Printf("Bucket \"%s\" created\n", bname)
+		return nil
+	})
+	db.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	//Update frequency for watcher in seconds
 	period := 3
-	go func(c chan map[string]string) {
-		fsm.Watch(period, c)
-	}(states)
+	go func() {
+		fsm.Watch(period)
+	}()
 
 	addr := ":"
 	addr += port
