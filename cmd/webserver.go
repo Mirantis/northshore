@@ -24,6 +24,8 @@ import (
 
 const repo = "https://github.com/Mirantis/northshore/trunk/ui"
 
+var uiDir string
+
 // webserverCmd represents the webserver command
 var webserverCmd = &cobra.Command{
 	Use:   "webserver",
@@ -35,9 +37,9 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("webserver called")
+		log.Println("Start downloading UI ...")
 		v := vcs.ByCmd("svn")
-		err := v.Create("ui", repo)
+		err := v.Create(uiDir, repo)
 		if err != nil {
 			log.Print(err)
 		}
@@ -46,6 +48,7 @@ to quickly create a Cobra application.`,
 
 func init() {
 	installCmd.AddCommand(webserverCmd)
+	webserverCmd.Flags().StringVarP(&uiDir, "dir", "d", "nsUI", "Destination directory for UI content")
 
 	// Here you will define your flags and configuration settings.
 
