@@ -178,12 +178,8 @@ func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	var (
-		data []interface{}
-		s    store.Store
-	)
-
-	err := s.LoadBucket([]byte(blueprint.DBBucketBlueprints), &data)
+	var data []interface{}
+	err := store.LoadBucket([]byte(blueprint.DBBucketBlueprints), &data)
 
 	o := map[string]interface{}{
 		"data": data,

@@ -22,6 +22,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+var s *Store
+
+func init() {
+	s = NewStore()
+}
+
 // Store represents boltdb storage
 type Store struct {
 	db *bolt.DB
@@ -87,8 +93,8 @@ func (s *Store) LoadBucket(bucket []byte, buf *[]interface{}) error {
 	return err
 }
 
-// Store stores item in boltdb Bucket as JSON
-func (s *Store) Store(bucket []byte, key []byte, v interface{}) error {
+// Save stores item in boltdb Bucket as JSON
+func (s *Store) Save(bucket []byte, key []byte, v interface{}) error {
 	s.openBucket(bucket)
 
 	err := s.db.Update(func(tx *bolt.Tx) error {
@@ -107,4 +113,25 @@ func (s *Store) Store(bucket []byte, key []byte, v interface{}) error {
 
 	s.db.Close()
 	return err
+}
+
+// NewStore returns an initialized Store instance
+func NewStore() *Store {
+	store := new(Store)
+	return store
+}
+
+// Load loads item from boltdb Bucket
+func Load(bucket []byte, key []byte, v interface{}) error {
+	return s.Load(bucket, key, v)
+}
+
+// LoadBucket loads all items from boltdb Bucket
+func LoadBucket(bucket []byte, buf *[]interface{}) error {
+	return s.LoadBucket(bucket, buf)
+}
+
+// Save stores item in boltdb Bucket as JSON
+func Save(bucket []byte, key []byte, v interface{}) error {
+	return s.Save(bucket, key, v)
 }

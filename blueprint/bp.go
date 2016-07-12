@@ -43,9 +43,7 @@ func NewBP(blueprint *Blueprint) *BP {
 		uuid.NewV4(),
 	}
 
-	var s store.Store
-	s.Store([]byte(DBBucketBlueprints), bp.UUID.Bytes(), bp)
-
+	store.Save([]byte(DBBucketBlueprints), bp.UUID.Bytes(), bp)
 	return bp
 }
 
@@ -53,9 +51,7 @@ func NewBP(blueprint *Blueprint) *BP {
 // and stores in DB
 func (bp *BP) Update(stagesStates map[string]fsm.StageState) error {
 	bp.BlueprintFSM.Update(stagesStates)
-
-	var s store.Store
-	return s.Store([]byte(DBBucketBlueprints), bp.UUID.Bytes(), bp)
+	return store.Save([]byte(DBBucketBlueprints), bp.UUID.Bytes(), bp)
 }
 
 /*
