@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Mirantis/northshore/blueprint"
@@ -26,6 +27,7 @@ import (
 	"github.com/Mirantis/northshore/store"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var demoBlueprintPath string
@@ -71,6 +73,10 @@ var demoCmd = &cobra.Command{
 The local server binds localhost:8998.
 Demo Blueprint Pipeline goes thru states.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		/* Init DB */
+		os.Remove("demo.db")
+		viper.Set("BoltDBPath", "demo.db")
 
 		/* Run Blueprint */
 		log.Println("#run_blueprint")

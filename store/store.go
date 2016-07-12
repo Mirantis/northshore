@@ -19,6 +19,7 @@ import (
 	"log"
 
 	"github.com/boltdb/bolt"
+	"github.com/spf13/viper"
 )
 
 // Store represents boltdb storage
@@ -27,8 +28,7 @@ type Store struct {
 }
 
 func (s *Store) openBucket(bucket []byte) {
-	path := "my.db"
-
+	path := viper.GetString("BoltDBPath")
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
 		log.Fatal(err)

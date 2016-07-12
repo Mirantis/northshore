@@ -62,6 +62,7 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	}
 
+	viper.SetDefault("BoltDBPath", "my.db")
 	viper.SetConfigName(".northshore") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")       // adding home directory as first search path
 	viper.AutomaticEnv()               // read in environment variables that match
