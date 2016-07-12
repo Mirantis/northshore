@@ -14,11 +14,8 @@
 package blueprint
 
 import (
-	"encoding/json"
-
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/store"
-	"github.com/boltdb/bolt"
 	"github.com/satori/go.uuid"
 )
 
@@ -45,32 +42,16 @@ func NewBP(blueprint *Blueprint) *BP {
 		fsm.NewBlueprintFSM(stagesStates),
 		uuid.NewV4(),
 	}
-	bp.store()
+
+	store.Save([]byte(DBBucketBlueprints), bp.UUID.Bytes(), bp)
 	return bp
-}
-
-// store item in DB
-func (bp *BP) store() error {
-	err := store.DB.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(DBBucketBlueprints))
-		bpEncoded, err := json.Marshal(bp)
-		if err != nil {
-			return err
-		}
-		if err := b.Put([]byte(bp.Name), bpEncoded); err != nil {
-			return err
-		}
-		return nil
-	})
-
-	return err
 }
 
 // Update updates current Blueprint status with Stages
 // and stores in DB
 func (bp *BP) Update(stagesStates map[string]fsm.StageState) error {
 	bp.BlueprintFSM.Update(stagesStates)
-	return bp.store()
+	return store.Save([]byte(DBBucketBlueprints), bp.UUID.Bytes(), bp)
 }
 
 /*

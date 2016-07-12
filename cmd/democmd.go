@@ -25,9 +25,9 @@ import (
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/server"
 	"github.com/Mirantis/northshore/store"
-	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var demoBlueprintPath string
@@ -75,23 +75,8 @@ Demo Blueprint Pipeline goes thru states.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		/* Init DB */
-		db, err := bolt.Open("demo.db", 0600, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer db.Close()
-		defer os.Remove(db.Path())
-
-		if err = db.Update(func(tx *bolt.Tx) error {
-			_, err = tx.CreateBucketIfNotExists([]byte(blueprint.DBBucketBlueprints))
-			if err != nil {
-				return err
-			}
-			return nil
-		}); err != nil {
-			log.Fatal(err)
-		}
-		store.DB = db
+		os.Remove("demo.db")
+		viper.Set("BoltDBPath", "demo.db")
 
 		/* Run Blueprint */
 		log.Println("#run_blueprint")
@@ -193,20 +178,8 @@ func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	var data []map[string]interface{}
-	err := store.DB.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(blueprint.DBBucketBlueprints))
-		b.ForEach(func(k, v []byte) error {
-			var item map[string]interface{}
-			if err := json.Unmarshal(v, &item); err != nil {
-				log.Println("#Error", err)
-				return err
-			}
-			data = append(data, item)
-			return nil
-		})
-		return nil
-	})
+	var data []interface{}
+	err := store.LoadBucket([]byte(blueprint.DBBucketBlueprints), &data)
 
 	o := map[string]interface{}{
 		"data": data,
