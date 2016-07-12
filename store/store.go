@@ -21,12 +21,37 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-// DB represents boltdb storage
-var DB *bolt.DB
+// Store represents boltdb storage
+type Store struct {
+	db *bolt.DB
+}
+
+func (s *Store) openBucket(bucket []byte) {
+	path := "my.db"
+
+	db, err := bolt.Open(path, 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err = db.Update(func(tx *bolt.Tx) error {
+		_, err = tx.CreateBucketIfNotExists(bucket)
+		if err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		log.Fatal(err)
+	}
+
+	s.db = db
+}
 
 // Load loads item from boltdb Bucket
-func Load(bucket []byte, key []byte, v interface{}) error {
-	err := DB.View(func(tx *bolt.Tx) error {
+func (s *Store) Load(bucket []byte, key []byte, v interface{}) error {
+	s.openBucket(bucket)
+
+	err := s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		buf := b.Get(key)
 		if err := json.Unmarshal(buf, &v); err != nil {
@@ -35,12 +60,16 @@ func Load(bucket []byte, key []byte, v interface{}) error {
 		}
 		return nil
 	})
+
+	s.db.Close()
 	return err
 }
 
 // LoadBucket loads all items from boltdb Bucket
-func LoadBucket(bucket []byte, buf *[]interface{}) error {
-	err := DB.View(func(tx *bolt.Tx) error {
+func (s *Store) LoadBucket(bucket []byte, buf *[]interface{}) error {
+	s.openBucket(bucket)
+
+	err := s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		b.ForEach(func(k, v []byte) error {
 			var item map[string]interface{}
@@ -53,12 +82,16 @@ func LoadBucket(bucket []byte, buf *[]interface{}) error {
 		})
 		return nil
 	})
+
+	s.db.Close()
 	return err
 }
 
 // Store stores item in boltdb Bucket as JSON
-func Store(bucket []byte, key []byte, v interface{}) error {
-	err := DB.Update(func(tx *bolt.Tx) error {
+func (s *Store) Store(bucket []byte, key []byte, v interface{}) error {
+	s.openBucket(bucket)
+
+	err := s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		vEncoded, err := json.Marshal(v)
 		if err != nil {
@@ -71,5 +104,7 @@ func Store(bucket []byte, key []byte, v interface{}) error {
 		}
 		return nil
 	})
+
+	s.db.Close()
 	return err
 }

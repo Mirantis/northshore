@@ -18,14 +18,12 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/server"
 	"github.com/Mirantis/northshore/store"
-	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 )
@@ -73,25 +71,6 @@ var demoCmd = &cobra.Command{
 The local server binds localhost:8998.
 Demo Blueprint Pipeline goes thru states.`,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		/* Init DB */
-		db, err := bolt.Open("demo.db", 0600, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer db.Close()
-		defer os.Remove(db.Path())
-
-		if err = db.Update(func(tx *bolt.Tx) error {
-			_, err = tx.CreateBucketIfNotExists([]byte(blueprint.DBBucketBlueprints))
-			if err != nil {
-				return err
-			}
-			return nil
-		}); err != nil {
-			log.Fatal(err)
-		}
-		store.DB = db
 
 		/* Run Blueprint */
 		log.Println("#run_blueprint")
@@ -193,8 +172,12 @@ func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	var data []interface{}
-	err := store.LoadBucket([]byte(blueprint.DBBucketBlueprints), &data)
+	var (
+		data []interface{}
+		s    store.Store
+	)
+
+	err := s.LoadBucket([]byte(blueprint.DBBucketBlueprints), &data)
 
 	o := map[string]interface{}{
 		"data": data,
