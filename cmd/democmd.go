@@ -18,18 +18,19 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/server"
+	"github.com/Mirantis/northshore/store"
+	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
-	"github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
 )
 
 var demoBlueprintPath string
-var demoBp blueprint.BP
 
 // demoBlueprintCmd represents the "demo-blueprint" command
 var demoBlueprintCmd = &cobra.Command{
@@ -51,13 +52,11 @@ var demoBlueprintCmd = &cobra.Command{
 var demoFSMCmd = &cobra.Command{
 	Use:   "demo-fsm",
 	Short: "Demo FSM",
-	Long:  `Run the Blueprint Pipeline thru states`,
+	Long:  `Run the Blueprint FSM thru states`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		stages := []string{"Stage A", "Stage B"}
-		pl := fsm.NewBlueprintPipeline(stages)
+		pl := fsm.NewBlueprintFSM(map[string]fsm.StageState{"Stage A": fsm.StageStateNew, "Stage B": fsm.StageStateNew})
 
-		pl.Start()
 		pl.Update(map[string]fsm.StageState{"Stage B": fsm.StageStateRunning})
 		pl.Update(map[string]fsm.StageState{"Stage A": fsm.StageStateRunning, "Stage B": fsm.StageStatePaused})
 		pl.Update(map[string]fsm.StageState{"Stage B": fsm.StageStateRunning})
@@ -74,6 +73,25 @@ var demoCmd = &cobra.Command{
 The local server binds localhost:8998.
 Demo Blueprint Pipeline goes thru states.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		/* Init DB */
+		db, err := bolt.Open("demo.db", 0600, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+		defer os.Remove(db.Path())
+
+		if err = db.Update(func(tx *bolt.Tx) error {
+			_, err = tx.CreateBucketIfNotExists([]byte(blueprint.DBBucketBlueprints))
+			if err != nil {
+				return err
+			}
+			return nil
+		}); err != nil {
+			log.Fatal(err)
+		}
+		store.DB = db
 
 		/* Run Blueprint */
 		log.Println("#run_blueprint")
@@ -99,11 +117,9 @@ Demo Blueprint Pipeline goes thru states.`,
 		}
 
 		go func() {
-			uuid := uuid.NewV4()
+			// uuid := uuid.NewV4()
 			for {
-				pl := fsm.NewBlueprintPipeline(stages)
-				demoBp = blueprint.BP{&bp, pl, uuid}
-				demoBp.Start()
+				demoBp := blueprint.NewBP(&bp)
 
 				time.Sleep(time.Second * 9)
 
@@ -177,13 +193,32 @@ func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
+	var data []map[string]interface{}
+	err := store.DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(blueprint.DBBucketBlueprints))
+		b.ForEach(func(k, v []byte) error {
+			var item map[string]interface{}
+			if err := json.Unmarshal(v, &item); err != nil {
+				log.Println("#Error", err)
+				return err
+			}
+			data = append(data, item)
+			return nil
+		})
+		return nil
+	})
+
 	o := map[string]interface{}{
-		"data": []blueprint.BP{
-			demoBp,
-		},
+		"data": data,
 		"meta": map[string]interface{}{
 			"info": "demouiAPI1BlueprintsHandler",
 		},
+	}
+
+	if err != nil {
+		o["errors"] = map[string]interface{}{
+			"details": err,
+		}
 	}
 
 	json.NewEncoder(w).Encode(o)

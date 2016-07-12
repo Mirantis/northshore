@@ -22,169 +22,145 @@ import (
 )
 
 // BlueprintState represents a state of the Blueprint
-type BlueprintState byte
+type BlueprintState string
 
 // StageState represents a state of the Stage
-type StageState byte
+type StageState string
 
 const (
 	// BlueprintStateNew is default state of the Blueprint
-	BlueprintStateNew BlueprintState = iota
+	BlueprintStateNew BlueprintState = "new"
 	// BlueprintStateProvision is the Blueprint status while provisioning
-	BlueprintStateProvision
+	BlueprintStateProvision BlueprintState = "provision"
 	// BlueprintStateActive is the Blueprint status when all Stages are up and ready
-	BlueprintStateActive
+	BlueprintStateActive BlueprintState = "active"
 	// BlueprintStateInactive is the Blueprint status when some Stage is down
-	BlueprintStateInactive
+	BlueprintStateInactive BlueprintState = "inactive"
 )
 
 const (
 	// StageStateNew is default state of the Stage
-	StageStateNew StageState = iota
+	StageStateNew StageState = "new"
 	// StageStateCreated indicates that container is created
-	StageStateCreated
+	StageStateCreated StageState = "created"
 	// StageStateRunning indicates that container is running
-	StageStateRunning
+	StageStateRunning StageState = "running"
 	// StageStatePaused indicates that container is paused
-	StageStatePaused
+	StageStatePaused StageState = "paused"
 	// StageStateStopped indicates that container is stopped
-	StageStateStopped
+	StageStateStopped StageState = "stopped"
 	// StageStateDeleted indicates that container is deleted
-	StageStateDeleted
+	StageStateDeleted StageState = "deleted"
 )
 
-func (s BlueprintState) String() string {
-	states := []string{
-		"new",
-		"provision",
-		"active",
-		"inactive",
-	}
-	return states[s]
-}
-
-func (s StageState) String() string {
-	states := []string{
-		"new",
-		"created",
-		"running",
-		"paused",
-		"stopped",
-		"deleted",
-	}
-	return states[s]
-}
-
-// MarshalText implements TextMarshaler interface
-func (s BlueprintState) MarshalText() ([]byte, error) {
-	return []byte(s.String()), nil
-}
-
-// MarshalText implements TextMarshaler interface
-func (s StageState) MarshalText() ([]byte, error) {
-	return []byte(s.String()), nil
-}
-
-// BlueprintPipeline represents a Blueprint Pipeline
-type BlueprintPipeline struct {
-	// State is current Pipeline status
+// BlueprintFSM represents a finite state machine of Blueprint
+type BlueprintFSM struct {
+	// State is current Blueprint status
 	State BlueprintState `json:"state"`
-	// StagesStates represents statuses of Pipeline Stages
+	// StagesStates represents statuses of Blueprint Stages
 	StagesStates map[string]StageState `json:"stagesStates"`
-	// fSM is the finite state machine of Pipeline
-	fSM *fsm.FSM
+	// FSM is the finite state machine
+	FSM *fsm.FSM `json:"-"`
 }
 
-// NewBlueprintPipeline constructs a Blueprint Pipeline with Stages
-func NewBlueprintPipeline(stages []string) *BlueprintPipeline {
-	plStages := map[string]StageState{}
-	for _, v := range stages {
-		plStages[v] = StageStateNew
-	}
+// NewBlueprintFSM constructs a Blueprint states data
+func NewBlueprintFSM(stagesStates map[string]StageState) *BlueprintFSM {
 
-	pl := &BlueprintPipeline{
-		BlueprintStateNew,
-		plStages,
+	bpFSM := &BlueprintFSM{
+		blueprintState(stagesStates),
+		stagesStates,
 		nil,
 	}
 
 	// https://godoc.org/github.com/looplab/fsm#NewFSM
-	pl.fSM = fsm.NewFSM(
-		"new",
+	bpFSM.FSM = fsm.NewFSM(
+		string(bpFSM.State),
 		fsm.Events{
 			{
 				Name: "activate",
-				Src:  []string{"inactive", "provision"},
-				Dst:  "active",
+				Src:  []string{string(BlueprintStateInactive), string(BlueprintStateNew), string(BlueprintStateProvision)},
+				Dst:  string(BlueprintStateActive),
 			},
 			{
 				Name: "inactivate",
-				Src:  []string{"active", "provision"},
-				Dst:  "inactive",
+				Src:  []string{string(BlueprintStateActive), string(BlueprintStateNew), string(BlueprintStateProvision)},
+				Dst:  string(BlueprintStateInactive),
 			},
 			{
-				Name: "start",
-				Src:  []string{"new"},
-				Dst:  "provision",
+				Name: "provision",
+				Src:  []string{string(BlueprintStateNew)},
+				Dst:  string(BlueprintStateProvision),
 			},
 		},
 		fsm.Callbacks{
-			"before_activate": func(e *fsm.Event) { pl.beforeActivate(e) },
-			"after_event":     func(e *fsm.Event) { pl.afterEvent(e) },
-			"activate":        func(e *fsm.Event) { pl.afterActivate(e) },
-			"inactivate":      func(e *fsm.Event) { pl.afterInactivate(e) },
-			"start":           func(e *fsm.Event) { pl.afterStart(e) },
+			"before_activate": func(e *fsm.Event) { bpFSM.beforeActivate(e) },
+			"after_event":     func(e *fsm.Event) { bpFSM.afterEvent(e) },
 		},
 	)
 
-	return pl
+	return bpFSM
 }
 
-func (pl *BlueprintPipeline) afterEvent(e *fsm.Event) {
-	log.Printf("#BlueprintPipeline,#afterEvent %+v %+v", e, pl)
+func (bpFSM *BlueprintFSM) afterEvent(e *fsm.Event) {
+	bpFSM.State = BlueprintState(bpFSM.FSM.Current())
 }
 
-func (pl *BlueprintPipeline) beforeActivate(e *fsm.Event) {
-	for _, v := range pl.StagesStates {
+func (bpFSM *BlueprintFSM) beforeActivate(e *fsm.Event) {
+	for _, v := range bpFSM.StagesStates {
 		if v != StageStateRunning {
 			e.Cancel(errors.New("Some stage isn't running"))
 		}
 	}
 }
 
-func (pl *BlueprintPipeline) afterActivate(e *fsm.Event) {
-	pl.State = BlueprintStateActive
-}
-
-func (pl *BlueprintPipeline) afterInactivate(e *fsm.Event) {
-	pl.State = BlueprintStateInactive
-}
-
-func (pl *BlueprintPipeline) afterStart(e *fsm.Event) {
-	pl.State = BlueprintStateProvision
-}
-
-// Start creates and runs Stages in Blueprint Pipeline
-func (pl *BlueprintPipeline) Start() {
-	pl.fSM.Event("start")
-}
-
-// Update updates current Blueprint Pipeline status with Stages
-func (pl *BlueprintPipeline) Update(stagesStates map[string]StageState) {
-	event := "activate"
+// Update updates current Blueprint status with Stages
+func (bpFSM *BlueprintFSM) Update(stagesStates map[string]StageState) {
 	for k, v := range stagesStates {
-		pl.StagesStates[k] = v
-		switch v {
-		case
-			StageStatePaused,
-			StageStateStopped,
-			StageStateDeleted:
-			event = "inactivate"
+		bpFSM.StagesStates[k] = v
+	}
+
+	event := "activate"
+	switch blueprintState(stagesStates) {
+	case
+		BlueprintStateInactive:
+		event = "inactivate"
+		break
+	case
+		BlueprintStateProvision:
+		event = "provision"
+		break
+	}
+
+	if err := bpFSM.FSM.Event(event); err != nil {
+		log.Println("#BlueprintFSM,#Update,#Error", event, err, bpFSM.StagesStates)
+	}
+}
+
+func blueprintState(stagesStates map[string]StageState) BlueprintState {
+	bpState := BlueprintStateNew
+
+	for _, v := range stagesStates {
+		if v == StageStateRunning {
+			bpState = BlueprintStateActive
+			break
 		}
 	}
-
-	err := pl.fSM.Event(event, stagesStates)
-	if err != nil {
-		log.Println("#BlueprintPipeline,#Update,#Error", err)
+	for _, v := range stagesStates {
+		if v == StageStateCreated {
+			bpState = BlueprintStateProvision
+			break
+		}
 	}
+LookInactive:
+	for _, v := range stagesStates {
+		switch v {
+		case
+			StageStateDeleted,
+			StageStatePaused,
+			StageStateStopped:
+			bpState = BlueprintStateInactive
+			break LookInactive
+		}
+	}
+	return bpState
 }
