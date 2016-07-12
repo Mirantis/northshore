@@ -193,20 +193,8 @@ func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	var data []map[string]interface{}
-	err := store.DB.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(blueprint.DBBucketBlueprints))
-		b.ForEach(func(k, v []byte) error {
-			var item map[string]interface{}
-			if err := json.Unmarshal(v, &item); err != nil {
-				log.Println("#Error", err)
-				return err
-			}
-			data = append(data, item)
-			return nil
-		})
-		return nil
-	})
+	var data []interface{}
+	err := store.LoadBucket([]byte(blueprint.DBBucketBlueprints), &data)
 
 	o := map[string]interface{}{
 		"data": data,

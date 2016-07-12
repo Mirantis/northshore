@@ -14,7 +14,62 @@
 
 package store
 
-import "github.com/boltdb/bolt"
+import (
+	"encoding/json"
+	"log"
+
+	"github.com/boltdb/bolt"
+)
 
 // DB represents boltdb storage
 var DB *bolt.DB
+
+// Load loads item from boltdb Bucket
+func Load(bucket []byte, key []byte, v interface{}) error {
+	err := DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucket)
+		buf := b.Get(key)
+		if err := json.Unmarshal(buf, &v); err != nil {
+			log.Println("#DB,#Load,#Error", err)
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+// LoadBucket loads all items from boltdb Bucket
+func LoadBucket(bucket []byte, buf *[]interface{}) error {
+	err := DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucket)
+		b.ForEach(func(k, v []byte) error {
+			var item map[string]interface{}
+			if err := json.Unmarshal(v, &item); err != nil {
+				log.Println("#DB,#LoadBucket,#Error", err)
+				return err
+			}
+			*buf = append(*buf, item)
+			return nil
+		})
+		return nil
+	})
+	return err
+}
+
+// Store stores item in boltdb Bucket as JSON
+func Store(bucket []byte, key []byte, v interface{}) error {
+	err := DB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucket)
+		vEncoded, err := json.Marshal(v)
+		if err != nil {
+			log.Println("#DB,#Store,#Error", err)
+			return err
+		}
+		if err := b.Put(key, vEncoded); err != nil {
+			log.Println("#DB,#Store,#Error", err)
+			return err
+		}
+		return nil
+	})
+	return err
+}
