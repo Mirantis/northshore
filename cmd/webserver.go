@@ -15,10 +15,14 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
+
+	"golang.org/x/tools/go/vcs"
 )
+
+const repo = "https://github.com/Mirantis/northshore/trunk/ui"
 
 // webserverCmd represents the webserver command
 var webserverCmd = &cobra.Command{
@@ -31,7 +35,12 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("webserver called")
+		log.Println("webserver called")
+		v := vcs.ByCmd("svn")
+		err := v.Create("ui", repo)
+		if err != nil {
+			log.Print(err)
+		}
 	},
 }
 
