@@ -44,9 +44,9 @@ System.register(['@angular/core', '@angular/router', '../../services/api/api', '
                     var _this = this;
                     this.getBlueprints();
                     var sub = this.route.params
-                        .map(function (params) { return params['name']; })
-                        .subscribe(function (name) {
-                        _this.bpSelectedName = name;
+                        .map(function (params) { return params['uuid']; })
+                        .subscribe(function (uuid) {
+                        _this.uuidSelected = uuid;
                         _this.getSelected();
                     });
                     this.subscriptions.push(sub);
@@ -61,10 +61,10 @@ System.register(['@angular/core', '@angular/router', '../../services/api/api', '
                     this.subscriptions.push(sub);
                 };
                 BlueprintsComponent.prototype.getSelected = function () {
-                    if (this.bpSelectedName) {
+                    if (this.uuidSelected) {
                         for (var _i = 0, _a = this.blueprints; _i < _a.length; _i++) {
                             var bp = _a[_i];
-                            if (bp.name == this.bpSelectedName) {
+                            if (bp.uuid == this.uuidSelected) {
                                 this.bpSelected = bp;
                             }
                         }

@@ -22,7 +22,7 @@ System.register(['./components/blueprints/blueprints', './components/home/home']
                     component: blueprints_1.BlueprintsComponent,
                 },
                 {
-                    path: 'blueprints/:name',
+                    path: 'blueprints/:uuid',
                     component: blueprints_1.BlueprintsComponent,
                 },
                 {
