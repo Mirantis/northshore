@@ -136,7 +136,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		uiAPI1.HandleFunc("/", server.UIAPI1RootHandler).Methods("GET")
 
 		uiAPI1.HandleFunc("/action", demouiAPI1ActionHandler).Methods("GET", "POST")
-		uiAPI1.HandleFunc("/blueprints", demouiAPI1BlueprintsHandler).Methods("GET", "POST")
+		uiAPI1.HandleFunc("/blueprints", server.UIAPI1BlueprintsHandler).Methods("GET")
 		uiAPI1.HandleFunc("/errors", demouiAPI1ErrorsHandler).Methods("GET", "POST")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
@@ -170,28 +170,6 @@ func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 		"meta": map[string]interface{}{
 			"info": "demouiAPI1ActionHandler",
 		},
-	}
-
-	json.NewEncoder(w).Encode(o)
-}
-
-func demouiAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	var data []interface{}
-	err := store.LoadBucket([]byte(blueprint.DBBucketBlueprints), &data)
-
-	o := map[string]interface{}{
-		"data": data,
-		"meta": map[string]interface{}{
-			"info": "demouiAPI1BlueprintsHandler",
-		},
-	}
-
-	if err != nil {
-		o["errors"] = map[string]interface{}{
-			"details": err,
-		}
 	}
 
 	json.NewEncoder(w).Encode(o)
