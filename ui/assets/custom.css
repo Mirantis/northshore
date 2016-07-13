@@ -29,6 +29,8 @@
   border: solid 1px dimgrey;
   border-radius: 2px;
   float: right;
+  min-width: 22px;
+  padding: 3px 0;
 }
 .badge-spacer {
   float: left;

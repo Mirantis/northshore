@@ -62,19 +62,20 @@ System.register(['@angular/core', '@angular/http', 'object-assign', 'rxjs/Observ
                         .catch(function (error) { return _this.handleError(error, '#APIService.getBlueprints,#Error'); });
                 }
                 APIService.prototype.extendBlueprintsData = function (bps) {
+                    var stagesStatesBages = {};
                     var filters = {
                         green: ['running'],
                         orange: ['new', 'created'],
                         grey: ['deleted', 'paused', 'stopped'],
                     };
-                    var ui = {
-                        stagesStatesBages: {}
-                    };
                     for (var f in filters) {
-                        ui.stagesStatesBages[f] = 0;
+                        stagesStatesBages[f] = 0;
                     }
                     for (var i in bps) {
-                        var bp = Object.assign(bps[i], { ui: ui });
+                        var bp = bps[i];
+                        bp.ui = {
+                            stagesStatesBages: Object.assign({}, stagesStatesBages)
+                        };
                         for (var s in bp.stagesStates) {
                             for (var f in filters) {
                                 if (filters[f].indexOf(bp.stagesStates[s]) > -1) {

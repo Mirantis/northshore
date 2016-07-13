@@ -53,20 +53,21 @@ export class APIService {
   }
 
   private extendBlueprintsData(bps: {}) {
+    let stagesStatesBages = {};
     let filters = {
       green: ['running'],
       orange: ['new', 'created'],
       grey: ['deleted', 'paused', 'stopped'],
     };
-    let ui = {
-      stagesStatesBages: {}
-    };
     for (let f in filters) {
-      ui.stagesStatesBages[f] = 0;
+      stagesStatesBages[f] = 0;
     }
 
     for (let i in bps) {
-      let bp = Object.assign(bps[i], { ui: ui });
+      let bp = bps[i]
+      bp.ui = {
+        stagesStatesBages: Object.assign({}, stagesStatesBages)
+      }
 
       for (let s in bp.stagesStates) {
         for (let f in filters) {
