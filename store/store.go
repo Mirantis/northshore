@@ -50,7 +50,7 @@ func Delete(bucket []byte, key []byte) error {
 	if err := db.Update(func(tx *bolt.Tx) error {
 		return tx.Bucket(bucket).Delete(key)
 	}); err != nil {
-		log.Println("#DB,#Store,#Error", err)
+		log.Println("#DB,#Delete,#Error", err)
 		return err
 	}
 	return nil
