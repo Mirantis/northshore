@@ -50,7 +50,9 @@ func NewBP(blueprint *Blueprint) *BP {
 // Update updates current Blueprint status with Stages
 // and stores in DB
 func (bp *BP) Update(stagesStates map[string]fsm.StageState) error {
-	bp.BlueprintFSM.Update(stagesStates)
+	if stagesStates != nil {
+		bp.BlueprintFSM.Update(stagesStates)
+	}
 	return store.Save([]byte(DBBucketBlueprints), bp.UUID.Bytes(), bp)
 }
 

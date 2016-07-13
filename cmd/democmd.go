@@ -102,11 +102,9 @@ Demo Blueprint Pipeline goes thru states.`,
 		}
 
 		go func() {
-			// uuid := uuid.NewV4()
 			for {
 				demoBp := blueprint.NewBP(&bp)
-
-				time.Sleep(time.Second * 9)
+				time.Sleep(time.Second * 3)
 
 				for _, s := range stages {
 					time.Sleep(time.Second * 3)
@@ -125,6 +123,8 @@ Demo Blueprint Pipeline goes thru states.`,
 					log.Println("#pl-update", v)
 					demoBp.Update(v)
 				}
+
+				store.Delete([]byte(blueprint.DBBucketBlueprints), demoBp.UUID.Bytes())
 			}
 		}()
 
