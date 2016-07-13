@@ -22,18 +22,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var s *Store
-
-func init() {
-	s = NewStore()
-}
-
-// Store represents boltdb storage
-type Store struct {
-	db *bolt.DB
-}
-
-func (s *Store) openBucket(bucket []byte) {
+func openDBBucket(bucket []byte) *bolt.DB {
 	path := viper.GetString("BoltDBPath")
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
@@ -50,14 +39,29 @@ func (s *Store) openBucket(bucket []byte) {
 		log.Fatal(err)
 	}
 
-	s.db = db
+	return db
+}
+
+// Delete deletes key from boltdb Bucket
+func Delete(bucket []byte, key []byte) error {
+	db := openDBBucket(bucket)
+	defer db.Close()
+
+	if err := db.Update(func(tx *bolt.Tx) error {
+		return tx.Bucket(bucket).Delete(key)
+	}); err != nil {
+		log.Println("#DB,#Store,#Error", err)
+		return err
+	}
+	return nil
 }
 
 // Load loads item from boltdb Bucket
-func (s *Store) Load(bucket []byte, key []byte, v interface{}) error {
-	s.openBucket(bucket)
+func Load(bucket []byte, key []byte, v interface{}) error {
+	db := openDBBucket(bucket)
+	defer db.Close()
 
-	err := s.db.View(func(tx *bolt.Tx) error {
+	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		buf := b.Get(key)
 		if err := json.Unmarshal(buf, &v); err != nil {
@@ -66,16 +70,15 @@ func (s *Store) Load(bucket []byte, key []byte, v interface{}) error {
 		}
 		return nil
 	})
-
-	s.db.Close()
 	return err
 }
 
 // LoadBucket loads all items from boltdb Bucket
-func (s *Store) LoadBucket(bucket []byte, buf *[]interface{}) error {
-	s.openBucket(bucket)
+func LoadBucket(bucket []byte, buf *[]interface{}) error {
+	db := openDBBucket(bucket)
+	defer db.Close()
 
-	err := s.db.View(func(tx *bolt.Tx) error {
+	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		b.ForEach(func(k, v []byte) error {
 			var item map[string]interface{}
@@ -88,16 +91,15 @@ func (s *Store) LoadBucket(bucket []byte, buf *[]interface{}) error {
 		})
 		return nil
 	})
-
-	s.db.Close()
 	return err
 }
 
 // Save stores item in boltdb Bucket as JSON
-func (s *Store) Save(bucket []byte, key []byte, v interface{}) error {
-	s.openBucket(bucket)
+func Save(bucket []byte, key []byte, v interface{}) error {
+	db := openDBBucket(bucket)
+	defer db.Close()
 
-	err := s.db.Update(func(tx *bolt.Tx) error {
+	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		vEncoded, err := json.Marshal(v)
 		if err != nil {
@@ -110,28 +112,5 @@ func (s *Store) Save(bucket []byte, key []byte, v interface{}) error {
 		}
 		return nil
 	})
-
-	s.db.Close()
 	return err
-}
-
-// NewStore returns an initialized Store instance
-func NewStore() *Store {
-	store := new(Store)
-	return store
-}
-
-// Load loads item from boltdb Bucket
-func Load(bucket []byte, key []byte, v interface{}) error {
-	return s.Load(bucket, key, v)
-}
-
-// LoadBucket loads all items from boltdb Bucket
-func LoadBucket(bucket []byte, buf *[]interface{}) error {
-	return s.LoadBucket(bucket, buf)
-}
-
-// Save stores item in boltdb Bucket as JSON
-func Save(bucket []byte, key []byte, v interface{}) error {
-	return s.Save(bucket, key, v)
 }
