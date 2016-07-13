@@ -19,7 +19,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/boltdb/bolt"
+	"github.com/Mirantis/northshore/fsm"
+	"github.com/Mirantis/northshore/store"
 	"github.com/docker/engine-api/client"
 	"github.com/docker/engine-api/types"
 	"github.com/docker/engine-api/types/container"
@@ -127,37 +128,8 @@ func RunBlueprint(bp Blueprint) {
 		log.Printf("%s -> Warnings: %s", name, r.Warnings)
 	}
 	if len(ids) > 0 {
-		updateIDs(strings.Join(ids[:], ","))
-	}
-}
-
-//Update list of containers in DB
-//TODO add ability to add one container
-func updateIDs(ids string) {
-	db, err := bolt.Open("my.db", 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	bname := []byte("Northshore")
-	key := []byte("containers")
-	value := []byte(ids)
-	err = db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists(bname)
-		if err != nil {
-			return fmt.Errorf("Create bucket: %s", err)
-		}
-		log.Printf("Bucket \"%s\" created\n", bname)
-		err = b.Put(key, value)
-		if err != nil {
-			return err
-		}
-		log.Printf("Info puted with key \"%s\"\n", key)
-		return nil
-	})
-
-	if err != nil {
-		log.Fatal(err)
+		//Update list of containers in DB
+		//TODO add ability to add one container
+		store.Save([]byte(fsm.DBBucketWatcher), []byte(fsm.DBKeyWatcher), strings.Join(ids[:], ","))
 	}
 }
