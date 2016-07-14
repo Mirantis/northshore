@@ -237,6 +237,10 @@
 			"Rev": "62bee037599929a6e9146f29d10dd5208c43507d"
 		},
 		{
+			"ImportPath": "golang.org/x/tools/go/vcs",
+			"Rev": "a2a552218a0e22e6fb22469f49ef371b492f6178"
+		},
+		{
 			"ImportPath": "gopkg.in/yaml.v2",
 			"Rev": "f7716cbe52baa25d2e9b0d0da546fcf909fc16b4"
 		}
