@@ -8,15 +8,12 @@ import { AssetsService } from '../../services/assets/assets';
 import { BlueprintsComponent } from '../blueprints/blueprints';
 import { HomeComponent } from '../home/home';
 
-declare var __moduleName: string;
-
 @Component({
   directives: [
     AlertComponent,
     CollapseDirective,
     CORE_DIRECTIVES,
   ],
-  moduleId: __moduleName,
   precompile: [
     BlueprintsComponent,
     HomeComponent,
@@ -26,7 +23,7 @@ declare var __moduleName: string;
     AssetsService,
   ],
   selector: 'my-app',
-  templateUrl: 'app.html',
+  template: require('./app.html'),
 })
 
 export class AppComponent {
