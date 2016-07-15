@@ -12,19 +12,15 @@
     <!--<link rel="stylesheet" href="ui/node_modules/font-awesome/css/font-awesome.min.css">-->
     <!--<link rel="stylesheet" href="ui/assets/custom.css">-->
 
-    <script src="ui/node_modules/core-js/client/shim.min.js"></script>
-    <script src="ui/node_modules/zone.js/dist/zone.js"></script>
-    <script src="ui/node_modules/reflect-metadata/Reflect.js"></script>
-    <script src="ui/node_modules/systemjs/dist/system.src.js"></script>
-    <script src="ui/assets/systemjs.config.js"></script>
-    <script>
-      // System.import('app/main')
-      //       .then(null, console.error.bind(console));
-      System.import('app').catch(function(err){ console.error(err); });
-    </script>
+    <!--<script src="ui/node_modules/core-js/client/shim.min.js"></script>-->
+    <!--<script src="ui/node_modules/zone.js/dist/zone.js"></script>-->
+    <!--<script src="ui/node_modules/reflect-metadata/Reflect.js"></script>-->
   </head>
 
   <body>
     <my-app>Loading...</my-app>
+    <script src="ui/dist/polyfills.bundle.js"></script>
+    <script src="ui/dist/vendor.bundle.js"></script>
+    <script src="ui/dist/main.bundle.js"></script>
   </body>
 </html>
