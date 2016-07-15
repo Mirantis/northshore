@@ -122,7 +122,7 @@ Demo Blueprint Pipeline goes thru states.`,
 					demoBp.Update(v)
 				}
 
-				store.Delete([]byte(blueprint.DBBucketBlueprints), demoBp.UUID.Bytes())
+				store.Delete([]byte(blueprint.DBBucketBlueprints), []byte(demoBp.UUID.String()))
 			}
 		}()
 
@@ -135,6 +135,9 @@ Demo Blueprint Pipeline goes thru states.`,
 
 		uiAPI1.HandleFunc("/action", demouiAPI1ActionHandler).Methods("GET", "POST")
 		uiAPI1.HandleFunc("/blueprints", server.UIAPI1BlueprintsHandler).Methods("GET")
+		uiAPI1.HandleFunc("/blueprints", server.UIAPI1BlueprintsCreateHandler).Methods("POST")
+		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsDeleteHandler).Methods("DELETE")
+		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsIDHandler).Methods("GET")
 		uiAPI1.HandleFunc("/errors", demouiAPI1ErrorsHandler).Methods("GET", "POST")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
@@ -169,7 +172,7 @@ func init() {
 func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	o := map[string]interface{}{
+	ans := map[string]interface{}{
 		"data": []map[string]interface{}{
 			{"details": "Details 1"},
 			{"details": "Details 2"},
@@ -179,14 +182,18 @@ func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	json.NewEncoder(w).Encode(o)
+	log.WithFields(log.Fields{
+		"request":  r,
+		"response": ans,
+	}).Debugln("#http,#demouiAPI1ActionHandler")
+	json.NewEncoder(w).Encode(ans)
 }
 
 func demouiAPI1ErrorsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	w.WriteHeader(500)
 
-	o := map[string]interface{}{
+	ans := map[string]interface{}{
 		"data": []map[string]interface{}{},
 		"errors": []map[string]interface{}{
 			{
@@ -205,5 +212,9 @@ func demouiAPI1ErrorsHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	json.NewEncoder(w).Encode(o)
+	log.WithFields(log.Fields{
+		"request":  r,
+		"response": ans,
+	}).Debugln("#http,#demouiAPI1ErrorsHandler")
+	json.NewEncoder(w).Encode(ans)
 }

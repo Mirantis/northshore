@@ -16,8 +16,9 @@ package blueprint
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/store"
@@ -25,6 +26,7 @@ import (
 	"github.com/docker/engine-api/types"
 	"github.com/docker/engine-api/types/container"
 	"github.com/docker/go-connections/nat"
+	"github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 
 	"golang.org/x/net/context"
@@ -132,4 +134,12 @@ func RunBlueprint(bp Blueprint) {
 		//TODO add ability to add one container
 		store.Save([]byte(fsm.DBBucketWatcher), []byte(fsm.DBKeyWatcher), strings.Join(ids[:], ","))
 	}
+}
+
+// DeleteBlueprint deletes blueprint with containers
+func DeleteBlueprint(id uuid.UUID) {
+	// TODO: stop and remove containers
+	log.Debugln("#blueprint,#DeleteBlueprint")
+
+	store.Delete([]byte(DBBucketBlueprints), []byte(id.String()))
 }
