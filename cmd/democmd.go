@@ -16,10 +16,11 @@ package cmd
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"os"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/fsm"
@@ -38,13 +39,14 @@ var demoBlueprintCmd = &cobra.Command{
 	Short: "Run execution of blueprint",
 	Long:  `This command read, parse and process blueprint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("Run Blueprint")
-		log.Printf("PATH -> %s", demoBlueprintPath)
 		bp, err := blueprint.ParseBlueprint(demoBlueprintPath)
 		if err != nil {
-			log.Fatalf("Parsing error: %s", err)
+			log.WithError(err).Fatal("Blueprint parsing error")
 		}
-		log.Printf("BLUEPRINT -> %+v", bp)
+		log.WithFields(log.Fields{
+			"path":      demoBlueprintPath,
+			"blueprint": bp,
+		}).Info("Blueprint parsing")
 	},
 }
 
@@ -74,22 +76,18 @@ The local server binds localhost:8998.
 Demo Blueprint Pipeline goes thru states.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		/* Init DB */
-		os.Remove("demo.db")
-		viper.Set("BoltDBPath", "demo.db")
-
 		/* Run Blueprint */
-		log.Println("#run_blueprint")
-		log.Printf("PATH -> %s \n", demoBlueprintPath)
 		bp, err := blueprint.ParseBlueprint(demoBlueprintPath)
 		if err != nil {
-			log.Printf("Parsing error: %s \n", err)
-			return
+			log.WithError(err).Fatal("Blueprint parsing error")
 		}
-		log.Printf("BLUEPRINT -> %+v \n", bp)
+		log.WithFields(log.Fields{
+			"path":      demoBlueprintPath,
+			"blueprint": bp,
+		}).Info("Blueprint parsing")
 
 		/* Run States */
-		log.Println("#run_states")
+		log.Info("Run blueprint states")
 		var stages []string
 		for k := range bp.Stages {
 			stages = append(stages, k)
@@ -109,18 +107,18 @@ Demo Blueprint Pipeline goes thru states.`,
 				for _, s := range stages {
 					time.Sleep(time.Second * 3)
 					v := map[string]fsm.StageState{s: fsm.StageStateCreated}
-					log.Println("#pl-update", v)
+					log.Infoln("#pl-update", v)
 					demoBp.Update(v)
 				}
 				for _, s := range stages {
 					time.Sleep(time.Second * 3)
 					v := map[string]fsm.StageState{s: fsm.StageStateRunning}
-					log.Println("#pl-update", v)
+					log.Infoln("#pl-update", v)
 					demoBp.Update(v)
 				}
 				for _, v := range ss {
 					time.Sleep(time.Second * 3)
-					log.Println("#pl-update", v)
+					log.Infoln("#pl-update", v)
 					demoBp.Update(v)
 				}
 
@@ -129,7 +127,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		}()
 
 		/* Run local server */
-		log.Println("#run_local_server")
+		log.Info("Run local server")
 		r := mux.NewRouter()
 
 		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
@@ -145,13 +143,22 @@ Demo Blueprint Pipeline goes thru states.`,
 
 		r.HandleFunc("/{_:.*}", server.UIIndexHandler)
 
-		log.Println("Listening at port 8998")
+		log.Infoln("#http", "Listening at port 8998")
 		http.ListenAndServe(":8998", r)
 
 	},
 }
 
 func init() {
+	/* Init DB */
+	os.Remove("demo.db")
+	viper.Set("BoltDBPath", "demo.db")
+
+	/* Init Logger */
+	viper.Set("LogLevel", log.DebugLevel)
+	log.SetLevel(log.DebugLevel)
+
+	/* Init cobra */
 	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
 	demoCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
 	runCmd.AddCommand(demoBlueprintCmd)

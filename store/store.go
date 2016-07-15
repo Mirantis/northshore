@@ -16,7 +16,8 @@ package store
 
 import (
 	"encoding/json"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/boltdb/bolt"
 	"github.com/spf13/viper"
@@ -50,7 +51,7 @@ func Delete(bucket []byte, key []byte) error {
 	if err := db.Update(func(tx *bolt.Tx) error {
 		return tx.Bucket(bucket).Delete(key)
 	}); err != nil {
-		log.Println("#DB,#Delete,#Error", err)
+		log.Errorln("#DB,#Delete", err)
 		return err
 	}
 	return nil
@@ -65,7 +66,7 @@ func Load(bucket []byte, key []byte, v interface{}) error {
 		b := tx.Bucket(bucket)
 		buf := b.Get(key)
 		if err := json.Unmarshal(buf, &v); err != nil {
-			log.Println("#DB,#Load,#Error", err)
+			log.Errorln("#DB,#Load", err)
 			return err
 		}
 		return nil
@@ -83,7 +84,7 @@ func LoadBucket(bucket []byte, buf *[]interface{}) error {
 		b.ForEach(func(k, v []byte) error {
 			var item map[string]interface{}
 			if err := json.Unmarshal(v, &item); err != nil {
-				log.Println("#DB,#LoadBucket,#Error", err)
+				log.Errorln("#DB,#LoadBucket", err)
 				return err
 			}
 			*buf = append(*buf, item)
@@ -103,11 +104,11 @@ func Save(bucket []byte, key []byte, v interface{}) error {
 		b := tx.Bucket(bucket)
 		vEncoded, err := json.Marshal(v)
 		if err != nil {
-			log.Println("#DB,#Store,#Error", err)
+			log.Errorln("#DB,#Store", err)
 			return err
 		}
 		if err := b.Put(key, vEncoded); err != nil {
-			log.Println("#DB,#Store,#Error", err)
+			log.Errorln("#DB,#Store", err)
 			return err
 		}
 		return nil

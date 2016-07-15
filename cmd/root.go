@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"log"
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -47,7 +47,13 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	initConfig()
+
+	logLevel, _ := log.ParseLevel(viper.GetString("LogLevel"))
+	log.SetLevel(logLevel)
+
+	log.WithField("file", viper.ConfigFileUsed()).Infoln("#viper", "Using config")
+	log.WithField("logLevel", log.GetLevel()).Infoln("#viper", "Set log level")
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports Persistent Flags, which, if defined here,
@@ -63,12 +69,12 @@ func initConfig() {
 	}
 
 	viper.SetDefault("BoltDBPath", "my.db")
+	viper.SetDefault("LogLevel", log.InfoLevel)
+
 	viper.SetConfigName(".northshore") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")       // adding home directory as first search path
 	viper.AutomaticEnv()               // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		log.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	viper.ReadInConfig()
 }
