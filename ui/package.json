@@ -2,7 +2,7 @@
   "name": "northshore-ui",
   "version": "0.0.1",
   "scripts": {
-    "build": "webpack --inline --colors --progress --display-error-details --display-cached",
+    "build": "rimraf dist && webpack --inline --colors --progress --display-error-details --display-cached",
     "watch": "npm run build -- --watch",
     "server": "webpack-dev-server --inline --colors --progress --display-error-details --display-cached --port 3000",
     "start": "npm run server",
@@ -31,13 +31,20 @@
   "devDependencies": {
     "angular2-template-loader": "^0.4.0",
     "awesome-typescript-loader": "^1.1.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.8.5",
+    "html-loader": "^0.4.3",
+    "html-webpack-plugin": "^2.15.0",
+    "null-loader": "^0.1.1",
+    "style-loader": "^0.13.1",
+    "ts-loader": "^0.8.1",
     "typescript": "^1.8.10",
-    "typings": "^0.7.12",
+    "typings": "^1.0.4",
     "css-loader": "^0.23.1",
     "json-loader": "^0.5.4",
     "raw-loader": "^0.5.1",
-    "to-string-loader": "^1.1.4",
-    "webpack": "^1.12.9",
+    "rimraf": "^2.5.2",
+    "webpack": "^1.13.0",
     "webpack-dev-server": "^1.14.0",
     "webpack-merge": "^0.8.4"
   }
