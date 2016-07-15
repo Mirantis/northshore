@@ -16,7 +16,8 @@ package fsm
 
 import (
 	"errors"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/looplab/fsm"
 )
@@ -132,7 +133,10 @@ func (bpFSM *BlueprintFSM) Update(stagesStates map[string]StageState) {
 	}
 
 	if err := bpFSM.FSM.Event(event); err != nil {
-		log.Println("#BlueprintFSM,#Update,#Error", event, err, bpFSM.StagesStates)
+		log.WithFields(log.Fields{
+			"event":        event,
+			"stagesStates": bpFSM.StagesStates,
+		}).Infoln("#BlueprintFSM,#Update", err) // Track err as info
 	}
 }
 
