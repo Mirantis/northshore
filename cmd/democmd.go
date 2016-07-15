@@ -143,9 +143,9 @@ Demo Blueprint Pipeline goes thru states.`,
 
 		r.HandleFunc("/{_:.*}", server.UIIndexHandler)
 
-		log.Infoln("#http", "Listening at port 8998")
-		http.ListenAndServe(":8998", r)
-
+		httpListen := viper.GetString("HTTPListen")
+		log.WithField("httpListen", httpListen).Infoln("#http", "Listen And Serve")
+		http.ListenAndServe(httpListen, r)
 	},
 }
 
