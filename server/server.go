@@ -15,9 +15,11 @@ package server
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/spf13/viper"
 
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/fsm"
@@ -39,16 +41,13 @@ func Run(port string) {
 
 	r.HandleFunc("/{_:.*}", UIIndexHandler)
 
-	//Update frequency for watcher in seconds
-	period := 3
 	go func() {
-		fsm.Watch(period)
+		fsm.Watch(viper.GetInt("WatchPeriod"))
 	}()
 
-	addr := ":"
-	addr += port
-	log.Printf("Listening at %s", addr)
-	log.Print(http.ListenAndServe(addr, r))
+	httpListen := viper.GetString("HTTPListen")
+	log.WithField("httpListen", httpListen).Infoln("#http", "Listen And Serve")
+	http.ListenAndServe(httpListen, r)
 }
 
 // NoDirListing returns 404 instead of directory listing with http.FileServer
@@ -90,6 +89,6 @@ func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 
 // UIIndexHandler returns UI index file
 func UIIndexHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("#uiIndexHandler")
+	log.Debugln("#http,#uiIndexHandler")
 	http.ServeFile(w, r, "ui/index.html")
 }

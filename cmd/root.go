@@ -69,7 +69,9 @@ func initConfig() {
 	}
 
 	viper.SetDefault("BoltDBPath", "my.db")
+	viper.SetDefault("HTTPListen", ":8998")
 	viper.SetDefault("LogLevel", log.InfoLevel)
+	viper.SetDefault("WatchPeriod", "3") // frequency for watcher in seconds
 
 	viper.SetConfigName(".northshore") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")       // adding home directory as first search path
