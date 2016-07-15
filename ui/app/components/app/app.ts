@@ -8,6 +8,8 @@ import { AssetsService } from '../../services/assets/assets';
 import { BlueprintsComponent } from '../blueprints/blueprints';
 import { HomeComponent } from '../home/home';
 
+import '../../../assets/custom.css';
+
 @Component({
   directives: [
     AlertComponent,
