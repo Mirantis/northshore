@@ -1,3 +1,1 @@
-/**
- * Created by ominakov on 7/15/16.
- */
+module.exports = require('./webpack.dev.js');
