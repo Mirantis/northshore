@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "system",
+    "module": "commonjs",
+    "rootDir": ".",
     "moduleResolution": "node",
     "sourceMap": true,
     "emitDecoratorMetadata": true,
@@ -15,6 +16,9 @@
     "typings/main",
     "typings/main.d.ts"
   ],
+  "awesomeTypescriptLoaderOptions": {
+    "useWebpackText": true
+  },
   "formatCodeOptions": {
     "indentSize": 2,
     "tabSize": 2,

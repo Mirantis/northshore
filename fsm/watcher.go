@@ -60,7 +60,9 @@ func Watch(period int) {
 func getIds() []string {
 	var buf string
 	if err := store.Load([]byte(DBBucketWatcher), []byte(DBKeyWatcher), buf); err != nil {
-		log.Fatal(err)
+		//Workaround for run local without containers in DB
+		log.Print(err)
+		return make([]string, 0)
 	}
 
 	return strings.Split(buf, ",")

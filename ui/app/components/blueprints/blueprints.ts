@@ -4,18 +4,15 @@ import { ActivatedRoute } from '@angular/router';
 import { Blueprint, APIService } from '../../services/api/api';
 import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-details';
 
-declare var __moduleName: string;
-
 @Component({
   directives: [
     BlueprintDetailsComponent,
   ],
-  moduleId: __moduleName,
   providers: [
     APIService,
   ],
   selector: 'blueprints',
-  templateUrl: 'blueprints.html',
+  template: require('./blueprints.html'),
 })
 
 export class BlueprintsComponent implements OnDestroy, OnInit {

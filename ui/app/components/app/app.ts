@@ -1,14 +1,13 @@
 import { Component } from '@angular/core';
 import { CORE_DIRECTIVES } from '@angular/common';
-import { AlertComponent } from 'ng2-bootstrap/components/alert';
-import { CollapseDirective } from 'ng2-bootstrap/components/collapse';
+import { AlertComponent, CollapseDirective } from 'ng2-bootstrap/ng2-bootstrap';
 
 import { AlertsService } from '../../services/alerts/alerts';
 import { AssetsService } from '../../services/assets/assets';
 import { BlueprintsComponent } from '../blueprints/blueprints';
 import { HomeComponent } from '../home/home';
 
-declare var __moduleName: string;
+import '../../../assets/custom.css';
 
 @Component({
   directives: [
@@ -16,7 +15,6 @@ declare var __moduleName: string;
     CollapseDirective,
     CORE_DIRECTIVES,
   ],
-  moduleId: __moduleName,
   precompile: [
     BlueprintsComponent,
     HomeComponent,
@@ -26,7 +24,7 @@ declare var __moduleName: string;
     AssetsService,
   ],
   selector: 'my-app',
-  templateUrl: 'app.html',
+  template: require('./app.html'),
 })
 
 export class AppComponent {

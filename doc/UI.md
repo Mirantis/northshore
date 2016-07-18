@@ -107,7 +107,7 @@ Local Environment
         cd ${GOPATH}/src/github.com/Mirantis/northshore
         go run main.go run local
 
-* Run browser http://localhost:8998/ui
+* Run browser http://localhost:8998
 
 
 ## Setup Development Environment with Node and Atom on Ubuntu
@@ -153,14 +153,12 @@ Angular application developers rely on the _npm_ package manager to install the 
   ```
 
 * Adding the libraries and packages we need with _npm_
-  and compile TypeScript into JavaScript
   ```
   cd ${GOPATH}/src/github.com/Mirantis/northshore/ui
   npm install
-  npm run tsc
   ```
 
-* Run local _lite-server_ for UI Development
+* Run webpack for UI Development
 
   There are few helpful scripts from
   [angular/quickstart](https://angular.io/docs/ts/latest/quickstart.html#!#config-files).
@@ -173,3 +171,9 @@ Angular application developers rely on the _npm_ package manager to install the 
   There is the proxy for the API calls to the Backend http://localhost:8998.
 
 * In your browser, go to http://localhost:3000
+
+
+Known Issues
+------------
+
+UI works on modern FF, Chrome and Safari, IE11 but not IE9.

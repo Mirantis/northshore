@@ -36,7 +36,7 @@ func Run(port string) {
 	uiAPI1.HandleFunc("/blueprints", UIAPI1BlueprintsHandler).Methods("GET")
 
 	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
-	ui.PathPrefix("/{uiDir:(app)|(assets)|(node_modules)}").Handler(http.StripPrefix("/ui", NoDirListing(http.FileServer(http.Dir("ui/")))))
+	ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(http.StripPrefix("/ui", NoDirListing(http.FileServer(http.Dir("ui/")))))
 	ui.HandleFunc("/{_:.*}", UIIndexHandler)
 
 	r.HandleFunc("/{_:.*}", UIIndexHandler)
@@ -69,6 +69,7 @@ func UIAPI1RootHandler(w http.ResponseWriter, r *http.Request) {
 
 // UIAPI1BlueprintsHandler returns an collection of blueprints
 func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("IN BLUEPRINT HANDLER -> %s", r.Body)
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
 	var data []interface{}
@@ -83,6 +84,7 @@ func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 			"details": err,
 		}
 	}
+	log.Printf("RETURNED FROM BPHANDLER -> %+v", o)
 
 	json.NewEncoder(w).Encode(o)
 }
