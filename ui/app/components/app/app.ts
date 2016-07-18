@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CORE_DIRECTIVES } from '@angular/common';
-import { AlertComponent } from 'ng2-bootstrap/components/alert';
-import { CollapseDirective } from 'ng2-bootstrap/components/collapse';
+import { AlertComponent, CollapseDirective } from 'ng2-bootstrap/ng2-bootstrap';
 
 import { AlertsService } from '../../services/alerts/alerts';
 import { AssetsService } from '../../services/assets/assets';
