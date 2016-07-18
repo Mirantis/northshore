@@ -13,7 +13,5 @@ import 'rxjs';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import 'ng2-bootstrap';
-import 'core-js/client/shim';
-import 'zone.js/dist/zone';
 import 'reflect-metadata';
 import 'object-assign';

@@ -171,3 +171,9 @@ Angular application developers rely on the _npm_ package manager to install the 
   There is the proxy for the API calls to the Backend http://localhost:8998.
 
 * In your browser, go to http://localhost:3000
+
+
+Known Issues
+------------
+
+UI works on modern FF, Chrome and Safari, IE11 but not IE9.

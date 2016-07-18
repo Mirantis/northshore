@@ -4,7 +4,7 @@
   "scripts": {
     "build": "rimraf dist && webpack --inline --colors --progress --display-error-details --display-cached",
     "watch": "npm run build -- --watch",
-    "server": "webpack-dev-server --inline --colors --progress --display-error-details --display-cached --port 3000",
+    "server": "webpack-dev-server --inline --colors --progress --display-error-details --display-cached --host 0.0.0.0 --port 3000",
     "start": "npm run server",
     "postinstall": "typings install"
   },
