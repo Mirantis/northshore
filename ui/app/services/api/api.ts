@@ -19,7 +19,6 @@ export class Blueprint {
   provisioner: string; //Provisioner type (docker/...)
   stages: Object[];
   state: string;
-  stateStages: Object[];
   type: string; //Type of blueprint (pipeline/application)
   version: string;
   ui: {
@@ -69,9 +68,9 @@ export class APIService {
         stagesStatesBages: Object.assign({}, stagesStatesBages)
       }
 
-      for (let s in bp.stagesStates) {
+      for (let s in bp.stages) {
         for (let f in filters) {
-          if (filters[f].indexOf(bp.stagesStates[s]) > -1) {
+          if (filters[f].indexOf(bp.stages[s].state) > -1) {
             bp.ui.stagesStatesBages[f]++;
             break;
           }
