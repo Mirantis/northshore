@@ -122,7 +122,7 @@ Demo Blueprint Pipeline goes thru states.`,
 					demoBp.Update(v)
 				}
 
-				store.Delete([]byte(blueprint.DBBucketBlueprints), []byte(demoBp.UUID.String()))
+				store.Delete([]byte(blueprint.DBBucketBlueprints), []byte(demoBp.ID.String()))
 			}
 		}()
 

@@ -25,7 +25,7 @@ export class Blueprint {
   ui: {
     stagesStatesBages: {};
   };
-  uuid: string;
+  id: string;
 }
 
 @Injectable()

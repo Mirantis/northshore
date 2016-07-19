@@ -27,7 +27,7 @@ const DBBucketBlueprints = "blueprints"
 type BP struct {
 	*Blueprint
 	*fsm.BlueprintFSM
-	UUID uuid.UUID `json:"uuid"`
+	ID uuid.UUID `json:"id"`
 }
 
 // NewBP creates a BP from Blueprint and stores in DB
@@ -43,7 +43,7 @@ func NewBP(blueprint *Blueprint) *BP {
 		uuid.NewV4(),
 	}
 
-	store.Save([]byte(DBBucketBlueprints), []byte(bp.UUID.String()), bp)
+	store.Save([]byte(DBBucketBlueprints), []byte(bp.ID.String()), bp)
 	return bp
 }
 
@@ -53,7 +53,7 @@ func (bp *BP) Update(stagesStates map[string]fsm.StageState) error {
 	if stagesStates != nil {
 		bp.BlueprintFSM.Update(stagesStates)
 	}
-	return store.Save([]byte(DBBucketBlueprints), []byte(bp.UUID.String()), bp)
+	return store.Save([]byte(DBBucketBlueprints), []byte(bp.ID.String()), bp)
 }
 
 /*
@@ -68,7 +68,7 @@ func NewBPfromJSON(data []byte) *BP {
 	bp := &BP{
 		buf.Blueprint,
 		fsm.NewBlueprintFSM(map[string]fsm.StageState(buf.BlueprintFSM)),
-		uuid.UUID(buf.UUID),
+		uuid.UUID(buf.ID),
 	}
 
 	log.Println("#NewBP", buf, "\n\n", bp.Blueprint, "\n\n", bp.BlueprintFSM)
