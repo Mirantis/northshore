@@ -65,6 +65,11 @@ func Load(bucket []byte, key []byte, v interface{}) error {
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		buf := b.Get(key)
+		if buf == nil {
+			log.Debugln("#DB,#Load,#Nil")
+			return nil
+		}
+
 		if err := json.Unmarshal(buf, &v); err != nil {
 			log.Errorln("#DB,#Load", err)
 			return err

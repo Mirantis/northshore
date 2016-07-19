@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 
 	"github.com/Mirantis/northshore/blueprint"
@@ -34,6 +35,9 @@ func Run(port string) {
 	uiAPI1.HandleFunc("/", UIAPI1RootHandler).Methods("GET")
 
 	uiAPI1.HandleFunc("/blueprints", UIAPI1BlueprintsHandler).Methods("GET")
+	uiAPI1.HandleFunc("/blueprints", UIAPI1BlueprintsCreateHandler).Methods("POST")
+	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsDeleteHandler).Methods("DELETE")
+	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsIDHandler).Methods("GET")
 
 	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 	ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(http.StripPrefix("/ui", NoDirListing(http.FileServer(http.Dir("ui/")))))
@@ -63,34 +67,111 @@ func NoDirListing(h http.Handler) http.HandlerFunc {
 
 // UIAPI1RootHandler returns UI API version
 func UIAPI1RootHandler(w http.ResponseWriter, r *http.Request) {
+	log.Debugln("#http,#UIAPI1RootHandler")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{"version": 1})
 }
 
-// UIAPI1BlueprintsHandler returns an collection of blueprints
+// UIAPI1BlueprintsHandler returns a collection of blueprints
 func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("IN BLUEPRINT HANDLER -> %s", r.Body)
+	log.Debugln("#http,#UIAPI1BlueprintsHandler")
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
 	var data []interface{}
 	err := store.LoadBucket([]byte(blueprint.DBBucketBlueprints), &data)
 
-	o := map[string]interface{}{
+	ans := map[string]interface{}{
 		"data": data,
 	}
 
 	if err != nil {
-		o["errors"] = map[string]interface{}{
+		ans["errors"] = map[string]interface{}{
 			"details": err,
 		}
 	}
-	log.Printf("RETURNED FROM BPHANDLER -> %+v", o)
 
-	json.NewEncoder(w).Encode(o)
+	json.NewEncoder(w).Encode(ans)
+}
+
+// UIAPI1BlueprintsCreateHandler creates and stores a blueprint
+func UIAPI1BlueprintsCreateHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+
+	// TODO: ParseBlueprint, then RunBlueprint?
+
+	ans := map[string]interface{}{
+		"data": map[string]interface{}{
+			"id": "id1",
+		},
+	}
+
+	w.Header().Set("Location", "/ui/api/v1/blueprints/id1")
+	w.WriteHeader(201)
+
+	log.WithFields(log.Fields{
+		"request":  r,
+		"response": ans,
+	}).Debugln("#http,#UIAPI1BlueprintsCreateHandler")
+	json.NewEncoder(w).Encode(ans)
+}
+
+// UIAPI1BlueprintsDeleteHandler deletes blueprint by ID
+func UIAPI1BlueprintsDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	ans := map[string]interface{}{
+		"meta": map[string]interface{}{
+			"info": "UIAPI1BlueprintsDeleteHandler",
+		},
+	}
+
+	// Deletion request has been accepted for processing,
+	// but the processing has not been completed by the time the server responds.
+	// So, Response 202 Accepted
+	w.WriteHeader(202)
+
+	log.WithFields(log.Fields{
+		"request":  r,
+		"response": ans,
+		"vars":     vars,
+	}).Debugln("#http,#UIAPI1BlueprintsDeleteHandler")
+	json.NewEncoder(w).Encode(ans)
+
+	go func() {
+		blueprint.DeleteBlueprint(uuid.FromStringOrNil(vars["id"]))
+	}()
+}
+
+// UIAPI1BlueprintsIDHandler returns a blueprint by id
+func UIAPI1BlueprintsIDHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+
+	var data interface{}
+	err := store.Load([]byte(blueprint.DBBucketBlueprints), []byte(vars["id"]), &data)
+
+	ans := map[string]interface{}{
+		"data": data,
+	}
+
+	if err != nil {
+		ans["errors"] = map[string]interface{}{
+			"details": err,
+		}
+	}
+
+	log.WithFields(log.Fields{
+		"request":  r,
+		"response": ans,
+		"vars":     vars,
+	}).Debugln("#http,#UIAPI1BlueprintsIDHandler")
+	json.NewEncoder(w).Encode(ans)
 }
 
 // UIIndexHandler returns UI index file
 func UIIndexHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debugln("#http,#uiIndexHandler")
+	log.Debugln("#http,#UIIndexHandler")
 	http.ServeFile(w, r, "ui/index.html")
 }
