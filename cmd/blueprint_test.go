@@ -26,9 +26,9 @@ func TestParseBlueprint(t *testing.T) {
 		Version:     "1",
 		Type:        "pipeline",
 		Name:        "bp_name",
-		Provisioner: "docker",
 		Stages: map[string]bp.Stage{
 			"gerrit": bp.Stage{
+				Provisioner: "docker",
 				Image:       "openfrontier/gerrit",
 				Description: "42",
 				Ports: []map[string]string{{"fromPort": "8080", "toPort": "8080"},
@@ -36,6 +36,7 @@ func TestParseBlueprint(t *testing.T) {
 				Variables: map[string]string{"NAME": "value", "NAME2": "value2"},
 			},
 			"jenkins": bp.Stage{
+				Provisioner: "docker",
 				Image:       "jenkins",
 				Description: "",
 				Ports: []map[string]string{{"fromPort": "8080", "toPort": "8088"},
@@ -43,6 +44,7 @@ func TestParseBlueprint(t *testing.T) {
 				Variables: map[string]string{"NAME": "v"},
 			},
 			"artifactory": bp.Stage{
+				Provisioner: "docker",
 				Image:       "jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest",
 				Description: "",
 				Ports:       []map[string]string{{"fromPort": "8081", "toPort": "8081"}},

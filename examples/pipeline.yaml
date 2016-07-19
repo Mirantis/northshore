@@ -1,9 +1,9 @@
 version: 1
 type: pipeline
 name: bp_name
-provisioner: docker
 stages:
     gerrit:
+      provisioner: docker
       image: openfrontier/gerrit
       description: 42
       ports:
@@ -15,6 +15,7 @@ stages:
         NAME: value
         NAME2: value2
     jenkins:
+      provisioner: docker
       image: jenkins
       ports:
         - fromPort: 8080
@@ -24,6 +25,7 @@ stages:
       variables:
         NAME: v
     artifactory:
+      provisioner: docker
       image: jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest
       ports:
         - fromPort: 8081

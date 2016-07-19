@@ -20,7 +20,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/store"
 	"github.com/docker/engine-api/client"
 	"github.com/docker/engine-api/types"
@@ -92,8 +91,16 @@ const (
 	StageStateDeleted StageState = "deleted"
 )
 
-// DBBucket defines boltdb bucket for blueprints
-const DBBucket = "blueprints"
+const (
+	// DBBucketWatcher defines boltdb bucket for Watcher
+	DBBucketWatcher = "Northshore"
+
+	// DBKeyWatcher defines boltdb key for Watcher
+	DBKeyWatcher = "containers"
+
+	// DBBucket defines boltdb bucket for blueprints
+	DBBucket = "blueprints"
+)
 
 func state(stagesStates map[string]StageState) State {
 	bpState := StateNew
@@ -202,7 +209,7 @@ func RunBlueprint(bp Blueprint) {
 	if len(ids) > 0 {
 		//Update list of containers in DB
 		//TODO add ability to add one container
-		store.Save([]byte(fsm.DBBucketWatcher), []byte(fsm.DBKeyWatcher), strings.Join(ids[:], ","))
+		store.Save([]byte(DBBucketWatcher), []byte(DBKeyWatcher), strings.Join(ids[:], ","))
 	}
 }
 

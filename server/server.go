@@ -24,7 +24,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/Mirantis/northshore/blueprint"
-	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/store"
 	"github.com/gorilla/mux"
 )
@@ -49,7 +48,7 @@ func Run() {
 	r.HandleFunc("/{_:.*}", UIIndexHandler)
 
 	go func() {
-		fsm.Watch(viper.GetInt("WatchPeriod"))
+		Watch(viper.GetInt("WatchPeriod"))
 	}()
 
 	ip := viper.GetString("ServerIP")

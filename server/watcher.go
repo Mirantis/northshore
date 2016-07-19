@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fsm
+package server
 
 import (
 	"log"
@@ -21,14 +21,7 @@ import (
 	"github.com/Mirantis/northshore/store"
 	"github.com/docker/engine-api/client"
 	"golang.org/x/net/context"
-)
-
-const (
-	// DBBucketWatcher defines boltdb bucket for Watcher
-	DBBucketWatcher = "Northshore"
-
-	// DBKeyWatcher defines boltdb key for Watcher
-	DBKeyWatcher = "containers"
+	"github.com/Mirantis/northshore/blueprint"
 )
 
 // Watch keeps watch over containers
@@ -59,7 +52,7 @@ func Watch(period int) {
 
 func getIds() []string {
 	var buf string
-	if err := store.Load([]byte(DBBucketWatcher), []byte(DBKeyWatcher), buf); err != nil {
+	if err := store.Load([]byte(blueprint.DBBucketWatcher), []byte(blueprint.DBKeyWatcher), buf); err != nil {
 		//Workaround for run local without containers in DB
 		log.Print(err)
 		return make([]string, 0)
