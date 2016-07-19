@@ -16,6 +16,7 @@ package server
 import (
 	"encoding/json"
 	"net/http"
+	"path"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -28,7 +29,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Run(port string) {
+func Run() {
 	r := mux.NewRouter()
 
 	uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
@@ -40,7 +41,9 @@ func Run(port string) {
 	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsIDHandler).Methods("GET")
 
 	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
-	ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(http.StripPrefix("/ui", NoDirListing(http.FileServer(http.Dir("ui/")))))
+	ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(
+		http.StripPrefix("/ui", NoDirListing(
+			http.FileServer(http.Dir(viper.GetString("UIRoot"))))))
 	ui.HandleFunc("/{_:.*}", UIIndexHandler)
 
 	r.HandleFunc("/{_:.*}", UIIndexHandler)
@@ -49,9 +52,12 @@ func Run(port string) {
 		fsm.Watch(viper.GetInt("WatchPeriod"))
 	}()
 
-	httpListen := viper.GetString("HTTPListen")
-	log.WithField("httpListen", httpListen).Infoln("#http", "Listen And Serve")
-	http.ListenAndServe(httpListen, r)
+	ip := viper.GetString("ServerIP")
+	port := viper.GetString("ServerPort")
+	addr := ip + ":" + port
+	log.WithField("address", addr).Infoln("#http", "Listen And Serve")
+	log.WithField("UIRoot", viper.GetString("UIRoot")).Infoln("#viper")
+	http.ListenAndServe(addr, r)
 }
 
 // NoDirListing returns 404 instead of directory listing with http.FileServer
@@ -173,5 +179,6 @@ func UIAPI1BlueprintsIDHandler(w http.ResponseWriter, r *http.Request) {
 // UIIndexHandler returns UI index file
 func UIIndexHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debugln("#http,#UIIndexHandler")
-	http.ServeFile(w, r, "ui/index.html")
+	indexPath := path.Join(viper.GetString("UIRoot"), "index.html")
+	http.ServeFile(w, r, indexPath)
 }

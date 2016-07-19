@@ -141,14 +141,19 @@ Demo Blueprint Pipeline goes thru states.`,
 		uiAPI1.HandleFunc("/errors", demouiAPI1ErrorsHandler).Methods("GET", "POST")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
-		ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(http.StripPrefix("/ui", server.NoDirListing(http.FileServer(http.Dir("ui/")))))
+		ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(
+			http.StripPrefix("/ui", server.NoDirListing(
+				http.FileServer(http.Dir(viper.GetString("UIRoot"))))))
 		ui.HandleFunc("/{_:.*}", server.UIIndexHandler)
 
 		r.HandleFunc("/{_:.*}", server.UIIndexHandler)
 
-		httpListen := viper.GetString("HTTPListen")
-		log.WithField("httpListen", httpListen).Infoln("#http", "Listen And Serve")
-		http.ListenAndServe(httpListen, r)
+		ip := viper.GetString("ServerIP")
+		port := viper.GetString("ServerPort")
+		addr := ip + ":" + port
+		log.WithField("address", addr).Infoln("#http", "Listen And Serve")
+		log.WithField("UIRoot", viper.GetString("UIRoot")).Infoln("#viper")
+		http.ListenAndServe(addr, r)
 	},
 }
 
@@ -164,6 +169,9 @@ func init() {
 	/* Init cobra */
 	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
 	demoCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
+	demoCmd.Flags().StringVarP(&UIRoot, "ui", "u", "./ui", "Path to UI root directory")
+	viper.BindPFlag("UIRoot", demoCmd.Flags().Lookup("ui"))
+
 	runCmd.AddCommand(demoBlueprintCmd)
 	runCmd.AddCommand(demoFSMCmd)
 	runCmd.AddCommand(demoCmd)

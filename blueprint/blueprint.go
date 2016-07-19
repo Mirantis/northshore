@@ -57,13 +57,14 @@ type Blueprint struct {
 
 // ParseBlueprint parses and validates the incoming data
 func ParseBlueprint(path string) (bp Blueprint, err error) {
-	viper.SetConfigFile(path)
-	err = viper.ReadInConfig()
+	bpv := viper.New()
+	bpv.SetConfigFile(path)
+	err = bpv.ReadInConfig()
 	if err != nil {
 		return bp, fmt.Errorf("Config not found. %s", err)
 	}
 
-	err = viper.Unmarshal(&bp)
+	err = bpv.Unmarshal(&bp)
 	if err != nil {
 		return bp, fmt.Errorf("Unable to decode into struct, %v", err)
 	}
