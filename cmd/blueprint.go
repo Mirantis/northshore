@@ -29,7 +29,7 @@ var blueprintCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Println("Blueprint was runned.")
 		log.Printf("PATH -> %s", path)
-		bp, err := blueprint.ParseBlueprint(path)
+		bp, err := blueprint.ParseFile(path)
 		if err != nil {
 			log.Fatalf("Parsing error: %s \n", err)
 		}

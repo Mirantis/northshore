@@ -84,7 +84,7 @@ func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
 	var data []interface{}
-	err := store.LoadBucket([]byte(blueprint.DBBucketBlueprints), &data)
+	err := store.LoadBucket([]byte(blueprint.DBBucket), &data)
 
 	ans := map[string]interface{}{
 		"data": data,
@@ -103,7 +103,7 @@ func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 func UIAPI1BlueprintsCreateHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	// TODO: ParseBlueprint, then RunBlueprint?
+	// TODO: ParseFile, then RunBlueprint?
 
 	ans := map[string]interface{}{
 		"data": map[string]interface{}{
@@ -145,7 +145,7 @@ func UIAPI1BlueprintsDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(ans)
 
 	go func() {
-		blueprint.DeleteBlueprint(uuid.FromStringOrNil(vars["id"]))
+		blueprint.DeleteByID(uuid.FromStringOrNil(vars["id"]))
 	}()
 }
 
@@ -156,7 +156,7 @@ func UIAPI1BlueprintsIDHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
 	var data interface{}
-	err := store.Load([]byte(blueprint.DBBucketBlueprints), []byte(vars["id"]), &data)
+	err := store.Load([]byte(blueprint.DBBucket), []byte(vars["id"]), &data)
 
 	ans := map[string]interface{}{
 		"data": data,

@@ -23,9 +23,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/Mirantis/northshore/blueprint"
-	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/server"
-	"github.com/Mirantis/northshore/store"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,7 +37,7 @@ var demoBlueprintCmd = &cobra.Command{
 	Short: "Run execution of blueprint",
 	Long:  `This command read, parse and process blueprint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		bp, err := blueprint.ParseBlueprint(demoBlueprintPath)
+		bp, err := blueprint.ParseFile(demoBlueprintPath)
 		if err != nil {
 			log.WithError(err).Fatal("Blueprint parsing error")
 		}
@@ -47,22 +45,6 @@ var demoBlueprintCmd = &cobra.Command{
 			"path":      demoBlueprintPath,
 			"blueprint": bp,
 		}).Info("Blueprint parsing")
-	},
-}
-
-// demoFSMCmd represents the "demo-fsm" command
-var demoFSMCmd = &cobra.Command{
-	Use:   "demo-fsm",
-	Short: "Demo FSM",
-	Long:  `Run the Blueprint FSM thru states`,
-	Run: func(cmd *cobra.Command, args []string) {
-
-		pl := fsm.NewBlueprintFSM(map[string]fsm.StageState{"Stage A": fsm.StageStateNew, "Stage B": fsm.StageStateNew})
-
-		pl.Update(map[string]fsm.StageState{"Stage B": fsm.StageStateRunning})
-		pl.Update(map[string]fsm.StageState{"Stage A": fsm.StageStateRunning, "Stage B": fsm.StageStatePaused})
-		pl.Update(map[string]fsm.StageState{"Stage B": fsm.StageStateRunning})
-
 	},
 }
 
@@ -77,7 +59,7 @@ Demo Blueprint Pipeline goes thru states.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		/* Run Blueprint */
-		bp, err := blueprint.ParseBlueprint(demoBlueprintPath)
+		bp, err := blueprint.ParseFile(demoBlueprintPath)
 		if err != nil {
 			log.WithError(err).Fatal("Blueprint parsing error")
 		}
@@ -86,43 +68,39 @@ Demo Blueprint Pipeline goes thru states.`,
 			"blueprint": bp,
 		}).Info("Blueprint parsing")
 
+		bp.Save()
+
 		/* Run States */
 		log.Info("Run blueprint states")
-		var stages []string
-		for k := range bp.Stages {
-			stages = append(stages, k)
-		}
-
-		ss := []map[string]fsm.StageState{
-			{stages[0]: fsm.StageStatePaused},
-			{stages[0]: fsm.StageStateRunning, stages[1]: fsm.StageStatePaused},
-			{stages[1]: fsm.StageStateRunning},
-		}
-
+		/*
+			ss := []map[string]fsm.StageState{
+				{stages[0]: fsm.StageStatePaused},
+				{stages[0]: fsm.StageStateRunning, stages[1]: fsm.StageStatePaused},
+				{stages[1]: fsm.StageStateRunning},
+			}
+		*/
 		go func() {
 			for {
-				demoBp := blueprint.NewBP(&bp)
-				time.Sleep(time.Second * 3)
 
-				for _, s := range stages {
+				for _, s := range bp.Stages {
 					time.Sleep(time.Second * 3)
-					v := map[string]fsm.StageState{s: fsm.StageStateCreated}
-					log.Infoln("#pl-update", v)
-					demoBp.Update(v)
+					s.State = blueprint.StageStateCreated
+					bp.Save()
 				}
-				for _, s := range stages {
-					time.Sleep(time.Second * 3)
-					v := map[string]fsm.StageState{s: fsm.StageStateRunning}
-					log.Infoln("#pl-update", v)
-					demoBp.Update(v)
-				}
-				for _, v := range ss {
-					time.Sleep(time.Second * 3)
-					log.Infoln("#pl-update", v)
-					demoBp.Update(v)
-				}
-
-				store.Delete([]byte(blueprint.DBBucketBlueprints), []byte(demoBp.ID.String()))
+				/*
+					for _, s := range stages {
+						time.Sleep(time.Second * 3)
+						v := map[string]fsm.StageState{s: fsm.StageStateRunning}
+						log.Infoln("#pl-update", v)
+						demoBp.Update(v)
+					}
+					for _, v := range ss {
+						time.Sleep(time.Second * 3)
+						log.Infoln("#pl-update", v)
+						demoBp.Update(v)
+					}
+				*/
+				// store.Delete([]byte(blueprint.DBBucketBlueprints), []byte(demoBp.ID.String()))
 			}
 		}()
 
@@ -173,7 +151,6 @@ func init() {
 	viper.BindPFlag("UIRoot", demoCmd.Flags().Lookup("ui"))
 
 	runCmd.AddCommand(demoBlueprintCmd)
-	runCmd.AddCommand(demoFSMCmd)
 	runCmd.AddCommand(demoCmd)
 }
 

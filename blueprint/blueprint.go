@@ -41,6 +41,10 @@ type Stage struct {
 	Ports []map[string]string `json:"ports"`
 	//Environment variables
 	Variables map[string]string `json:"variables"`
+	//Provisioner type (docker/...)
+	Provisioner string `json:"provisioner"`
+	// State is current Blueprint status
+	State StageState `json:"state"`
 }
 
 // Blueprint represents a Blueprint
@@ -48,15 +52,80 @@ type Blueprint struct {
 	//API version for processing blueprint
 	Version string `json:"version"`
 	//Type of blueprint (pipeline/application)
-	Type string `json:"type"`
-	Name string `json:"name"`
-	//Provisioner type (docker/...)
-	Provisioner string           `json:"provisioner"`
-	Stages      map[string]Stage `json:"stages"`
+	Type   string           `json:"type"`
+	Name   string           `json:"name"`
+	Stages map[string]Stage `json:"stages"`
+	// State is current Blueprint status
+	State State     `json:"state"`
+	ID    uuid.UUID `json:"id"`
 }
 
-// ParseBlueprint parses and validates the incoming data
-func ParseBlueprint(path string) (bp Blueprint, err error) {
+// State represents a state of the Blueprint
+type State string
+
+// StageState represents a state of the Stage
+type StageState string
+
+const (
+	// StateNew is default state of the Blueprint
+	StateNew State = "new"
+	// StateProvision is the Blueprint status while provisioning
+	StateProvision State = "provision"
+	// StateActive is the Blueprint status when all Stages are up and ready
+	StateActive State = "active"
+	// StateInactive is the Blueprint status when some Stage is down
+	StateInactive State = "inactive"
+)
+
+const (
+	// StageStateNew is default state of the Stage
+	StageStateNew StageState = "new"
+	// StageStateCreated indicates that container is created
+	StageStateCreated StageState = "created"
+	// StageStateRunning indicates that container is running
+	StageStateRunning StageState = "running"
+	// StageStatePaused indicates that container is paused
+	StageStatePaused StageState = "paused"
+	// StageStateStopped indicates that container is stopped
+	StageStateStopped StageState = "stopped"
+	// StageStateDeleted indicates that container is deleted
+	StageStateDeleted StageState = "deleted"
+)
+
+// DBBucket defines boltdb bucket for blueprints
+const DBBucket = "blueprints"
+
+func state(stagesStates map[string]StageState) State {
+	bpState := StateNew
+
+	for _, v := range stagesStates {
+		if v == StageStateRunning {
+			bpState = StateActive
+			break
+		}
+	}
+	for _, v := range stagesStates {
+		if v == StageStateCreated {
+			bpState = StateProvision
+			break
+		}
+	}
+LookInactive:
+	for _, v := range stagesStates {
+		switch v {
+		case
+			StageStateDeleted,
+			StageStatePaused,
+			StageStateStopped:
+			bpState = StateInactive
+			break LookInactive
+		}
+	}
+	return bpState
+}
+
+// ParseFile parses and validates the incoming data
+func ParseFile(path string) (bp Blueprint, err error) {
 	bpv := viper.New()
 	bpv.SetConfigFile(path)
 	err = bpv.ReadInConfig()
@@ -137,10 +206,29 @@ func RunBlueprint(bp Blueprint) {
 	}
 }
 
-// DeleteBlueprint deletes blueprint with containers
-func DeleteBlueprint(id uuid.UUID) {
+// DeleteByID deletes blueprint with containers
+func DeleteByID(id uuid.UUID) {
 	// TODO: stop and remove containers
 	log.Debugln("#blueprint,#DeleteBlueprint")
 
-	store.Delete([]byte(DBBucketBlueprints), []byte(id.String()))
+	store.Delete([]byte(DBBucket), []byte(id.String()))
+}
+
+// Save stores blueprint in db
+func (bp *Blueprint) Save() error {
+	ss := map[string]StageState{}
+	for s := range bp.Stages {
+		ss[s] = bp.Stages[s].State
+	}
+	bp.State = state(ss)
+	zerouuid := uuid.UUID{}
+	if bp.ID == zerouuid {
+		bp.ID = uuid.NewV4()
+	}
+	return store.Save([]byte(DBBucket), []byte(bp.ID.String()), bp)
+}
+
+// Save stores blueprint in db
+func Save(bp Blueprint) error {
+	return bp.Save()
 }
