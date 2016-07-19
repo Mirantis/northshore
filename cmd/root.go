@@ -69,7 +69,9 @@ func initConfig() {
 	}
 
 	viper.SetDefault("BoltDBPath", "my.db")
-	viper.SetDefault("HTTPListen", ":8998")
+	viper.SetDefault("ServerIP", "127.0.0.1")
+	viper.SetDefault("ServerPort", "8998")
+	viper.SetDefault("UIRoot", "./ui/")
 	viper.SetDefault("LogLevel", log.InfoLevel)
 	viper.SetDefault("WatchPeriod", "3") // frequency for watcher in seconds
 

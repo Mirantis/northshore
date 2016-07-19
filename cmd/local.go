@@ -19,19 +19,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var port string
-
 // localCmd represents the local command
 var localCmd = &cobra.Command{
 	Use:   "local",
 	Short: "Run NorthShore local",
 	Long:  `Run local HTTP server with BoltDB and watcher for Docker.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		server.Run(port)
+		server.Run()
 	},
 }
 
 func init() {
-	localCmd.Flags().StringVarP(&port, "port", "p", "8998", "Port for local server")
 	runCmd.AddCommand(localCmd)
 }
