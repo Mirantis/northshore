@@ -152,6 +152,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		port := viper.GetString("ServerPort")
 		addr := ip + ":" + port
 		log.WithField("address", addr).Infoln("#http", "Listen And Serve")
+		log.WithField("UIRoot", viper.GetString("UIRoot")).Infoln("#viper")
 		http.ListenAndServe(addr, r)
 	},
 }
@@ -168,6 +169,9 @@ func init() {
 	/* Init cobra */
 	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
 	demoCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
+	demoCmd.Flags().StringVarP(&UIRoot, "ui", "u", "./ui", "Path to UI root directory")
+	viper.BindPFlag("UIRoot", demoCmd.Flags().Lookup("ui"))
+
 	runCmd.AddCommand(demoBlueprintCmd)
 	runCmd.AddCommand(demoFSMCmd)
 	runCmd.AddCommand(demoCmd)

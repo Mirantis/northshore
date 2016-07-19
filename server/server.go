@@ -56,6 +56,7 @@ func Run() {
 	port := viper.GetString("ServerPort")
 	addr := ip + ":" + port
 	log.WithField("address", addr).Infoln("#http", "Listen And Serve")
+	log.WithField("UIRoot", viper.GetString("UIRoot")).Infoln("#viper")
 	http.ListenAndServe(addr, r)
 }
 

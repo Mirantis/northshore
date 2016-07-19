@@ -17,7 +17,10 @@ package cmd
 import (
 	"github.com/Mirantis/northshore/server"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+var UIRoot string
 
 // localCmd represents the local command
 var localCmd = &cobra.Command{
@@ -30,5 +33,7 @@ var localCmd = &cobra.Command{
 }
 
 func init() {
+	localCmd.Flags().StringVarP(&UIRoot, "ui", "", "./ui", "Path to UI root directory")
+	viper.BindPFlag("UIRoot", localCmd.Flags().Lookup("ui"))
 	runCmd.AddCommand(localCmd)
 }
