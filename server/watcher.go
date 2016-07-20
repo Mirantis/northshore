@@ -14,19 +14,19 @@
 package server
 
 import (
-	"log"
 	"strings"
 	"time"
 
+	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/store"
+	log "github.com/Sirupsen/logrus"
 	"github.com/docker/engine-api/client"
 	"golang.org/x/net/context"
-	"github.com/Mirantis/northshore/blueprint"
 )
 
 // Watch keeps watch over containers
 func Watch(period int) {
-	log.Println("Watcher was started...")
+	log.Infoln("Watcher was started...")
 	cli, err := client.NewEnvClient()
 	if err != nil {
 		panic(err)
@@ -34,7 +34,7 @@ func Watch(period int) {
 	for {
 		ids := getIds()
 		if len(ids) == 0 {
-			log.Println("No containers for watching.")
+			log.Infoln("No containers for watching.")
 			time.Sleep(time.Duration(period) * time.Second)
 			continue
 		}
@@ -44,19 +44,19 @@ func Watch(period int) {
 				log.Println(err)
 				continue
 			}
-			log.Printf(`Container "%s" with id "%s" is in status "%s"`, res.Name, id, res.State.Status)
+			log.Infof(`Container "%s" with id "%s" is in status "%s"`, res.Name, id, res.State.Status)
 		}
 		time.Sleep(time.Duration(period) * time.Second)
 	}
 }
 
 func getIds() []string {
-	var buf string
-	if err := store.Load([]byte(blueprint.DBBucketWatcher), []byte(blueprint.DBKeyWatcher), buf); err != nil {
+	var data string
+	log.Debugln("Get ID's from DB")
+	if err := store.Load([]byte(blueprint.DBBucketWatcher), []byte(blueprint.DBKeyWatcher), &data); err != nil {
 		//Workaround for run local without containers in DB
-		log.Print(err)
+		log.Errorln(err)
 		return make([]string, 0)
 	}
-
-	return strings.Split(buf, ",")
+	return strings.Split(data, ",")
 }
