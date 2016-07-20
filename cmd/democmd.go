@@ -69,38 +69,59 @@ Demo Blueprint Pipeline goes thru states.`,
 		}).Info("Blueprint parsing")
 
 		bp.Save()
+		log.Infoln("#bp_parsed", blueprintStates(bp), bp.State)
 
 		/* Run States */
 		log.Info("Run blueprint states")
-		/*
-			ss := []map[string]fsm.StageState{
-				{stages[0]: fsm.StageStatePaused},
-				{stages[0]: fsm.StageStateRunning, stages[1]: fsm.StageStatePaused},
-				{stages[1]: fsm.StageStateRunning},
-			}
-		*/
+
+		ss := [][]blueprint.StageState{
+			{blueprint.StageStatePaused},
+			{blueprint.StageStateRunning, blueprint.StageStatePaused},
+			{blueprint.StageStateRunning, blueprint.StageStateRunning},
+			{"badstate", blueprint.StageStateRunning},
+		}
+
 		go func() {
 			for {
 
-				for _, s := range bp.Stages {
+				for i, s := range bp.Stages {
 					time.Sleep(time.Second * 3)
 					s.State = blueprint.StageStateCreated
+					bp.Stages[i] = s
 					bp.Save()
+					log.Infoln("#bp_update", blueprintStates(bp), bp.State)
 				}
-				/*
-					for _, s := range stages {
-						time.Sleep(time.Second * 3)
-						v := map[string]fsm.StageState{s: fsm.StageStateRunning}
-						log.Infoln("#pl-update", v)
-						demoBp.Update(v)
+
+				for i, s := range bp.Stages {
+					time.Sleep(time.Second * 3)
+					s.State = blueprint.StageStateRunning
+					bp.Stages[i] = s
+					bp.Save()
+					log.Infoln("#bp_update", blueprintStates(bp), bp.State)
+				}
+
+				for _, v := range ss {
+					time.Sleep(time.Second * 3)
+
+					idx := 0
+					for i, s := range bp.Stages {
+						if idx < len(v) {
+							s.State = v[idx]
+							bp.Stages[i] = s
+						}
+						idx++
 					}
-					for _, v := range ss {
-						time.Sleep(time.Second * 3)
-						log.Infoln("#pl-update", v)
-						demoBp.Update(v)
-					}
-				*/
-				// store.Delete([]byte(blueprint.DBBucketBlueprints), []byte(demoBp.ID.String()))
+					bp.Save()
+					log.Infoln("#bp_update", blueprintStates(bp), bp.State)
+				}
+
+				time.Sleep(time.Second * 3)
+				for i, s := range bp.Stages {
+					s.State = blueprint.StageStateNew
+					bp.Stages[i] = s
+				}
+				bp.Save()
+				log.Infoln("#bp_update", blueprintStates(bp), bp.State)
 			}
 		}()
 
@@ -202,4 +223,11 @@ func demouiAPI1ErrorsHandler(w http.ResponseWriter, r *http.Request) {
 		"response": ans,
 	}).Debugln("#http,#demouiAPI1ErrorsHandler")
 	json.NewEncoder(w).Encode(ans)
+}
+
+func blueprintStates(bp blueprint.Blueprint) (ss []blueprint.StageState) {
+	for _, s := range bp.Stages {
+		ss = append(ss, s.State)
+	}
+	return ss
 }

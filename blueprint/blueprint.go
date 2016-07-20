@@ -102,35 +102,6 @@ const (
 	DBBucket = "blueprints"
 )
 
-func state(stagesStates map[string]StageState) State {
-	bpState := StateNew
-
-	for _, v := range stagesStates {
-		if v == StageStateRunning {
-			bpState = StateActive
-			break
-		}
-	}
-	for _, v := range stagesStates {
-		if v == StageStateCreated {
-			bpState = StateProvision
-			break
-		}
-	}
-LookInactive:
-	for _, v := range stagesStates {
-		switch v {
-		case
-			StageStateDeleted,
-			StageStatePaused,
-			StageStateStopped:
-			bpState = StateInactive
-			break LookInactive
-		}
-	}
-	return bpState
-}
-
 // ParseFile parses and validates the incoming data
 func ParseFile(path string) (bp Blueprint, err error) {
 	bpv := viper.New()
@@ -223,19 +194,67 @@ func DeleteByID(id uuid.UUID) {
 
 // Save stores blueprint in db
 func (bp *Blueprint) Save() error {
-	ss := map[string]StageState{}
-	for s := range bp.Stages {
-		ss[s] = bp.Stages[s].State
-	}
-	bp.State = state(ss)
+	bp.updateStates()
 	zerouuid := uuid.UUID{}
 	if bp.ID == zerouuid {
 		bp.ID = uuid.NewV4()
 	}
+
 	return store.Save([]byte(DBBucket), []byte(bp.ID.String()), bp)
 }
 
-// Save stores blueprint in db
-func Save(bp Blueprint) error {
-	return bp.Save()
+func (bp *Blueprint) updateStates() {
+	/* Set stage as StageStateNew if unknown */
+	for i, s := range bp.Stages {
+		switch s.State {
+		case
+			StageStateNew,
+			StageStateCreated,
+			StageStateRunning,
+			StageStatePaused,
+			StageStateStopped,
+			StageStateDeleted:
+			break
+		default:
+			s.State = StageStateNew
+			bp.Stages[i] = s
+		}
+	}
+
+	bpState := StateNew
+
+	for _, s := range bp.Stages {
+		if s.State == StageStateRunning {
+			bpState = StateActive
+			break
+		}
+	}
+LookProvision:
+	for _, s := range bp.Stages {
+		switch s.State {
+		case
+			StageStateNew:
+			if bpState == StateActive {
+				bpState = StateProvision
+				break LookProvision
+			}
+		case
+			StageStateCreated:
+			bpState = StateProvision
+			break LookProvision
+		}
+	}
+LookInactive:
+	for _, s := range bp.Stages {
+		switch s.State {
+		case
+			StageStateDeleted,
+			StageStatePaused,
+			StageStateStopped:
+			bpState = StateInactive
+			break LookInactive
+		}
+	}
+
+	bp.State = bpState
 }
