@@ -25,6 +25,7 @@ import (
 
 func openDBBucket(bucket []byte) *bolt.DB {
 	path := viper.GetString("BoltDBPath")
+	log.Debugln("Open #DB -> ", path)
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -62,6 +63,7 @@ func Load(bucket []byte, key []byte, v interface{}) error {
 	db := openDBBucket(bucket)
 	defer db.Close()
 
+	log.Debugln("#DB", "Load data from DB")
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		buf := b.Get(key)
@@ -84,6 +86,7 @@ func LoadBucket(bucket []byte, buf *[]interface{}) error {
 	db := openDBBucket(bucket)
 	defer db.Close()
 
+	log.Debugln("#DB", "Load bucket from DB")
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		b.ForEach(func(k, v []byte) error {
@@ -105,9 +108,11 @@ func Save(bucket []byte, key []byte, v interface{}) error {
 	db := openDBBucket(bucket)
 	defer db.Close()
 
+	log.Debugln("#DB", "Save data to DB")
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		vEncoded, err := json.Marshal(v)
+		log.Debugln("#DB,#Save,#Encoded", string(vEncoded))
 		if err != nil {
 			log.Errorln("#DB,#Store", err)
 			return err

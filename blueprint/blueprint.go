@@ -180,7 +180,8 @@ func RunBlueprint(bp Blueprint) {
 	if len(ids) > 0 {
 		//Update list of containers in DB
 		//TODO add ability to add one container
-		store.Save([]byte(DBBucketWatcher), []byte(DBKeyWatcher), strings.Join(ids[:], ","))
+		res := strings.Join(ids[:], ",")
+		store.Save([]byte(DBBucketWatcher), []byte(DBKeyWatcher), res)
 	}
 }
 

@@ -23,9 +23,9 @@ import (
 
 func TestParseBlueprint(t *testing.T) {
 	var expected bp.Blueprint = bp.Blueprint{
-		Version:     "1",
-		Type:        "pipeline",
-		Name:        "bp_name",
+		Version: "1",
+		Type:    "pipeline",
+		Name:    "bp_name",
 		Stages: map[string]bp.Stage{
 			"gerrit": bp.Stage{
 				Provisioner: "docker",
