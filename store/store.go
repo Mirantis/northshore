@@ -16,6 +16,7 @@ package store
 
 import (
 	"encoding/json"
+	"errors"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -69,7 +70,7 @@ func Load(bucket []byte, key []byte, v interface{}) error {
 		buf := b.Get(key)
 		if buf == nil {
 			log.Debugln("#DB,#Load,#Nil")
-			return nil
+			return errors.New("Key does not exist or key is a nested bucket")
 		}
 
 		if err := json.Unmarshal(buf, &v); err != nil {
