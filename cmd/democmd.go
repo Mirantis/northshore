@@ -37,6 +37,8 @@ var demoBlueprintCmd = &cobra.Command{
 	Short: "Run execution of blueprint",
 	Long:  `This command read, parse and process blueprint.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		overrideSettings()
+
 		bp, err := blueprint.ParseFile(demoBlueprintPath)
 		if err != nil {
 			log.WithError(err).Fatal("Blueprint parsing error")
@@ -57,6 +59,7 @@ var demoCmd = &cobra.Command{
 The local server binds localhost:8998.
 Demo Blueprint Pipeline goes thru states.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		overrideSettings()
 
 		/* Run Blueprint */
 		bp, err := blueprint.ParseFile(demoBlueprintPath)
@@ -157,14 +160,6 @@ Demo Blueprint Pipeline goes thru states.`,
 }
 
 func init() {
-	/* Init DB */
-	os.Remove("demo.db")
-	viper.Set("BoltDBPath", "demo.db")
-
-	/* Init Logger */
-	viper.Set("LogLevel", log.DebugLevel)
-	log.SetLevel(log.DebugLevel)
-
 	/* Init cobra */
 	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
 	demoCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
@@ -230,4 +225,14 @@ func blueprintStates(bp blueprint.Blueprint) (ss []blueprint.StageState) {
 		ss = append(ss, s.State)
 	}
 	return ss
+}
+
+func overrideSettings() {
+	/* Init DB */
+	os.Remove("demo.db")
+	viper.Set("BoltDBPath", "demo.db")
+
+	/* Init Logger */
+	viper.Set("LogLevel", log.DebugLevel)
+	log.SetLevel(log.DebugLevel)
 }
