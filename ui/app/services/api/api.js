@@ -59,9 +59,9 @@ var APIService = (function () {
             bp.ui = {
                 stagesStatesBages: Object.assign({}, stagesStatesBages)
             };
-            for (var s in bp.stagesStates) {
+            for (var s in bp.stages) {
                 for (var f in filters) {
-                    if (filters[f].indexOf(bp.stagesStates[s]) > -1) {
+                    if (filters[f].indexOf(bp.stages[s].state) > -1) {
                         bp.ui.stagesStatesBages[f]++;
                         break;
                     }

@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"log"
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/spf13/cobra"
@@ -27,14 +27,14 @@ var blueprintCmd = &cobra.Command{
 	Short: "Run execution of blueprint",
 	Long:  `This command read, parse and process blueprint.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("Blueprint was runned.")
-		log.Printf("PATH -> %s", path)
-		bp, err := blueprint.ParseBlueprint(path)
+		log.Infoln("Blueprint was runned.")
+		log.Infoln("PATH -> ", path)
+		bp, err := blueprint.ParseFile(path)
 		if err != nil {
-			log.Fatalf("Parsing error: %s \n", err)
+			log.Errorln("Parsing error: ", err)
 		}
-		log.Printf("BLUEPRINT -> %+v", bp)
-		log.Println("Running............")
+		log.Debugln("BLUEPRINT -> ", bp)
+		log.Infoln("Running............")
 		blueprint.RunBlueprint(bp)
 	},
 }

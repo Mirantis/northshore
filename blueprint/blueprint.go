@@ -20,7 +20,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/Mirantis/northshore/fsm"
 	"github.com/Mirantis/northshore/store"
 	"github.com/docker/engine-api/client"
 	"github.com/docker/engine-api/types"
@@ -41,6 +40,10 @@ type Stage struct {
 	Ports []map[string]string `json:"ports"`
 	//Environment variables
 	Variables map[string]string `json:"variables"`
+	//Provisioner type (docker/...)
+	Provisioner string `json:"provisioner"`
+	// State is current Blueprint status
+	State StageState `json:"state"`
 }
 
 // Blueprint represents a Blueprint
@@ -48,15 +51,59 @@ type Blueprint struct {
 	//API version for processing blueprint
 	Version string `json:"version"`
 	//Type of blueprint (pipeline/application)
-	Type string `json:"type"`
-	Name string `json:"name"`
-	//Provisioner type (docker/...)
-	Provisioner string           `json:"provisioner"`
-	Stages      map[string]Stage `json:"stages"`
+	Type   string           `json:"type"`
+	Name   string           `json:"name"`
+	Stages map[string]Stage `json:"stages"`
+	// State is current Blueprint status
+	State State     `json:"state"`
+	ID    uuid.UUID `json:"id"`
 }
 
-// ParseBlueprint parses and validates the incoming data
-func ParseBlueprint(path string) (bp Blueprint, err error) {
+// State represents a state of the Blueprint
+type State string
+
+// StageState represents a state of the Stage
+type StageState string
+
+const (
+	// StateNew is default state of the Blueprint
+	StateNew State = "new"
+	// StateProvision is the Blueprint status while provisioning
+	StateProvision State = "provision"
+	// StateActive is the Blueprint status when all Stages are up and ready
+	StateActive State = "active"
+	// StateInactive is the Blueprint status when some Stage is down
+	StateInactive State = "inactive"
+)
+
+const (
+	// StageStateNew is default state of the Stage
+	StageStateNew StageState = "new"
+	// StageStateCreated indicates that container is created
+	StageStateCreated StageState = "created"
+	// StageStateRunning indicates that container is running
+	StageStateRunning StageState = "running"
+	// StageStatePaused indicates that container is paused
+	StageStatePaused StageState = "paused"
+	// StageStateStopped indicates that container is stopped
+	StageStateStopped StageState = "stopped"
+	// StageStateDeleted indicates that container is deleted
+	StageStateDeleted StageState = "deleted"
+)
+
+const (
+	// DBBucketWatcher defines boltdb bucket for Watcher
+	DBBucketWatcher = "Northshore"
+
+	// DBKeyWatcher defines boltdb key for Watcher
+	DBKeyWatcher = "containers"
+
+	// DBBucket defines boltdb bucket for blueprints
+	DBBucket = "blueprints"
+)
+
+// ParseFile parses and validates the incoming data
+func ParseFile(path string) (bp Blueprint, err error) {
 	bpv := viper.New()
 	bpv.SetConfigFile(path)
 	err = bpv.ReadInConfig()
@@ -133,14 +180,82 @@ func RunBlueprint(bp Blueprint) {
 	if len(ids) > 0 {
 		//Update list of containers in DB
 		//TODO add ability to add one container
-		store.Save([]byte(fsm.DBBucketWatcher), []byte(fsm.DBKeyWatcher), strings.Join(ids[:], ","))
+		res := strings.Join(ids[:], ",")
+		store.Save([]byte(DBBucketWatcher), []byte(DBKeyWatcher), res)
 	}
 }
 
-// DeleteBlueprint deletes blueprint with containers
-func DeleteBlueprint(id uuid.UUID) {
+// DeleteByID deletes blueprint with containers
+func DeleteByID(id uuid.UUID) {
 	// TODO: stop and remove containers
 	log.Debugln("#blueprint,#DeleteBlueprint")
 
-	store.Delete([]byte(DBBucketBlueprints), []byte(id.String()))
+	store.Delete([]byte(DBBucket), []byte(id.String()))
+}
+
+// Save stores blueprint in db
+func (bp *Blueprint) Save() error {
+	bp.updateStates()
+	zerouuid := uuid.UUID{}
+	if bp.ID == zerouuid {
+		bp.ID = uuid.NewV4()
+	}
+
+	return store.Save([]byte(DBBucket), []byte(bp.ID.String()), bp)
+}
+
+func (bp *Blueprint) updateStates() {
+	/* Set stage as StageStateNew if unknown */
+	for i, s := range bp.Stages {
+		switch s.State {
+		case
+			StageStateNew,
+			StageStateCreated,
+			StageStateRunning,
+			StageStatePaused,
+			StageStateStopped,
+			StageStateDeleted:
+			break
+		default:
+			s.State = StageStateNew
+			bp.Stages[i] = s
+		}
+	}
+
+	bpState := StateNew
+
+	for _, s := range bp.Stages {
+		if s.State == StageStateRunning {
+			bpState = StateActive
+			break
+		}
+	}
+LookProvision:
+	for _, s := range bp.Stages {
+		switch s.State {
+		case
+			StageStateNew:
+			if bpState == StateActive {
+				bpState = StateProvision
+				break LookProvision
+			}
+		case
+			StageStateCreated:
+			bpState = StateProvision
+			break LookProvision
+		}
+	}
+LookInactive:
+	for _, s := range bp.Stages {
+		switch s.State {
+		case
+			StageStateDeleted,
+			StageStatePaused,
+			StageStateStopped:
+			bpState = StateInactive
+			break LookInactive
+		}
+	}
+
+	bp.State = bpState
 }
