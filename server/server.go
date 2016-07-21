@@ -82,8 +82,8 @@ func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debugln("#http,#UIAPI1BlueprintsHandler")
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	var data []interface{}
-	err := store.LoadBucket([]byte(blueprint.DBBucket), &data)
+	var data []blueprint.Blueprint
+	err := store.LoadBucketAsSlice([]byte(blueprint.DBBucket), &data)
 
 	ans := map[string]interface{}{
 		"data": data,

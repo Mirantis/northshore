@@ -17,6 +17,7 @@ package store
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -91,7 +92,7 @@ func LoadBucket(bucket []byte, buf *[]interface{}) error {
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 		b.ForEach(func(k, v []byte) error {
-			var item map[string]interface{}
+			var item interface{}
 			if err := json.Unmarshal(v, &item); err != nil {
 				log.Errorln("#DB,#LoadBucket", err)
 				return err
@@ -99,6 +100,40 @@ func LoadBucket(bucket []byte, buf *[]interface{}) error {
 			*buf = append(*buf, item)
 			return nil
 		})
+		return nil
+	})
+	return err
+}
+
+// LoadBucketAsSlice loads all items from boltdb Bucket
+func LoadBucketAsSlice(bucket []byte, v interface{}) error {
+	db := openDBBucket(bucket)
+	defer db.Close()
+
+	err := db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucket)
+
+		bLenght := 0
+		b.ForEach(func(_, _ []byte) error {
+			bLenght++
+			return nil
+		})
+
+		ss := make([]string, bLenght)
+		idx := 0
+		b.ForEach(func(_, v []byte) error {
+			ss[idx] = string(v)
+			idx++
+			return nil
+		})
+
+		s := "[" + strings.Join(ss, ", ") + "]"
+
+		if err := json.Unmarshal([]byte(s), v); err != nil {
+			log.Errorln("#DB,#LoadBucketAsSlice", err)
+			return err
+		}
+
 		return nil
 	})
 	return err
