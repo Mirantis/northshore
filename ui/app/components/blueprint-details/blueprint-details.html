@@ -13,7 +13,10 @@
                 <ul class="list-unstyled list-group">
                     <li class="list-group-item">
                         <span title="stage"> {{s}} </span>
-                        <span title="state" class="pull-right text-muted"> {{blueprint.stages[s].state}} </span>
+                        <span title="state" class="pull-right text-muted"> {{blueprint.stages[s].state}}
+                            <i class="state-light"
+                                [ngClass]="{new: 'bg-orange', created: 'bg-orange', running: 'bg-green', deleted: 'bg-grey', paused: 'bg-grey', stopped: 'bg-grey'}[blueprint.stages[s].state]"></i>
+                        </span>
                      </li>
                     <li class="list-group-item" title="description" *ngIf="blueprint.stages[s].description">
                         {{blueprint.stages[s].description}}

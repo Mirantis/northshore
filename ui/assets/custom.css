@@ -1,3 +1,16 @@
+
+/* <editor-fold desc="Backgrounds"> */
+.bg-green {
+  background-color: green;
+}
+.bg-grey {
+  background-color: grey;
+}
+.bg-orange {
+  background-color: orange;
+}
+/* </editor-fold> */
+
 /* <editor-fold desc="Alerts"> */
 .alerts {
   background-color: #fff;
@@ -37,14 +50,16 @@
   padding-right: 8px;
   width: 80px;
 }
+/* </editor-fold> */
 
-.badge-green {
-  background-color: green;
-}
-.badge-grey {
-  background-color: grey;
-}
-.badge-orange {
-  background-color: orange;
+/* <editor-fold desc="States"> */
+.state-light {
+    border: solid 1px dimgrey;
+    border-radius: 6px;
+    display: inline-block;
+    height: 12px;
+    padding: 0;
+    vertical-align: middle;
+    width: 12px;
 }
 /* </editor-fold> */
