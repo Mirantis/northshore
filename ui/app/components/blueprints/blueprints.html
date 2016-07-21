@@ -7,13 +7,13 @@
             <li *ngFor="let blueprint of blueprints" routerLinkActive="active">
                 <a [routerLink]="['/blueprints', blueprint.id]">
                     <span class="badge-spacer">
-                        <span class="badge badge-box badge-orange"
+                        <span class="badge badge-box bg-orange"
                             title="new stages"
                             [innerHTML]="(blueprint.ui.stagesStatesBages.orange > 0) ? blueprint.ui.stagesStatesBages.orange : ''"></span>
-                        <span class="badge badge-box badge-grey"
+                        <span class="badge badge-box bg-grey"
                             title="inactive stages"
                             [innerHTML]="(blueprint.ui.stagesStatesBages.grey > 0) ? blueprint.ui.stagesStatesBages.grey : ''"></span>
-                        <span class="badge badge-box badge-green"
+                        <span class="badge badge-box bg-green"
                             title="active stages"
                             [innerHTML]="(blueprint.ui.stagesStatesBages.green > 0) ? blueprint.ui.stagesStatesBages.green : ''"></span>
                     </span>
