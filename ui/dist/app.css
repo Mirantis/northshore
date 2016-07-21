@@ -1,0 +1,65 @@
+
+/* <editor-fold desc="Backgrounds"> */
+.bg-green {
+  background-color: green;
+}
+.bg-grey {
+  background-color: grey;
+}
+.bg-orange {
+  background-color: orange;
+}
+/* </editor-fold> */
+
+/* <editor-fold desc="Alerts"> */
+.alerts {
+  background-color: #fff;
+}
+.alerts .alert {
+  margin-top: 20px;
+}
+.alerts-float {
+  position: fixed;
+  top: 50px;
+  z-index: 1049;
+}
+
+.alerts-float-wrapper {
+  position: absolute;
+  right: 15px;
+  width: 50%;
+  min-width: 200px;
+}
+
+.alerts-float .alert {
+  -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25);
+}
+/* </editor-fold> */
+
+/* <editor-fold desc="Badges"> */
+.badge-box {
+  border: solid 1px dimgrey;
+  border-radius: 2px;
+  float: right;
+  min-width: 22px;
+  padding: 3px 0;
+}
+.badge-spacer {
+  float: left;
+  padding-right: 8px;
+  width: 80px;
+}
+/* </editor-fold> */
+
+/* <editor-fold desc="States"> */
+.state-light {
+    border: solid 1px dimgrey;
+    border-radius: 6px;
+    display: inline-block;
+    height: 12px;
+    padding: 0;
+    vertical-align: middle;
+    width: 12px;
+}
+/* </editor-fold> */
