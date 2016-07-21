@@ -43,6 +43,7 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Print(err)
 		}
+		log.Println("Latest UI downloaded")
 	},
 }
 
