@@ -113,13 +113,7 @@ func LoadBucketAsSlice(bucket []byte, v interface{}) error {
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucket)
 
-		bLenght := 0
-		b.ForEach(func(_, _ []byte) error {
-			bLenght++
-			return nil
-		})
-
-		ss := make([]string, bLenght)
+		ss := make([]string, b.Stats().KeyN)
 		idx := 0
 		b.ForEach(func(_, v []byte) error {
 			ss[idx] = string(v)
