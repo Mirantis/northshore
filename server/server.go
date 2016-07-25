@@ -111,7 +111,7 @@ func UIAPI1BlueprintsCreateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Location", "/ui/api/v1/blueprints/id1")
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 
 	log.WithFields(log.Fields{
 		"request":  r,
@@ -134,7 +134,7 @@ func UIAPI1BlueprintsDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	// Deletion request has been accepted for processing,
 	// but the processing has not been completed by the time the server responds.
 	// So, Response 202 Accepted
-	w.WriteHeader(202)
+	w.WriteHeader(http.StatusAccepted)
 
 	log.WithFields(log.Fields{
 		"request":  r,
