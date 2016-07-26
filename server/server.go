@@ -26,6 +26,7 @@ import (
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/store"
 	"github.com/gorilla/mux"
+	"errors"
 )
 
 func Run() {
@@ -38,6 +39,7 @@ func Run() {
 	uiAPI1.HandleFunc("/blueprints", UIAPI1BlueprintsCreateHandler).Methods("POST")
 	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsDeleteHandler).Methods("DELETE")
 	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsIDHandler).Methods("GET")
+	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsUpdateHandler).Methods("PUT")
 
 	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 	ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(
@@ -118,6 +120,30 @@ func UIAPI1BlueprintsCreateHandler(w http.ResponseWriter, r *http.Request) {
 		"response": ans,
 	}).Debugln("#http,#UIAPI1BlueprintsCreateHandler")
 	json.NewEncoder(w).Encode(ans)
+}
+
+// UIAPI1BlueprintsUpdateHandler creates and stores a blueprint
+func UIAPI1BlueprintsUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+
+	var bp interface{}
+	if err := store.Load([]byte(blueprint.DBBucket), []byte(vars["id"]), &bp); err != nil {
+		//TODO Handle error gracefully
+		if err.Error() == errors.New("Key does not exist or key is a nested bucket").Error() {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+
+	//TODO Read BP from request
+	updatedBp := ""
+	if err:= store.Save([]byte(blueprint.DBBucket), []byte(vars["id"]), updatedBp); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 // UIAPI1BlueprintsDeleteHandler deletes blueprint by ID
