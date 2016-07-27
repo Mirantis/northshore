@@ -132,6 +132,10 @@
 			"Rev": "30411dbcefb7a1da7e84f75530ad3abe4011b4f8"
 		},
 		{
+			"ImportPath": "github.com/gedex/inflector",
+			"Rev": "91797f1712fd58f224781be1080b8613d096187e"
+		},
+		{
 			"ImportPath": "github.com/gorilla/context",
 			"Comment": "v1.1-4-gaed02d1",
 			"Rev": "aed02d124ae4a0e94fea4541c8effd05bf0c8296"
@@ -189,6 +193,11 @@
 			"ImportPath": "github.com/magiconair/properties",
 			"Comment": "v1.6.0-1-gc81f9d7",
 			"Rev": "c81f9d71af8f8cba1466501d30326b99a4e56c19"
+		},
+		{
+			"ImportPath": "github.com/manyminds/api2go/jsonapi",
+			"Comment": "1.0-RC1-38-g22da272",
+			"Rev": "22da272c420e3e0f59a8aaa74dbd0f170053ade7"
 		},
 		{
 			"ImportPath": "github.com/mitchellh/mapstructure",
