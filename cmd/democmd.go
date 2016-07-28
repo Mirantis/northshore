@@ -20,10 +20,9 @@ import (
 	"os"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/server"
+	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -140,6 +139,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		uiAPI1.HandleFunc("/blueprints", server.UIAPI1BlueprintsCreateHandler).Methods("POST")
 		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsDeleteHandler).Methods("DELETE")
 		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsIDHandler).Methods("GET")
+		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsUpdateHandler).Methods("PATCH")
 		uiAPI1.HandleFunc("/errors", demouiAPI1ErrorsHandler).Methods("GET", "POST")
 
 		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)

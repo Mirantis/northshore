@@ -102,6 +102,17 @@ const (
 	DBBucket = "blueprints"
 )
 
+//GetID returns ID of blueprint
+func (b Blueprint) GetID() string {
+	return b.ID.String()
+}
+
+//SetID takes string, converts it to uuid and sets blueprint ID
+func (b *Blueprint) SetID(id string) (err error) {
+	b.ID, err = uuid.FromString(id)
+	return
+}
+
 // ParseFile parses and validates the incoming data
 func ParseFile(path string) (bp Blueprint, err error) {
 	bpv := viper.New()

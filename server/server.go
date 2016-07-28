@@ -15,17 +15,19 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
+	"io/ioutil"
 	"net/http"
 	"path"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/satori/go.uuid"
-	"github.com/spf13/viper"
-
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/store"
+	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
+	"github.com/manyminds/api2go/jsonapi"
+	"github.com/satori/go.uuid"
+	"github.com/spf13/viper"
 )
 
 func Run() {
@@ -38,6 +40,7 @@ func Run() {
 	uiAPI1.HandleFunc("/blueprints", UIAPI1BlueprintsCreateHandler).Methods("POST")
 	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsDeleteHandler).Methods("DELETE")
 	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsIDHandler).Methods("GET")
+	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsUpdateHandler).Methods("PATCH")
 
 	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
 	ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(
@@ -82,66 +85,108 @@ func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debugln("#http,#UIAPI1BlueprintsHandler")
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	var data []blueprint.Blueprint
-	err := store.LoadBucketAsSlice([]byte(blueprint.DBBucket), &data)
-
-	ans := map[string]interface{}{
-		"data": data,
+	var ans []byte
+	var err error
+	var bps []blueprint.Blueprint
+	if err := store.LoadBucketAsSlice([]byte(blueprint.DBBucket), &bps); err != nil {
+		log.Errorln("Error during get BPs from DB: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	if err != nil {
-		ans["errors"] = map[string]interface{}{
-			"details": err,
-		}
+	if ans, err = jsonapi.Marshal(bps); err != nil {
+		log.Errorln("Error during marshalling bps: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	json.NewEncoder(w).Encode(ans)
+	if _, err = w.Write(ans); err != nil {
+		log.Errorln("Error during writing responce: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // UIAPI1BlueprintsCreateHandler creates and stores a blueprint
 func UIAPI1BlueprintsCreateHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 
-	// TODO: ParseFile, then RunBlueprint?
-
-	ans := map[string]interface{}{
-		"data": map[string]interface{}{
-			"id": "id1",
-		},
+	var body []byte
+	var err error
+	if body, err = ioutil.ReadAll(r.Body); err != nil {
+		log.Errorln("Error during read request body: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	w.Header().Set("Location", "/ui/api/v1/blueprints/id1")
-	w.WriteHeader(201)
+	var bp blueprint.Blueprint
+	if err := jsonapi.Unmarshal(body, &bp); err != nil {
+		log.Errorln("Error during unmarshalling body: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Debugln("#CreateHandler, #BP", bp)
 
-	log.WithFields(log.Fields{
-		"request":  r,
-		"response": ans,
-	}).Debugln("#http,#UIAPI1BlueprintsCreateHandler")
-	json.NewEncoder(w).Encode(ans)
+	//TODO Handle case if already exists
+	store.Save([]byte(blueprint.DBBucket), []byte(bp.GetID()), bp)
+	//TODO Automate location handling
+	location := "/ui/api/v1/blueprints/" + bp.GetID()
+
+	w.Header().Set("Location", location)
+	w.WriteHeader(http.StatusCreated)
+}
+
+// UIAPI1BlueprintsUpdateHandler creates and stores a blueprint
+func UIAPI1BlueprintsUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+
+	var body []byte
+	var err error
+	var oldBP blueprint.Blueprint
+	var newBP blueprint.Blueprint
+	if err = store.Load([]byte(blueprint.DBBucket), []byte(vars["id"]), &oldBP); err != nil {
+		//TODO Handle error gracefully
+		if err.Error() == errors.New("Key does not exist or key is a nested bucket").Error() {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+	log.Debugln("#UpateHandler, #OldBP", oldBP)
+
+	if body, err = ioutil.ReadAll(r.Body); err != nil {
+		log.Errorln("Error during read request body: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := jsonapi.Unmarshal(body, &newBP); err != nil {
+		log.Errorln("Error during unmarshalling body: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Debugln("#UpdateHandler, #NewBP", newBP)
+	//TODO Handle case with partial update
+	if err := store.Save([]byte(blueprint.DBBucket), []byte(vars["id"]), newBP); err != nil {
+		log.Errorln("Error during updating BP in DB: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 // UIAPI1BlueprintsDeleteHandler deletes blueprint by ID
 func UIAPI1BlueprintsDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-
 	w.Header().Set("Content-Type", "application/vnd.api+json")
-	ans := map[string]interface{}{
-		"meta": map[string]interface{}{
-			"info": "UIAPI1BlueprintsDeleteHandler",
-		},
-	}
 
 	// Deletion request has been accepted for processing,
 	// but the processing has not been completed by the time the server responds.
 	// So, Response 202 Accepted
-	w.WriteHeader(202)
-
-	log.WithFields(log.Fields{
-		"request":  r,
-		"response": ans,
-		"vars":     vars,
-	}).Debugln("#http,#UIAPI1BlueprintsDeleteHandler")
-	json.NewEncoder(w).Encode(ans)
+	w.WriteHeader(http.StatusAccepted)
+	log.Debugln("#DeleteHandler", vars["id"])
 
 	go func() {
 		blueprint.DeleteByID(uuid.FromStringOrNil(vars["id"]))
