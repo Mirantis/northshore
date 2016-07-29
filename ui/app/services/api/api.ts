@@ -44,7 +44,7 @@ export class APIService {
       .interval(this.blueprintsInterval)
       .startWith(0)
       .switchMap(() => this.http.get(this.blueprintsUrl))
-      .map(this.extractData)
+      .map(this.extractJSONAPI)
       .map(this.extendBlueprintsData)
       .share()
       .catch(error => this.handleError(error, '#APIService.getBlueprints,#Error'));
@@ -80,9 +80,58 @@ export class APIService {
     return bps;
   }
 
-  private extractData(res: Response) {
-    let body = res.json();
-    return body.data || {};
+  private extractJSONAPI(res: Response) {
+    /* TODO: wrap and use jsonapi-serializer promise
+        var JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
+        var p = new JSONAPIDeserializer().deserialize(res.json(), function(err: any, data: {}) {
+          console.log('#JSONAPIDeserializer', data);
+        });
+        console.log('#JSONAPIDeserializer,#p', p, Observable.fromPromise(p));
+    */
+    let _ = require('lodash');
+
+    function isComplexType(obj: any) {
+      return _.isArray(obj) || _.isPlainObject(obj);
+    }
+
+    function keyForAttribute(attribute: any) {
+      if (_.isPlainObject(attribute)) {
+        return _.transform(attribute, function(result: any, value: any, key: any) {
+          if (isComplexType(value)) {
+            result[keyForAttribute(key)] = keyForAttribute(value);
+          } else {
+            result[keyForAttribute(key)] = value;
+          }
+        });
+      } else if (_.isArray(attribute)) {
+        return attribute.map(function(attr: any) {
+          if (isComplexType(attr)) {
+            return keyForAttribute(attr);
+          } else {
+            return attr;
+          }
+        });
+      } else {
+        // original calls to inflection here
+        return attribute;
+      }
+    }
+
+    function extractAttributes(from: any) {
+      var dest = keyForAttribute(from.attributes || {});
+      if ('id' in from) { dest.id = from.id; }
+      return dest;
+    }
+
+    let data = res.json().data;
+    if (Array.isArray(data)) {
+      for (let i in data) {
+        data[i] = extractAttributes(data[i]);
+      }
+    } else {
+      data = extractAttributes(data);
+    }
+    return data;
   }
 
   private handleError(error: any, logTags?: string) {

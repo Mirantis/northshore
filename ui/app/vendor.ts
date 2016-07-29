@@ -12,6 +12,7 @@ import 'rxjs';
 //Other
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
+import 'jsonapi-serializer';
 import 'ng2-bootstrap';
 import 'reflect-metadata';
 import 'object-assign';
