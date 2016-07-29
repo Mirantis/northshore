@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { Http } from '@angular/http';
 
 import 'object-assign';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromPromise';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/catch';
@@ -40,11 +41,14 @@ export class APIService {
     private http: Http
   ) {
 
+    let JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
+    let p = new JSONAPIDeserializer({ keyForAttribute: 'camelCase' });
+
     this.blueprints = Observable
       .interval(this.blueprintsInterval)
       .startWith(0)
       .switchMap(() => this.http.get(this.blueprintsUrl))
-      .map(this.extractData)
+      .switchMap(res => Observable.fromPromise(p.deserialize(res.json())))
       .map(this.extendBlueprintsData)
       .share()
       .catch(error => this.handleError(error, '#APIService.getBlueprints,#Error'));
@@ -78,11 +82,6 @@ export class APIService {
       }
     }
     return bps;
-  }
-
-  private extractData(res: Response) {
-    let body = res.json();
-    return body.data || {};
   }
 
   private handleError(error: any, logTags?: string) {
