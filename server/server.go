@@ -128,49 +128,37 @@ func UIAPI1BlueprintsParseHandler(w http.ResponseWriter, r *http.Request) {
 
 	var body []byte
 	var err error
+	var f APIFormParseBlueprint
+
 	if body, err = ioutil.ReadAll(r.Body); err != nil {
 		log.Errorln("Error during read request body: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var f APIFormParseBlueprint
-	err = jsonapi.Unmarshal(body, &f)
+	if err = jsonapi.Unmarshal(body, &f); err != nil {
+		log.WithError(err).Fatal("Blueprint parsing error")
+	}
+
+	bp, err := blueprint.ParseBytes([]byte(f.Data))
+	if err != nil {
+		log.WithError(err).Fatal("Blueprint parsing error")
+	}
 
 	log.WithFields(log.Fields{
 		"body": string(body),
 		"err":  err,
 		"f":    f,
+		"bp":   bp,
 	}).Debugln("#UIAPI1BlueprintsParseHandler")
 
-	/*
-		bp, err := blueprint.ParseBytes(body["data"]["attributes"]["yaml"])
-		if err != nil {
-			log.WithError(err).Fatal("Blueprint parsing error")
-		}
-		log.WithFields(log.Fields{
-			"blueprint": bp,
-		}).Info("Blueprint parsing")
+	//TODO Handle case if already exists
+	bp.Save()
+	//TODO Automate location handling
+	location := "/ui/api/v1/blueprints/" + bp.GetID()
 
-		bp.Save()
-	*/
-	/*
-		var bp blueprint.Blueprint
-		if err := jsonapi.Unmarshal(body, &bp); err != nil {
-			log.Errorln("Error during unmarshalling body: ", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		log.Debugln("#CreateHandler, #BP", bp)
-
-		//TODO Handle case if already exists
-		store.Save([]byte(blueprint.DBBucket), []byte(bp.GetID()), bp)
-		//TODO Automate location handling
-		location := "/ui/api/v1/blueprints/" + bp.GetID()
-
-		w.Header().Set("Location", location)
-		w.WriteHeader(http.StatusCreated)
-	*/
+	w.Header().Set("Location", location)
+	w.WriteHeader(http.StatusCreated)
 }
 
 // UIAPI1BlueprintsCreateHandler creates and stores a blueprint

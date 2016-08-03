@@ -14,6 +14,7 @@
 package blueprint
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -126,6 +127,23 @@ func ParseFile(path string) (bp Blueprint, err error) {
 	if err != nil {
 		return bp, fmt.Errorf("Unable to decode into struct, %v", err)
 	}
+	return bp, nil
+}
+
+// ParseBytes parses and validates the incoming data
+func ParseBytes(b []byte) (bp Blueprint, err error) {
+	v := viper.New()
+	v.SetConfigType("yaml")
+	err = v.ReadConfig(bytes.NewBuffer(b))
+	if err != nil {
+		return bp, fmt.Errorf("Config not found. %s", err)
+	}
+
+	err = v.Unmarshal(&bp)
+	if err != nil {
+		return bp, fmt.Errorf("Unable to decode into struct, %v", err)
+	}
+
 	return bp, nil
 }
 
