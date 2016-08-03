@@ -137,6 +137,7 @@ Demo Blueprint Pipeline goes thru states.`,
 		uiAPI1.HandleFunc("/action", demouiAPI1ActionHandler).Methods("GET", "POST")
 		uiAPI1.HandleFunc("/blueprints", server.UIAPI1BlueprintsHandler).Methods("GET")
 		uiAPI1.HandleFunc("/blueprints", server.UIAPI1BlueprintsCreateHandler).Methods("POST")
+		uiAPI1.HandleFunc("/blueprints/parse", server.UIAPI1BlueprintsParseHandler).Methods("POST")
 		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsDeleteHandler).Methods("DELETE")
 		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsIDHandler).Methods("GET")
 		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsUpdateHandler).Methods("PATCH")

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
+import { Headers, Http } from '@angular/http';
 
 import 'object-assign';
 import { Observable } from 'rxjs/Observable';
@@ -28,12 +28,17 @@ export class Blueprint {
   id: string;
 }
 
+export class APIFormParseBlueprint {
+  data: string;
+}
+
 @Injectable()
 export class APIService {
 
   private blueprints: Observable<Blueprint[]>;
   private blueprintsInterval = this.assetsService.asset('timers').blueprintsInterval;
   private blueprintsUrl = this.assetsService.asset('api').blueprintsUrl;
+  private parseBlueprintUrl = this.assetsService.asset('api').parseBlueprintUrl;
 
   constructor(
     private alertsService: AlertsService,
@@ -106,6 +111,23 @@ export class APIService {
    */
   getBlueprints(): Observable<Blueprint[]> {
     return this.blueprints;
+  }
+
+  parseBlueprint(v: APIFormParseBlueprint) {
+    let headers = new Headers({
+      'Content-Type': 'application/vnd.api+json'
+    });
+
+    let JSONAPISerializer = require('jsonapi-serializer').Serializer;
+    let s = new JSONAPISerializer('apiFormParseBlueprint', { attributes: ['data'], pluralizeType: false });
+    let payload = s.serialize(v)
+    // https://github.com/SeyZ/jsonapi-serializer/issues/70#issuecomment-197310834
+    delete (payload.data.id);
+
+    return this.http
+      .post(this.parseBlueprintUrl, payload, { headers: headers })
+      .toPromise()
+      .catch(error => this.handleError(error, '#APIService.parseBlueprint,#Error'));
   }
 
 }

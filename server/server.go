@@ -30,6 +30,21 @@ import (
 	"github.com/spf13/viper"
 )
 
+// APIFormParseBlueprint represents form data
+type APIFormParseBlueprint struct {
+	Data string `json:"data"`
+}
+
+//GetName implements jsonapi interface
+func (f APIFormParseBlueprint) GetName() string {
+	return "apiFormParseBlueprint"
+}
+
+//SetID implements jsonapi interface
+func (f *APIFormParseBlueprint) SetID(string) error {
+	return nil
+}
+
 func Run() {
 	r := mux.NewRouter()
 
@@ -105,6 +120,57 @@ func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+// UIAPI1BlueprintsParseHandler creates and stores a blueprint
+func UIAPI1BlueprintsParseHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+
+	var body []byte
+	var err error
+	if body, err = ioutil.ReadAll(r.Body); err != nil {
+		log.Errorln("Error during read request body: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var f APIFormParseBlueprint
+	err = jsonapi.Unmarshal(body, &f)
+
+	log.WithFields(log.Fields{
+		"body": string(body),
+		"err":  err,
+		"f":    f,
+	}).Debugln("#UIAPI1BlueprintsParseHandler")
+
+	/*
+		bp, err := blueprint.ParseBytes(body["data"]["attributes"]["yaml"])
+		if err != nil {
+			log.WithError(err).Fatal("Blueprint parsing error")
+		}
+		log.WithFields(log.Fields{
+			"blueprint": bp,
+		}).Info("Blueprint parsing")
+
+		bp.Save()
+	*/
+	/*
+		var bp blueprint.Blueprint
+		if err := jsonapi.Unmarshal(body, &bp); err != nil {
+			log.Errorln("Error during unmarshalling body: ", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		log.Debugln("#CreateHandler, #BP", bp)
+
+		//TODO Handle case if already exists
+		store.Save([]byte(blueprint.DBBucket), []byte(bp.GetID()), bp)
+		//TODO Automate location handling
+		location := "/ui/api/v1/blueprints/" + bp.GetID()
+
+		w.Header().Set("Location", location)
+		w.WriteHeader(http.StatusCreated)
+	*/
 }
 
 // UIAPI1BlueprintsCreateHandler creates and stores a blueprint
