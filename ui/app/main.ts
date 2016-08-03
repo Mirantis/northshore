@@ -1,5 +1,6 @@
-import { bootstrap }    from '@angular/platform-browser-dynamic';
+import { bootstrap } from '@angular/platform-browser-dynamic';
 import { provide, PLATFORM_DIRECTIVES, PLATFORM_PIPES } from '@angular/core';
+import { disableDeprecatedForms, provideForms } from '@angular/forms';
 import { HTTP_PROVIDERS } from '@angular/http';
 import { provideRouter, ROUTER_DIRECTIVES } from '@angular/router';
 //import {enableProdMode} from '@angular/core';
@@ -17,4 +18,6 @@ bootstrap(AppComponent, [
   provide(PLATFORM_DIRECTIVES, { useValue: [ROUTER_DIRECTIVES], multi: true }),
   provide(PLATFORM_PIPES, { useValue: [KeysPipe], multi: true }),
   provideRouter(AppRoutes),
+  disableDeprecatedForms(),
+  provideForms()
 ]);

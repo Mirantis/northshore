@@ -1,10 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { TAB_DIRECTIVES } from 'ng2-bootstrap/components/tabs';
 
 import { Blueprint, APIService } from '../../services/api/api';
 
 @Component({
-  directives: [],
+  directives: [
+    TAB_DIRECTIVES,
+  ],
   providers: [
     APIService,
   ],
@@ -14,6 +17,7 @@ import { Blueprint, APIService } from '../../services/api/api';
 
 export class AddBlueprintComponent implements OnDestroy, OnInit {
 
+  formData: string;
   private subscriptions: any[] = [];
 
   constructor(
@@ -26,6 +30,10 @@ export class AddBlueprintComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit() {
+  }
+
+  submitParseBlueprint(v: any) {
+    console.log('#submitParseBlueprint', v);
   }
 
 }
