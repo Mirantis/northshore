@@ -28,7 +28,7 @@ export class Blueprint {
   id: string;
 }
 
-export class APIFormParseBlueprint {
+export class BlueprintYAML {
   data: string;
 }
 
@@ -96,7 +96,9 @@ export class APIService {
       let o = error.json()
       if (o && o.errors) {
         for (let i in o.errors) {
-          this.alertsService.alertError(o.errors[i].details);
+          this.alertsService.alertError(
+            o.errors[i].title + ' ' + o.errors[i].detail
+          );
         }
       }
     } catch (e) {
@@ -113,13 +115,13 @@ export class APIService {
     return this.blueprints;
   }
 
-  parseBlueprint(v: APIFormParseBlueprint) {
+  parseBlueprint(v: BlueprintYAML) {
     let headers = new Headers({
       'Content-Type': 'application/vnd.api+json'
     });
 
     let JSONAPISerializer = require('jsonapi-serializer').Serializer;
-    let s = new JSONAPISerializer('apiFormParseBlueprint', { attributes: ['data'], pluralizeType: false });
+    let s = new JSONAPISerializer('blueprintYAML', { attributes: ['data'], pluralizeType: false });
     let payload = s.serialize(v)
     // https://github.com/SeyZ/jsonapi-serializer/issues/70#issuecomment-197310834
     delete (payload.data.id);

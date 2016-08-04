@@ -15,268 +15,75 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
-	"io/ioutil"
+	"fmt"
 	"net/http"
 	"path"
-	"strings"
 
 	"github.com/Mirantis/northshore/blueprint"
-	"github.com/Mirantis/northshore/store"
+
 	log "github.com/Sirupsen/logrus"
-	"github.com/gorilla/mux"
-	"github.com/manyminds/api2go/jsonapi"
-	"github.com/satori/go.uuid"
+	"github.com/gin-gonic/gin"
+	"github.com/manyminds/api2go"
+	"github.com/manyminds/api2go-adapter/gingonic"
 	"github.com/spf13/viper"
 )
 
-// APIFormParseBlueprint represents form data
-type APIFormParseBlueprint struct {
-	Data string `json:"data"`
-}
-
-//GetName implements jsonapi interface
-func (f APIFormParseBlueprint) GetName() string {
-	return "apiFormParseBlueprint"
-}
-
-//SetID implements jsonapi interface
-func (f *APIFormParseBlueprint) SetID(string) error {
-	return nil
-}
-
 func Run() {
-	r := mux.NewRouter()
-
-	uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
-	uiAPI1.HandleFunc("/", UIAPI1RootHandler).Methods("GET")
-
-	uiAPI1.HandleFunc("/blueprints", UIAPI1BlueprintsHandler).Methods("GET")
-	uiAPI1.HandleFunc("/blueprints", UIAPI1BlueprintsCreateHandler).Methods("POST")
-	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsDeleteHandler).Methods("DELETE")
-	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsIDHandler).Methods("GET")
-	uiAPI1.HandleFunc("/blueprints/{id}", UIAPI1BlueprintsUpdateHandler).Methods("PATCH")
-
-	ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
-	ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(
-		http.StripPrefix("/ui", NoDirListing(
-			http.FileServer(http.Dir(viper.GetString("UIRoot"))))))
-	ui.HandleFunc("/{_:.*}", UIIndexHandler)
-
-	r.HandleFunc("/{_:.*}", UIIndexHandler)
-
 	go func() {
 		Watch(viper.GetInt("WatchPeriod"))
 	}()
 
-	ip := viper.GetString("ServerIP")
-	port := viper.GetString("ServerPort")
-	addr := ip + ":" + port
-	log.WithField("address", addr).Infoln("#http", "Listen And Serve")
-	log.WithField("UIRoot", viper.GetString("UIRoot")).Infoln("#viper")
+	r := gin.Default()
+	r.NoRoute(func(c *gin.Context) {
+		c.File(path.Join(viper.GetString("UIRoot"), "index.html"))
+	})
+
+	ui := r.Group("/ui")
+	ui.Static("/app", path.Join(viper.GetString("UIRoot"), "/app"))
+	ui.Static("/assets", path.Join(viper.GetString("UIRoot"), "/assets"))
+	ui.Static("/dist", path.Join(viper.GetString("UIRoot"), "/dist"))
+	ui.Static("/node_modules", path.Join(viper.GetString("UIRoot"), "/node_modules"))
+
+	r.GET("/api", APIRootHandler)
+	r.POST("/ui/api/v1/parse/blueprint", APIParseBlueprintHandler)
+	api1 := api2go.NewAPIWithRouting(
+		"/ui/api/v1",
+		api2go.NewStaticResolver("/"),
+		gingonic.New(r),
+	)
+	api1.AddResource(blueprint.Blueprint{}, &BlueprintResource{})
+
+	addr := fmt.Sprintf(
+		"%s:%s",
+		viper.GetString("ServerIP"),
+		viper.GetString("ServerPort"),
+	)
+	log.WithFields(log.Fields{
+		"addr":   addr,
+		"UIRoot": viper.GetString("UIRoot"),
+	}).Infoln("#http", "Listen And Serve")
 	http.ListenAndServe(addr, r)
 }
 
-// NoDirListing returns 404 instead of directory listing with http.FileServer
-func NoDirListing(h http.Handler) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasSuffix(r.URL.Path, "/") {
-			http.NotFound(w, r)
-			return
-		}
-		h.ServeHTTP(w, r)
+// APIError writes JSON-API compatible structure
+func APIError(w http.ResponseWriter, e error, status int) {
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(gin.H{
+		"errors": []gin.H{
+			{
+				"detail": e.Error(),
+				"title":  "",
+			},
+		},
 	})
 }
 
-// UIAPI1RootHandler returns UI API version
-func UIAPI1RootHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debugln("#http,#UIAPI1RootHandler")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{"version": 1})
+// APIRootHandler returns the API description
+func APIRootHandler(c *gin.Context) {
+	c.JSON(200, gin.H{"/ui/api/v1": gin.H{"version": 1, "type": "jsonapi", "url": "http://jsonapi.org/format/1.0/"}})
 }
 
-// UIAPI1BlueprintsHandler returns a collection of blueprints
-func UIAPI1BlueprintsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debugln("#http,#UIAPI1BlueprintsHandler")
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	var ans []byte
-	var err error
-	var bps []blueprint.Blueprint
-	if err := store.LoadBucketAsSlice([]byte(blueprint.DBBucket), &bps); err != nil {
-		log.Errorln("Error during get BPs from DB: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if ans, err = jsonapi.Marshal(bps); err != nil {
-		log.Errorln("Error during marshalling bps: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if _, err = w.Write(ans); err != nil {
-		log.Errorln("Error during writing responce: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-// UIAPI1BlueprintsParseHandler creates and stores a blueprint
-func UIAPI1BlueprintsParseHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	var body []byte
-	var err error
-	var f APIFormParseBlueprint
-
-	if body, err = ioutil.ReadAll(r.Body); err != nil {
-		log.Errorln("Error during read request body: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if err = jsonapi.Unmarshal(body, &f); err != nil {
-		log.WithError(err).Fatal("Blueprint parsing error")
-	}
-
-	bp, err := blueprint.ParseBytes([]byte(f.Data))
-	if err != nil {
-		log.WithError(err).Fatal("Blueprint parsing error")
-	}
-
-	log.WithFields(log.Fields{
-		"body": string(body),
-		"err":  err,
-		"f":    f,
-		"bp":   bp,
-	}).Debugln("#UIAPI1BlueprintsParseHandler")
-
-	//TODO Handle case if already exists
-	bp.Save()
-	//TODO Automate location handling
-	location := "/ui/api/v1/blueprints/" + bp.GetID()
-
-	w.Header().Set("Location", location)
-	w.WriteHeader(http.StatusCreated)
-}
-
-// UIAPI1BlueprintsCreateHandler creates and stores a blueprint
-func UIAPI1BlueprintsCreateHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	var body []byte
-	var err error
-	if body, err = ioutil.ReadAll(r.Body); err != nil {
-		log.Errorln("Error during read request body: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	var bp blueprint.Blueprint
-	if err := jsonapi.Unmarshal(body, &bp); err != nil {
-		log.Errorln("Error during unmarshalling body: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	log.Debugln("#CreateHandler, #BP", bp)
-
-	//TODO Handle case if already exists
-	store.Save([]byte(blueprint.DBBucket), []byte(bp.GetID()), bp)
-	//TODO Automate location handling
-	location := "/ui/api/v1/blueprints/" + bp.GetID()
-
-	w.Header().Set("Location", location)
-	w.WriteHeader(http.StatusCreated)
-}
-
-// UIAPI1BlueprintsUpdateHandler creates and stores a blueprint
-func UIAPI1BlueprintsUpdateHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	var body []byte
-	var err error
-	var oldBP blueprint.Blueprint
-	var newBP blueprint.Blueprint
-	if err = store.Load([]byte(blueprint.DBBucket), []byte(vars["id"]), &oldBP); err != nil {
-		//TODO Handle error gracefully
-		if err.Error() == errors.New("Key does not exist or key is a nested bucket").Error() {
-			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	}
-	log.Debugln("#UpateHandler, #OldBP", oldBP)
-
-	if body, err = ioutil.ReadAll(r.Body); err != nil {
-		log.Errorln("Error during read request body: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if err := jsonapi.Unmarshal(body, &newBP); err != nil {
-		log.Errorln("Error during unmarshalling body: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	log.Debugln("#UpdateHandler, #NewBP", newBP)
-	//TODO Handle case with partial update
-	if err := store.Save([]byte(blueprint.DBBucket), []byte(vars["id"]), newBP); err != nil {
-		log.Errorln("Error during updating BP in DB: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-}
-
-// UIAPI1BlueprintsDeleteHandler deletes blueprint by ID
-func UIAPI1BlueprintsDeleteHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	// Deletion request has been accepted for processing,
-	// but the processing has not been completed by the time the server responds.
-	// So, Response 202 Accepted
-	w.WriteHeader(http.StatusAccepted)
-	log.Debugln("#DeleteHandler", vars["id"])
-
-	go func() {
-		blueprint.DeleteByID(uuid.FromStringOrNil(vars["id"]))
-	}()
-}
-
-// UIAPI1BlueprintsIDHandler returns a blueprint by id
-func UIAPI1BlueprintsIDHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	var data interface{}
-	err := store.Load([]byte(blueprint.DBBucket), []byte(vars["id"]), &data)
-
-	ans := map[string]interface{}{
-		"data": data,
-	}
-
-	if err != nil {
-		ans["errors"] = map[string]interface{}{
-			"details": err,
-		}
-	}
-
-	log.WithFields(log.Fields{
-		"request":  r,
-		"response": ans,
-		"vars":     vars,
-	}).Debugln("#http,#UIAPI1BlueprintsIDHandler")
-	json.NewEncoder(w).Encode(ans)
-}
-
-// UIIndexHandler returns UI index file
-func UIIndexHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debugln("#http,#UIIndexHandler")
-	indexPath := path.Join(viper.GetString("UIRoot"), "index.html")
-	http.ServeFile(w, r, indexPath)
+// APIParseBlueprintHandler creates and stores a blueprint
+func APIParseBlueprintHandler(c *gin.Context) {
+	ParseBlueprintHandler(c.Writer, c.Request)
 }

@@ -145,16 +145,14 @@ Demo Blueprint Pipeline goes thru states.`,
 		ui.Static("/dist", path.Join(viper.GetString("UIRoot"), "/dist"))
 		ui.Static("/node_modules", path.Join(viper.GetString("UIRoot"), "/node_modules"))
 
+		r.GET("/api", server.APIRootHandler)
+		r.POST("/ui/api/v1/parse/blueprint", server.APIParseBlueprintHandler)
 		api1 := api2go.NewAPIWithRouting(
 			"/ui/api/v1",
 			api2go.NewStaticResolver("/"),
 			gingonic.New(r),
 		)
 		api1.AddResource(blueprint.Blueprint{}, &server.BlueprintResource{})
-
-		r.GET("/api", func(c *gin.Context) {
-			c.JSON(200, gin.H{"/ui/api/v1": gin.H{"version": 1, "type": "jsonapi", "url": "http://jsonapi.org/format/1.0/"}})
-		})
 
 		// Custom api route
 		// https://github.com/manyminds/api2go/issues/256#issuecomment-234923954
