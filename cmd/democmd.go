@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var demoBlueprintPath string
+var demoBlueprintFile string
 
 // demoBlueprintCmd represents the "demo-blueprint" command
 var demoBlueprintCmd = &cobra.Command{
@@ -38,12 +38,12 @@ var demoBlueprintCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		overrideSettings()
 
-		bp, err := blueprint.ParseFile(demoBlueprintPath)
+		bp, err := blueprint.ParseFile(demoBlueprintFile)
 		if err != nil {
 			log.WithError(err).Fatal("Blueprint parsing error")
 		}
 		log.WithFields(log.Fields{
-			"path":      demoBlueprintPath,
+			"path":      demoBlueprintFile,
 			"blueprint": bp,
 		}).Info("Blueprint parsing")
 	},
@@ -61,12 +61,12 @@ Demo Blueprint Pipeline goes thru states.`,
 		overrideSettings()
 
 		/* Run Blueprint */
-		bp, err := blueprint.ParseFile(demoBlueprintPath)
+		bp, err := blueprint.ParseFile(demoBlueprintFile)
 		if err != nil {
 			log.WithError(err).Fatal("Blueprint parsing error")
 		}
 		log.WithFields(log.Fields{
-			"path":      demoBlueprintPath,
+			"path":      demoBlueprintFile,
 			"blueprint": bp,
 		}).Info("Blueprint parsing")
 
@@ -162,8 +162,8 @@ Demo Blueprint Pipeline goes thru states.`,
 
 func init() {
 	/* Init cobra */
-	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
-	demoCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
+	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintFile, "file", "f", "", "Path to blueprint yaml")
+	demoCmd.Flags().StringVarP(&demoBlueprintFile, "file", "f", "", "Path to blueprint yaml")
 	demoCmd.Flags().StringVarP(&UIRoot, "ui", "u", "./ui", "Path to UI root directory")
 	viper.BindPFlag("UIRoot", demoCmd.Flags().Lookup("ui"))
 
