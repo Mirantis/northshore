@@ -45,9 +45,9 @@ func Run() {
 	ui.Static("/node_modules", path.Join(viper.GetString("UIRoot"), "/node_modules"))
 
 	r.GET("/api", APIRootHandler)
-	r.POST("/ui/api/v1/parse/blueprint", APIParseBlueprintHandler)
+	r.POST("/api/v1/parse/blueprint", APIParseBlueprintHandler)
 	api1 := api2go.NewAPIWithRouting(
-		"/ui/api/v1",
+		"/api/v1",
 		api2go.NewStaticResolver("/"),
 		gingonic.New(r),
 	)
@@ -80,7 +80,7 @@ func APIError(w http.ResponseWriter, e error, status int) {
 
 // APIRootHandler returns the API description
 func APIRootHandler(c *gin.Context) {
-	c.JSON(200, gin.H{"/ui/api/v1": gin.H{"version": 1, "type": "jsonapi", "url": "http://jsonapi.org/format/1.0/"}})
+	c.JSON(200, gin.H{"/api/v1": gin.H{"version": 1, "type": "jsonapi", "url": "http://jsonapi.org/format/1.0/"}})
 }
 
 // APIParseBlueprintHandler creates and stores a blueprint

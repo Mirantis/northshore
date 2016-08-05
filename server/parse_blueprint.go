@@ -82,7 +82,7 @@ func ParseBlueprintHandler(w http.ResponseWriter, r *http.Request) {
 	//TODO Handle case if already exists
 	bp.Save()
 	//TODO Automate location handling
-	location := "/ui/api/v1/blueprints/" + bp.GetID()
+	location := "/api/v1/blueprints/" + bp.GetID()
 
 	w.Header().Set("Location", location)
 	w.WriteHeader(http.StatusCreated)

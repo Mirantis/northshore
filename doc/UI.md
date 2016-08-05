@@ -90,7 +90,7 @@ should be defined as a2app route list.
 Add the "ui" prefix to routes, it's combines and marks them as targeted for UI.
 The allowed routes start with BASE (ie `http://host:port/`) and so:
 
-- BASE/ui/api/
+- BASE/api/
 - BASE/ui/app/
 - BASE/ui/assets/
 - BASE/ui/node_modules/

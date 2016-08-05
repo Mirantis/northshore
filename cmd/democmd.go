@@ -146,9 +146,9 @@ Demo Blueprint Pipeline goes thru states.`,
 		ui.Static("/node_modules", path.Join(viper.GetString("UIRoot"), "/node_modules"))
 
 		r.GET("/api", server.APIRootHandler)
-		r.POST("/ui/api/v1/parse/blueprint", server.APIParseBlueprintHandler)
+		r.POST("/api/v1/parse/blueprint", server.APIParseBlueprintHandler)
 		api1 := api2go.NewAPIWithRouting(
-			"/ui/api/v1",
+			"/api/v1",
 			api2go.NewStaticResolver("/"),
 			gingonic.New(r),
 		)
