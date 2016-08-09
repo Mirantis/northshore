@@ -63,3 +63,10 @@
     width: 12px;
 }
 /* </editor-fold> */
+
+/* <editor-fold desc="Custom Forms"> */
+.add-blueprint textarea {
+    height: 30em;
+    resize: none;
+}
+/* </editor-fold> */

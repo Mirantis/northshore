@@ -19,6 +19,9 @@ export class AssetsService {
         success: 'success',
         warning: 'warning',
       },
+      Blueprints: {
+        onParseSuccess: 'The new Blueprint successfully stored',
+      },
     },
     timers: {
       alertDismiss: 9000,

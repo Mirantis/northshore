@@ -115,7 +115,7 @@ export class APIService {
     return this.blueprints;
   }
 
-  parseBlueprint(v: BlueprintYAML) {
+  parseBlueprint(v: BlueprintYAML): Observable<{}> {
     let headers = new Headers({
       'Content-Type': 'application/vnd.api+json'
     });
@@ -128,7 +128,6 @@ export class APIService {
 
     return this.http
       .post(this.parseBlueprintUrl, payload, { headers: headers })
-      .toPromise()
       .catch(error => this.handleError(error, '#APIService.parseBlueprint,#Error'));
   }
 
