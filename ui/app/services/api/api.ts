@@ -97,7 +97,8 @@ export class APIService {
       if (o && o.errors) {
         for (let i in o.errors) {
           this.alertsService.alertError(
-            o.errors[i].title + ' ' + o.errors[i].detail
+            (o.errors[i].title ? o.errors[i].title + ' ' : '')
+            + (o.errors[i].detail ? o.errors[i].detail : '')
           );
         }
       }
@@ -120,6 +121,8 @@ export class APIService {
       'Content-Type': 'application/vnd.api+json'
     });
 
+    let JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
+    let p = new JSONAPIDeserializer({ keyForAttribute: 'camelCase' });
     let JSONAPISerializer = require('jsonapi-serializer').Serializer;
     let s = new JSONAPISerializer('blueprintYAML', { attributes: ['data'], pluralizeType: false });
     let payload = s.serialize(v)
@@ -128,6 +131,7 @@ export class APIService {
 
     return this.http
       .post(this.parseBlueprintUrl, payload, { headers: headers })
+      .switchMap(res => Observable.fromPromise(p.deserialize(res.json())))
       .catch(error => this.handleError(error, '#APIService.parseBlueprint,#Error'));
   }
 
