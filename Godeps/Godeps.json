@@ -136,14 +136,23 @@
 			"Rev": "91797f1712fd58f224781be1080b8613d096187e"
 		},
 		{
-			"ImportPath": "github.com/gorilla/context",
-			"Comment": "v1.1-4-gaed02d1",
-			"Rev": "aed02d124ae4a0e94fea4541c8effd05bf0c8296"
+			"ImportPath": "github.com/gin-gonic/gin",
+			"Comment": "v1.0rc1-268-gf931d1e",
+			"Rev": "f931d1ea80ae95a6fc739213cdd9399bd2967fb6"
 		},
 		{
-			"ImportPath": "github.com/gorilla/mux",
-			"Comment": "v1.1-13-g9fa818a",
-			"Rev": "9fa818a44c2bf1396a17f9d5a3c0f6dd39d2ff8e"
+			"ImportPath": "github.com/gin-gonic/gin/binding",
+			"Comment": "v1.0rc1-268-gf931d1e",
+			"Rev": "f931d1ea80ae95a6fc739213cdd9399bd2967fb6"
+		},
+		{
+			"ImportPath": "github.com/gin-gonic/gin/render",
+			"Comment": "v1.0rc1-268-gf931d1e",
+			"Rev": "f931d1ea80ae95a6fc739213cdd9399bd2967fb6"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "c3cefd437628a0b7d31b34fe44b3a7a540e98527"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/hcl",
@@ -186,8 +195,9 @@
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
 		},
 		{
-			"ImportPath": "github.com/looplab/fsm",
-			"Rev": "c77ccaafd443c852ceb0b4b0b5258235286e85a0"
+			"ImportPath": "github.com/julienschmidt/httprouter",
+			"Comment": "v1.1-31-gfb79d6a",
+			"Rev": "fb79d6a91d3e4a9ecb6d945b218d78fc0d9b1939"
 		},
 		{
 			"ImportPath": "github.com/magiconair/properties",
@@ -195,7 +205,25 @@
 			"Rev": "c81f9d71af8f8cba1466501d30326b99a4e56c19"
 		},
 		{
+			"ImportPath": "github.com/manucorporat/sse",
+			"Rev": "ee05b128a739a0fb76c7ebd3ae4810c1de808d6d"
+		},
+		{
+			"ImportPath": "github.com/manyminds/api2go",
+			"Comment": "1.0-RC1-38-g22da272",
+			"Rev": "22da272c420e3e0f59a8aaa74dbd0f170053ade7"
+		},
+		{
+			"ImportPath": "github.com/manyminds/api2go-adapter/gingonic",
+			"Rev": "9aa1d84f77b6b9b4939e6926115590827eb2e24b"
+		},
+		{
 			"ImportPath": "github.com/manyminds/api2go/jsonapi",
+			"Comment": "1.0-RC1-38-g22da272",
+			"Rev": "22da272c420e3e0f59a8aaa74dbd0f170053ade7"
+		},
+		{
+			"ImportPath": "github.com/manyminds/api2go/routing",
 			"Comment": "1.0-RC1-38-g22da272",
 			"Rev": "22da272c420e3e0f59a8aaa74dbd0f170053ade7"
 		},
@@ -248,6 +276,11 @@
 		{
 			"ImportPath": "golang.org/x/tools/go/vcs",
 			"Rev": "a2a552218a0e22e6fb22469f49ef371b492f6178"
+		},
+		{
+			"ImportPath": "gopkg.in/go-playground/validator.v8",
+			"Comment": "v8.18.1",
+			"Rev": "5f57d2222ad794d0dffb07e664ea05e2ee07d60c"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
