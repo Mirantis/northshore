@@ -5,7 +5,8 @@ export class AssetsService {
 
   private assets = {
     api: {
-      blueprintsUrl: 'ui/api/v1/blueprints',
+      blueprintsUrl: 'api/v1/blueprints',
+      parseBlueprintUrl: 'api/v1/parse/blueprint',
     },
     alerts: {
       AlertsService: {
@@ -17,6 +18,9 @@ export class AssetsService {
         error: 'danger',
         success: 'success',
         warning: 'warning',
+      },
+      Blueprints: {
+        onParseSuccess: 'The new Blueprint successfully stored',
       },
     },
     timers: {

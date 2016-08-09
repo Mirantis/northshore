@@ -20,7 +20,7 @@ module.exports = webpackMerge(commonConfig, {
     historyApiFallback: true,
     stats: 'minimal',
     proxy: {
-      '/ui/api/*': 'http://localhost:8998'
+      '/api/*': 'http://localhost:8998'
     }
   }
 });

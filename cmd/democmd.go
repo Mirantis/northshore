@@ -16,19 +16,23 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
+	"path"
 	"time"
 
 	"github.com/Mirantis/northshore/blueprint"
 	"github.com/Mirantis/northshore/server"
 	log "github.com/Sirupsen/logrus"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
+	"github.com/manyminds/api2go"
+	"github.com/manyminds/api2go-adapter/gingonic"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var demoBlueprintPath string
+var demoBlueprintFile string
 
 // demoBlueprintCmd represents the "demo-blueprint" command
 var demoBlueprintCmd = &cobra.Command{
@@ -38,12 +42,12 @@ var demoBlueprintCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		overrideSettings()
 
-		bp, err := blueprint.ParseFile(demoBlueprintPath)
+		bp, err := blueprint.ParseFile(demoBlueprintFile)
 		if err != nil {
 			log.WithError(err).Fatal("Blueprint parsing error")
 		}
 		log.WithFields(log.Fields{
-			"path":      demoBlueprintPath,
+			"path":      demoBlueprintFile,
 			"blueprint": bp,
 		}).Info("Blueprint parsing")
 	},
@@ -61,12 +65,12 @@ Demo Blueprint Pipeline goes thru states.`,
 		overrideSettings()
 
 		/* Run Blueprint */
-		bp, err := blueprint.ParseFile(demoBlueprintPath)
+		bp, err := blueprint.ParseFile(demoBlueprintFile)
 		if err != nil {
 			log.WithError(err).Fatal("Blueprint parsing error")
 		}
 		log.WithFields(log.Fields{
-			"path":      demoBlueprintPath,
+			"path":      demoBlueprintFile,
 			"blueprint": bp,
 		}).Info("Blueprint parsing")
 
@@ -129,95 +133,67 @@ Demo Blueprint Pipeline goes thru states.`,
 
 		/* Run local server */
 		log.Info("Run local server")
-		r := mux.NewRouter()
 
-		uiAPI1 := r.PathPrefix("/ui/api/v1").Subrouter().StrictSlash(true)
-		uiAPI1.HandleFunc("/", server.UIAPI1RootHandler).Methods("GET")
+		r := gin.Default()
+		r.NoRoute(func(c *gin.Context) {
+			c.File(path.Join(viper.GetString("UIRoot"), "index.html"))
+		})
 
-		uiAPI1.HandleFunc("/action", demouiAPI1ActionHandler).Methods("GET", "POST")
-		uiAPI1.HandleFunc("/blueprints", server.UIAPI1BlueprintsHandler).Methods("GET")
-		uiAPI1.HandleFunc("/blueprints", server.UIAPI1BlueprintsCreateHandler).Methods("POST")
-		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsDeleteHandler).Methods("DELETE")
-		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsIDHandler).Methods("GET")
-		uiAPI1.HandleFunc("/blueprints/{id}", server.UIAPI1BlueprintsUpdateHandler).Methods("PATCH")
-		uiAPI1.HandleFunc("/errors", demouiAPI1ErrorsHandler).Methods("GET", "POST")
+		ui := r.Group("/ui")
+		ui.Static("/app", path.Join(viper.GetString("UIRoot"), "/app"))
+		ui.Static("/assets", path.Join(viper.GetString("UIRoot"), "/assets"))
+		ui.Static("/dist", path.Join(viper.GetString("UIRoot"), "/dist"))
+		ui.Static("/node_modules", path.Join(viper.GetString("UIRoot"), "/node_modules"))
 
-		ui := r.PathPrefix("/ui").Subrouter().StrictSlash(true)
-		ui.PathPrefix("/{uiDir:(app)|(assets)|(dist)|(node_modules)}").Handler(
-			http.StripPrefix("/ui", server.NoDirListing(
-				http.FileServer(http.Dir(viper.GetString("UIRoot"))))))
-		ui.HandleFunc("/{_:.*}", server.UIIndexHandler)
+		r.GET("/api", server.APIRootHandler)
+		r.POST("/api/v1/parse/blueprint", server.APIParseBlueprintHandler)
+		api1 := api2go.NewAPIWithRouting(
+			"/api/v1",
+			api2go.NewStaticResolver("/"),
+			gingonic.New(r),
+		)
+		api1.AddResource(blueprint.Blueprint{}, &server.BlueprintResource{})
 
-		r.HandleFunc("/{_:.*}", server.UIIndexHandler)
+		// Custom api route
+		// https://github.com/manyminds/api2go/issues/256#issuecomment-234923954
+		// it couses to stack overflow
+		//
+		// api1Handler := api1.Handler().(*httprouter.Router)
+		// api1Handler.GET("/a1", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		// 	w.Header().Set("Content-Type", "application/json")
+		// 	json.NewEncoder(w).Encode(gin.H{"txt": "/a1"})
+		// })
+		//
+		// api1Router := api1.Router().(*routing.HTTPRouter)
+		// it works:
+		api1Router := api1.Router()
+		api1Router.Handle("GET", "/api/a", func(w http.ResponseWriter, r *http.Request, params map[string]string) {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(gin.H{"/api/a": 1})
+		})
 
-		ip := viper.GetString("ServerIP")
-		port := viper.GetString("ServerPort")
-		addr := ip + ":" + port
-		log.WithField("address", addr).Infoln("#http", "Listen And Serve")
-		log.WithField("UIRoot", viper.GetString("UIRoot")).Infoln("#viper")
+		addr := fmt.Sprintf(
+			"%s:%s",
+			viper.GetString("ServerIP"),
+			viper.GetString("ServerPort"),
+		)
+		log.WithFields(log.Fields{
+			"addr":   addr,
+			"UIRoot": viper.GetString("UIRoot"),
+		}).Infoln("#http", "Listen And Serve")
 		http.ListenAndServe(addr, r)
 	},
 }
 
 func init() {
 	/* Init cobra */
-	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
-	demoCmd.Flags().StringVarP(&demoBlueprintPath, "file", "f", "", "Path to blueprint yaml")
+	demoBlueprintCmd.Flags().StringVarP(&demoBlueprintFile, "file", "f", "", "Path to blueprint yaml")
+	demoCmd.Flags().StringVarP(&demoBlueprintFile, "file", "f", "", "Path to blueprint yaml")
 	demoCmd.Flags().StringVarP(&UIRoot, "ui", "u", "./ui", "Path to UI root directory")
 	viper.BindPFlag("UIRoot", demoCmd.Flags().Lookup("ui"))
 
 	runCmd.AddCommand(demoBlueprintCmd)
 	runCmd.AddCommand(demoCmd)
-}
-
-func demouiAPI1ActionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-
-	ans := map[string]interface{}{
-		"data": []map[string]interface{}{
-			{"details": "Details 1"},
-			{"details": "Details 2"},
-		},
-		"meta": map[string]interface{}{
-			"info": "demouiAPI1ActionHandler",
-		},
-	}
-
-	log.WithFields(log.Fields{
-		"request":  r,
-		"response": ans,
-	}).Debugln("#http,#demouiAPI1ActionHandler")
-	json.NewEncoder(w).Encode(ans)
-}
-
-func demouiAPI1ErrorsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/vnd.api+json")
-	w.WriteHeader(500)
-
-	ans := map[string]interface{}{
-		"data": []map[string]interface{}{},
-		"errors": []map[string]interface{}{
-			{
-				"details": "Error details 1",
-				"title":   "Error title 1",
-			},
-			{
-				"details": "Details of Error 2",
-				"meta": map[string]interface{}{
-					"info": "meta info of Error 2",
-				},
-			},
-		},
-		"meta": map[string]interface{}{
-			"info": "demouiAPI1ErrorsHandler",
-		},
-	}
-
-	log.WithFields(log.Fields{
-		"request":  r,
-		"response": ans,
-	}).Debugln("#http,#demouiAPI1ErrorsHandler")
-	json.NewEncoder(w).Encode(ans)
 }
 
 func blueprintStates(bp blueprint.Blueprint) (ss []blueprint.StageState) {

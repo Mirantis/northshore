@@ -21,15 +21,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var path string
+var blueprintFile string
 var blueprintCmd = &cobra.Command{
 	Use:   "blueprint",
 	Short: "Run execution of blueprint",
 	Long:  `This command read, parse and process blueprint.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Infoln("Blueprint was runned.")
-		log.Infoln("PATH -> ", path)
-		bp, err := blueprint.ParseFile(path)
+		log.Infoln("PATH -> ", blueprintFile)
+		bp, err := blueprint.ParseFile(blueprintFile)
 		if err != nil {
 			log.Errorln("Parsing error: ", err)
 		}
@@ -40,6 +40,6 @@ var blueprintCmd = &cobra.Command{
 }
 
 func init() {
-	blueprintCmd.Flags().StringVarP(&path, "file", "f", "", "Path to blueprint yaml")
+	blueprintCmd.Flags().StringVarP(&blueprintFile, "file", "f", "", "Path to blueprint yaml")
 	runCmd.AddCommand(blueprintCmd)
 }
