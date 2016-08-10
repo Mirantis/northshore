@@ -4,7 +4,7 @@ import { TAB_DIRECTIVES } from 'ng2-bootstrap/components/tabs';
 
 import { AlertsService } from '../../services/alerts/alerts';
 import { AssetsService } from '../../services/assets/assets';
-import { BlueprintYAML, APIService } from '../../services/api/api';
+import { Blueprint, BlueprintYAML, APIService } from '../../services/api/api';
 
 @Component({
   directives: [
@@ -41,11 +41,11 @@ export class AddBlueprintComponent implements OnDestroy, OnInit {
 
   submitParseBlueprint(v: BlueprintYAML) {
     let sub = this.apiService.parseBlueprint(v)
-      .subscribe(res => {
+      .subscribe((res: Blueprint) => {
         // onSuccess
         console.log('#submitParseBlueprint', res);
         this.alertsService.alertSuccess(this.AlertOnParseSuccess);
-        this.router.navigate(['/blueprints']);
+        this.router.navigate(['/blueprints', res.id]);
       });
     this.subscriptions.push(sub);
   }

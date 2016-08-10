@@ -39,7 +39,6 @@ func (*BlueprintYAML) SetID(string) error {
 
 // ParseBlueprintHandler creates and stores a blueprint
 func ParseBlueprintHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/vnd.api+json")
 
 	var body []byte
 	var err error
@@ -79,11 +78,9 @@ func ParseBlueprintHandler(w http.ResponseWriter, r *http.Request) {
 		"bp":   bp,
 	}).Debugln("#ParseBlueprintHandler")
 
-	//TODO Handle case if already exists
+	//TODO: Handle case if already exists
 	bp.Save()
-	//TODO Automate location handling
-	location := "/api/v1/blueprints/" + bp.GetID()
 
-	w.Header().Set("Location", location)
-	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Location", "/api/v1/blueprints/"+bp.GetID())
+	APIData(w, bp, http.StatusCreated)
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/manyminds/api2go"
 	"github.com/manyminds/api2go-adapter/gingonic"
+	"github.com/manyminds/api2go/jsonapi"
 	"github.com/spf13/viper"
 )
 
@@ -65,15 +66,25 @@ func Run() {
 	http.ListenAndServe(addr, r)
 }
 
-// APIError writes JSON-API compatible structure
+// APIData writes JSONAPI compatible structure
+func APIData(w http.ResponseWriter, v interface{}, status int) {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(status)
+	json, err := jsonapi.Marshal(v)
+	if err != nil {
+		APIError(w, err, http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprint(w, string(json))
+}
+
+// APIError writes JSONAPI compatible structure
 func APIError(w http.ResponseWriter, e error, status int) {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(gin.H{
 		"errors": []gin.H{
-			{
-				"detail": e.Error(),
-				"title":  "",
-			},
+			{"detail": e.Error()},
 		},
 	})
 }
