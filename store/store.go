@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func openDBBucket(bucket []byte) *bolt.DB {
+func OpenDBBucket(bucket []byte) *bolt.DB {
 	path := viper.GetString("BoltDBPath")
 	log.Debugln("Open #DB -> ", path)
 	db, err := bolt.Open(path, 0600, nil)
@@ -48,7 +48,7 @@ func openDBBucket(bucket []byte) *bolt.DB {
 
 // Delete deletes key from boltdb Bucket
 func Delete(bucket []byte, key []byte) error {
-	db := openDBBucket(bucket)
+	db := OpenDBBucket(bucket)
 	defer db.Close()
 
 	if err := db.Update(func(tx *bolt.Tx) error {
@@ -62,7 +62,7 @@ func Delete(bucket []byte, key []byte) error {
 
 // Load loads item from boltdb Bucket
 func Load(bucket []byte, key []byte, v interface{}) error {
-	db := openDBBucket(bucket)
+	db := OpenDBBucket(bucket)
 	defer db.Close()
 
 	log.Debugln("#DB", "Load data from DB")
@@ -85,7 +85,7 @@ func Load(bucket []byte, key []byte, v interface{}) error {
 
 // LoadBucket loads all items from boltdb Bucket
 func LoadBucket(bucket []byte, buf *[]interface{}) error {
-	db := openDBBucket(bucket)
+	db := OpenDBBucket(bucket)
 	defer db.Close()
 
 	log.Debugln("#DB", "Load bucket from DB")
@@ -107,7 +107,7 @@ func LoadBucket(bucket []byte, buf *[]interface{}) error {
 
 // LoadBucketAsSlice loads all items from boltdb Bucket
 func LoadBucketAsSlice(bucket []byte, v interface{}) error {
-	db := openDBBucket(bucket)
+	db := OpenDBBucket(bucket)
 	defer db.Close()
 
 	err := db.View(func(tx *bolt.Tx) error {
@@ -135,7 +135,7 @@ func LoadBucketAsSlice(bucket []byte, v interface{}) error {
 
 // Save stores item in boltdb Bucket as JSON
 func Save(bucket []byte, key []byte, v interface{}) error {
-	db := openDBBucket(bucket)
+	db := OpenDBBucket(bucket)
 	defer db.Close()
 
 	log.Debugln("#DB", "Save data to DB")

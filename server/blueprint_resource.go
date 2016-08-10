@@ -28,8 +28,13 @@ type BlueprintResource struct{}
 
 // FindAll implements `api2go.FindAll` interface
 func (s BlueprintResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	var bps []blueprint.Blueprint
-	if err := store.LoadBucketAsSlice([]byte(blueprint.DBBucket), &bps); err != nil {
+	// var bps []blueprint.Blueprint
+	// if err := store.LoadBucketAsSlice([]byte(blueprint.DBBucket), &bps); err != nil {
+
+	bps, err := blueprint.LoadAll()
+	log.Debugln("#FindAll", bps)
+
+	if err != nil {
 		log.Errorln("#BlueprintResource,#FindAll", err)
 		return &api2go.Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusInternalServerError)
 	}

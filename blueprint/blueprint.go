@@ -15,11 +15,13 @@ package blueprint
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/boltdb/bolt"
 
 	"github.com/Mirantis/northshore/store"
 	"github.com/docker/engine-api/client"
@@ -288,4 +290,33 @@ func ParseBytes(b []byte) (bp Blueprint, err error) {
 	}
 
 	return bp, nil
+}
+
+// LoadAll loads stored blueprints
+func LoadAll() (items []Blueprint, err error) {
+	db := store.OpenDBBucket([]byte(DBBucket))
+	defer db.Close()
+
+	err = db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(DBBucket))
+		items = make([]Blueprint, 0, b.Stats().KeyN)
+
+		log.Debugln("#blueprint,#LoadAll", b.Stats().KeyN, len(items))
+
+		b.ForEach(func(k, v []byte) error {
+			item := new(Blueprint)
+			if err = json.Unmarshal(v, item); err != nil {
+				log.Errorln("#DB,#LoadBucket", err)
+				return err
+			}
+			items = append(items, *item)
+
+			log.Debugln("#blueprint,#LoadAll,##", string(k), len(items))
+			return nil
+		})
+
+		return nil
+	})
+
+	return items, err
 }
