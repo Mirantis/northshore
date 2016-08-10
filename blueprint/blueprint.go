@@ -320,3 +320,24 @@ func LoadAll() (items []Blueprint, err error) {
 
 	return items, err
 }
+
+// Blueprints represents Storable collection
+type Blueprints []Blueprint
+
+// Bucket implements Storable interface
+func (items *Blueprints) Bucket() []byte {
+	return []byte(DBBucket)
+}
+
+// Next implements Storable interface
+func (items *Blueprints) Next() interface{} {
+	item := new(Blueprint)
+	*items = append(*items, *item)
+	l := len(*items)
+	return &(*items)[l-1]
+}
+
+// Prepare implements Storable interface
+func (items *Blueprints) Prepare(len int) {
+	*items = make([]Blueprint, 0, len)
+}

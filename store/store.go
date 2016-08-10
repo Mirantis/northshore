@@ -155,3 +155,38 @@ func Save(bucket []byte, key []byte, v interface{}) error {
 	})
 	return err
 }
+
+// Storable defines collection interface
+type Storable interface {
+	// Bucket returns the bucket name
+	Bucket() []byte
+	// Next wraps an item constructor
+	Next() interface{}
+	// Prepare sets collection size
+	Prepare(int)
+}
+
+// LoadStorable loads all items from boltdb Bucket
+func LoadStorable(items Storable) error {
+	bucket := items.Bucket()
+	db := OpenDBBucket(bucket)
+	defer db.Close()
+
+	err := db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucket)
+		items.Prepare(b.Stats().KeyN)
+
+		b.ForEach(func(k, v []byte) error {
+
+			if err := json.Unmarshal(v, items.Next()); err != nil {
+				log.Errorln("#DB,#LoadStorable", err)
+				return err
+			}
+
+			return nil
+		})
+
+		return nil
+	})
+	return err
+}
