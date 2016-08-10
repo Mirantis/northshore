@@ -103,52 +103,19 @@ const (
 	DBBucket = "blueprints"
 )
 
-//GetID returns ID of blueprint
-func (b Blueprint) GetID() string {
-	return b.ID.String()
+// GetID implements `api2go.MarshalIdentifier` interface
+func (bp Blueprint) GetID() string {
+	return bp.ID.String()
 }
 
-//SetID takes string, converts it to uuid and sets blueprint ID
-func (b *Blueprint) SetID(id string) (err error) {
-	b.ID, err = uuid.FromString(id)
+// SetID implements `api2go.UnmarshalIdentifier` interface
+func (bp *Blueprint) SetID(id string) (err error) {
+	bp.ID, err = uuid.FromString(id)
 	return
 }
 
-// ParseFile parses and validates the incoming data
-func ParseFile(path string) (bp Blueprint, err error) {
-	bpv := viper.New()
-	bpv.SetConfigFile(path)
-	err = bpv.ReadInConfig()
-	if err != nil {
-		return bp, fmt.Errorf("Config not found. %s", err)
-	}
-
-	err = bpv.Unmarshal(&bp)
-	if err != nil {
-		return bp, fmt.Errorf("Unable to decode into struct, %v", err)
-	}
-	return bp, nil
-}
-
-// ParseBytes parses and validates the incoming data
-func ParseBytes(b []byte) (bp Blueprint, err error) {
-	v := viper.New()
-	v.SetConfigType("yaml")
-	err = v.ReadConfig(bytes.NewBuffer(b))
-	if err != nil {
-		return bp, fmt.Errorf("Config not found. %s", err)
-	}
-
-	err = v.Unmarshal(&bp)
-	if err != nil {
-		return bp, fmt.Errorf("Unable to decode into struct, %v", err)
-	}
-
-	return bp, nil
-}
-
-// RunBlueprint creates and starts Docker containers
-func RunBlueprint(bp Blueprint) {
+// Run creates and starts Docker containers
+func (bp *Blueprint) Run() {
 	cli, err := client.NewEnvClient()
 	if err != nil {
 		panic(err)
@@ -214,12 +181,12 @@ func RunBlueprint(bp Blueprint) {
 	}
 }
 
-// DeleteByID deletes blueprint with containers
-func DeleteByID(id uuid.UUID) {
+// Delete deletes blueprint with containers
+func (bp *Blueprint) Delete() error {
 	// TODO: stop and remove containers
 	log.Debugln("#blueprint,#DeleteBlueprint")
 
-	store.Delete([]byte(DBBucket), []byte(id.String()))
+	return store.Delete([]byte(DBBucket), []byte(bp.ID.String()))
 }
 
 // Save stores blueprint in db
@@ -287,4 +254,38 @@ LookInactive:
 	}
 
 	bp.State = bpState
+}
+
+// ParseFile parses and validates the incoming data
+func ParseFile(path string) (bp Blueprint, err error) {
+	v := viper.New()
+	v.SetConfigFile(path)
+	err = v.ReadInConfig()
+	if err != nil {
+		return bp, fmt.Errorf("Config not found. %s", err)
+	}
+
+	err = v.Unmarshal(&bp)
+	if err != nil {
+		return bp, fmt.Errorf("Unable to decode into struct, %v", err)
+	}
+
+	return bp, nil
+}
+
+// ParseBytes parses and validates the incoming data
+func ParseBytes(b []byte) (bp Blueprint, err error) {
+	v := viper.New()
+	v.SetConfigType("yaml")
+	err = v.ReadConfig(bytes.NewBuffer(b))
+	if err != nil {
+		return bp, fmt.Errorf("Config not found. %s", err)
+	}
+
+	err = v.Unmarshal(&bp)
+	if err != nil {
+		return bp, fmt.Errorf("Unable to decode into struct, %v", err)
+	}
+
+	return bp, nil
 }

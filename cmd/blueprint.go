@@ -35,7 +35,7 @@ var blueprintCmd = &cobra.Command{
 		}
 		log.Debugln("BLUEPRINT -> ", bp)
 		log.Infoln("Running............")
-		blueprint.RunBlueprint(bp)
+		bp.Run()
 	},
 }
 

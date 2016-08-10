@@ -21,7 +21,6 @@ import (
 	"github.com/Mirantis/northshore/store"
 	log "github.com/Sirupsen/logrus"
 	"github.com/manyminds/api2go"
-	"github.com/satori/go.uuid"
 )
 
 // BlueprintResource represents `api2go.CRUD` interface
@@ -53,9 +52,16 @@ func (s BlueprintResource) FindOne(id string, r api2go.Request) (api2go.Responde
 
 // Delete implements `api2go.CRUD` interface
 func (s BlueprintResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
+	var bp blueprint.Blueprint
+	if err := store.Load([]byte(blueprint.DBBucket), []byte(id), &bp); err != nil {
+		log.WithFields(log.Fields{
+			"id": id,
+		}).Errorln("#BlueprintResource,#FindOne", err)
+		return &api2go.Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
+	}
 
 	go func() {
-		blueprint.DeleteByID(uuid.FromStringOrNil(id))
+		bp.Delete()
 	}()
 
 	// Deletion request has been accepted for processing,
