@@ -79,7 +79,14 @@ func ParseBlueprintHandler(w http.ResponseWriter, r *http.Request) {
 	}).Debugln("#ParseBlueprintHandler")
 
 	//TODO: Handle case if already exists
-	bp.Save()
+	if err := bp.Save(); err != nil {
+		log.WithFields(log.Fields{
+			"bp":  bp,
+			"err": err,
+		}).Errorln("#ParseBlueprintHandler")
+		APIError(w, err, http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Location", "/api/v1/blueprints/"+bp.GetID())
 	APIData(w, bp, http.StatusCreated)
