@@ -1,48 +1,57 @@
-<ul class="list-unstyled list-group" *ngIf="blueprint">
-    <li class="list-group-item text-center" >
-        <span title="type" class="pull-left text-muted"> {{blueprint.type}} </span>
-        <span title="version" class="pull-left text-muted"> :ver.{{blueprint.version}} </span>
-        <span> {{blueprint.name}} </span>
-        <span title="state" class="state-name pull-right text-muted"> {{blueprint.state}} </span>
-    </li>
-    <li class="list-group-item">
+<div class="panel panel-default" *ngIf="blueprint">
+    <div class="panel-heading">
+        <button class="btn btn-default" title="Run blueprint"
+            [disabled]="blueprint.state != 'new'"
+            (click)="runBlueprint()"> Run
+        </button>
+        <button class="btn btn-default" title="Delete blueprint"
+            (click)="deleteBlueprint()"> Del
+        </button>
+    </div>
+    <div class="panel-body">
+
+        <div class="text-center">
+            <span title="type" class="pull-left text-muted"> {{blueprint.type}} </span>
+            <span title="version" class="pull-left text-muted"> :ver.{{blueprint.version}} </span>
+            <span> {{blueprint.name}} </span>
+            <span title="state" class="state-name pull-right text-muted"> {{blueprint.state}} </span>
+        </div>
+
         <h4>Stages</h4>
-        <ul class="list-unstyled list-group">
-            <li class="list-group-item" *ngFor="let s of blueprint.stages | keys">
-                <ul class="list-unstyled list-group">
-                    <li class="list-group-item text-center">
-                        <span title="provisioner" class="pull-left text-muted"> {{blueprint.stages[s].provisioner}} </span>
-                        <span title="stage"> {{s}} </span>
-                        <span title="state" class="state-name pull-right text-muted"> {{blueprint.stages[s].state}}
-                            <i class="state-light"
-                                [ngClass]="{new: 'bg-orange', created: 'bg-orange', running: 'bg-green', deleted: 'bg-grey', paused: 'bg-grey', stopped: 'bg-grey'}[blueprint.stages[s].state]"></i>
-                        </span>
-                     </li>
-                    <li class="list-group-item" title="description" *ngIf="blueprint.stages[s].description">
-                        {{blueprint.stages[s].description}}
+
+        <ul class="list-unstyled list-group" *ngFor="let s of blueprint.stages | keys">
+            <li class="list-group-item text-center">
+                <span title="provisioner" class="pull-left text-muted"> {{blueprint.stages[s].provisioner}} </span>
+                <span title="stage"> {{s}} </span>
+                <span title="state" class="state-name pull-right text-muted"> {{blueprint.stages[s].state}}
+                    <i class="state-light"
+                        [ngClass]="{new: 'bg-orange', created: 'bg-orange', running: 'bg-green', deleted: 'bg-grey', paused: 'bg-grey', stopped: 'bg-grey'}[blueprint.stages[s].state]"></i>
+                </span>
+             </li>
+            <li class="list-group-item" title="description" *ngIf="blueprint.stages[s].description">
+                {{blueprint.stages[s].description}}
+            </li>
+            <li class="list-group-item" title="image" *ngIf="blueprint.stages[s].image">
+                {{blueprint.stages[s].image}}
+            </li>
+            <li class="list-group-item" *ngIf="blueprint.stages[s].ports">
+                <h5>Ports</h5>
+                <ul class="list-unstyled">
+                    <li *ngFor="let port of blueprint.stages[s].ports">
+                        <span title="fromPort"> {{port.fromPort}} </span>
+                        : <span title="toPort"> {{port.toPort}} </span>
                     </li>
-                    <li class="list-group-item" title="image" *ngIf="blueprint.stages[s].image">
-                        {{blueprint.stages[s].image}}
-                    </li>
-                    <li class="list-group-item" *ngIf="blueprint.stages[s].ports">
-                        <h5>Ports</h5>
-                        <ul class="list-unstyled">
-                            <li *ngFor="let port of blueprint.stages[s].ports">
-                                <span title="fromPort"> {{port.fromPort}} </span>
-                                : <span title="toPort"> {{port.toPort}} </span>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="list-group-item" *ngIf="blueprint.stages[s].variables">
-                        <h5>Variables</h5>
-                        <ul class="list-unstyled">
-                            <li *ngFor="let k of blueprint.stages[s].variables | keys">
-                                {{k}} : {{blueprint.stages[s].variables[k]}}
-                            </li>
-                        </ul>
+                </ul>
+            </li>
+            <li class="list-group-item" *ngIf="blueprint.stages[s].variables">
+                <h5>Variables</h5>
+                <ul class="list-unstyled">
+                    <li *ngFor="let k of blueprint.stages[s].variables | keys">
+                        {{k}} : {{blueprint.stages[s].variables[k]}}
                     </li>
                 </ul>
             </li>
         </ul>
-    </li>
-</ul>
+
+    </div>
+</div>

@@ -10,4 +10,12 @@ import { Blueprint } from '../../services/api/api';
 export class BlueprintDetailsComponent {
   @Input()
   blueprint: Blueprint;
+
+  deleteBlueprint() {
+    console.log('#deleteBlueprint');
+  }
+
+  runBlueprint() {
+    console.log('#runBlueprint');
+  }
 }
