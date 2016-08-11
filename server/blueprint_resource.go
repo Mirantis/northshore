@@ -108,23 +108,28 @@ func (s BlueprintResource) Update(obj interface{}, r api2go.Request) (api2go.Res
 	var bpOld blueprint.Blueprint
 	if err := store.Load([]byte(blueprint.DBBucket), []byte(bp.ID.String()), &bpOld); err != nil {
 		log.WithFields(log.Fields{
-			"id": bp.ID,
+			"id":  bp.ID,
+			"obj": obj,
 		}).Errorln("#BlueprintResource,#Update", err)
 		return &api2go.Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
 
-	// TODO:
-	// Handle Run/Stop blueprint if bp.State != bpOld.State
-	// Handle Create/Delete stages
-	// Use stages states from the old one
+	go func() {
+		// TODO:
+		// Handle Run/Stop blueprint if bp.State != bpOld.State
+		// Handle Create/Delete stages
+		// Use stages states from the old one
 
-	if err := bp.Save(); err != nil {
-		log.WithFields(log.Fields{
-			"bp":  bp,
-			"obj": obj,
-		}).Errorln("#BlueprintResource,#Update", err)
-		return &api2go.Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusInternalServerError)
-	}
+		if err := bp.Save(); err != nil {
+			log.WithFields(log.Fields{
+				"bp":  bp,
+				"obj": obj,
+			}).Errorln("#BlueprintResource,#Update", err)
+		}
+	}()
 
-	return &api2go.Response{Res: bp, Code: http.StatusNoContent}, nil
+	// Update request has been accepted for processing,
+	// but the processing has not been completed by the time the server responds.
+	// So, Response 202 Accepted
+	return &api2go.Response{Code: http.StatusAccepted}, nil
 }

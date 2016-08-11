@@ -21,6 +21,7 @@ export class AssetsService {
       },
       Blueprints: {
         onParseSuccess: 'The new Blueprint successfully stored',
+        onRunSuccess: 'The Blueprint started',
       },
     },
     timers: {

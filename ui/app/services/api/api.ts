@@ -143,4 +143,26 @@ export class APIService {
       .catch(error => this.handleError(error, '#APIService.parseBlueprint,#Error'));
   }
 
+  updateBlueprint(bp: Blueprint): Observable<{}> {
+    let headers = new Headers({
+      'Content-Type': 'application/vnd.api+json'
+    });
+
+    let JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
+    let p = new JSONAPIDeserializer({ keyForAttribute: 'camelCase' });
+    let JSONAPISerializer = require('jsonapi-serializer').Serializer;
+    let s = new JSONAPISerializer(
+      'blueprints',
+      {
+        attributes: ['id', 'name', 'stages', 'state', 'type', 'version'],
+        pluralizeType: false,
+      }
+    );
+    let payload = s.serialize(bp)
+
+    return this.http
+      .patch(this.blueprintsUrl + '/' + bp.id, payload, { headers: headers })
+      .catch(error => this.handleError(error, '#APIService.updateBlueprint,#Error'));
+  }
+
 }
