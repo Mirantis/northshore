@@ -17,8 +17,7 @@ import { AssetsService } from '../assets/assets';
 
 export class Blueprint {
   name: string;
-  provisioner: string; //Provisioner type (docker/...)
-  stages: Object[];
+  stages: BlueprintStage[];
   state: string;
   type: string; //Type of blueprint (pipeline/application)
   version: string;
@@ -26,6 +25,15 @@ export class Blueprint {
     stagesStatesBages: {};
   };
   id: string;
+}
+
+export class BlueprintStage {
+  image: string;
+  description: string;
+  provisioner: string; //Provisioner type (docker/...)
+  state: string;
+  ports: Object[];
+  variables: Object;
 }
 
 export class BlueprintYAML {

@@ -62,6 +62,10 @@
     vertical-align: middle;
     width: 12px;
 }
+.state-name {
+    min-width: 5em;
+    text-align: right;
+}
 /* </editor-fold> */
 
 /* <editor-fold desc="Custom Forms"> */
