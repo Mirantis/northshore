@@ -116,7 +116,7 @@ export class APIService {
     return this.blueprints;
   }
 
-  parseBlueprint(v: BlueprintYAML): Observable<{}> {
+  parseBlueprint(v: BlueprintYAML): Observable<Blueprint> {
     let headers = new Headers({
       'Content-Type': 'application/vnd.api+json'
     });

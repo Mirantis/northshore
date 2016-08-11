@@ -21,7 +21,7 @@ export class AddBlueprintComponent implements OnDestroy, OnInit {
 
   formData: string = "";
   private subscriptions: any[] = [];
-  private AlertOnParseSuccess = this.assetsService.asset('alerts').Blueprints.onParseSuccess;
+  private alertOnParseSuccess = this.assetsService.asset('alerts').Blueprints.onParseSuccess;
 
   constructor(
     private alertsService: AlertsService,
@@ -43,8 +43,7 @@ export class AddBlueprintComponent implements OnDestroy, OnInit {
     let sub = this.apiService.parseBlueprint(v)
       .subscribe((res: Blueprint) => {
         // onSuccess
-        console.log('#submitParseBlueprint', res);
-        this.alertsService.alertSuccess(this.AlertOnParseSuccess);
+        this.alertsService.alertSuccess(this.alertOnParseSuccess);
         this.router.navigate(['/blueprints', res.id]);
       });
     this.subscriptions.push(sub);
