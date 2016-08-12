@@ -17,8 +17,7 @@ import { AssetsService } from '../assets/assets';
 
 export class Blueprint {
   name: string;
-  provisioner: string; //Provisioner type (docker/...)
-  stages: Object[];
+  stages: BlueprintStage[];
   state: string;
   type: string; //Type of blueprint (pipeline/application)
   version: string;
@@ -26,6 +25,15 @@ export class Blueprint {
     stagesStatesBages: {};
   };
   id: string;
+}
+
+export class BlueprintStage {
+  image: string;
+  description: string;
+  provisioner: string; //Provisioner type (docker/...)
+  state: string;
+  ports: Object[];
+  variables: Object;
 }
 
 export class BlueprintYAML {
@@ -116,7 +124,7 @@ export class APIService {
     return this.blueprints;
   }
 
-  parseBlueprint(v: BlueprintYAML): Observable<{}> {
+  parseBlueprint(v: BlueprintYAML): Observable<Blueprint> {
     let headers = new Headers({
       'Content-Type': 'application/vnd.api+json'
     });
@@ -133,6 +141,38 @@ export class APIService {
       .post(this.parseBlueprintUrl, payload, { headers: headers })
       .switchMap(res => Observable.fromPromise(p.deserialize(res.json())))
       .catch(error => this.handleError(error, '#APIService.parseBlueprint,#Error'));
+  }
+
+  deleteBlueprint(bp: Blueprint): Observable<{}> {
+    let headers = new Headers({
+      'Content-Type': 'application/vnd.api+json'
+    });
+
+    return this.http
+      .delete(this.blueprintsUrl + '/' + bp.id, { headers: headers })
+      .catch(error => this.handleError(error, '#APIService.deleteBlueprint,#Error'));
+  }
+
+  updateBlueprint(bp: Blueprint): Observable<{}> {
+    let headers = new Headers({
+      'Content-Type': 'application/vnd.api+json'
+    });
+
+    let JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
+    let p = new JSONAPIDeserializer({ keyForAttribute: 'camelCase' });
+    let JSONAPISerializer = require('jsonapi-serializer').Serializer;
+    let s = new JSONAPISerializer(
+      'blueprints',
+      {
+        attributes: ['id', 'name', 'stages', 'state', 'type', 'version'],
+        pluralizeType: false,
+      }
+    );
+    let payload = s.serialize(bp)
+
+    return this.http
+      .patch(this.blueprintsUrl + '/' + bp.id, payload, { headers: headers })
+      .catch(error => this.handleError(error, '#APIService.updateBlueprint,#Error'));
   }
 
 }
