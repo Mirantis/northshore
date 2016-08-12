@@ -20,6 +20,7 @@ export class AssetsService {
         warning: 'warning',
       },
       Blueprints: {
+        onDeleteSuccess: 'The Blueprint deleted',
         onParseSuccess: 'The new Blueprint successfully stored',
         onRunSuccess: 'The Blueprint started',
       },

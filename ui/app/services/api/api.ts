@@ -143,6 +143,16 @@ export class APIService {
       .catch(error => this.handleError(error, '#APIService.parseBlueprint,#Error'));
   }
 
+  deleteBlueprint(bp: Blueprint): Observable<{}> {
+    let headers = new Headers({
+      'Content-Type': 'application/vnd.api+json'
+    });
+
+    return this.http
+      .delete(this.blueprintsUrl + '/' + bp.id, { headers: headers })
+      .catch(error => this.handleError(error, '#APIService.deleteBlueprint,#Error'));
+  }
+
   updateBlueprint(bp: Blueprint): Observable<{}> {
     let headers = new Headers({
       'Content-Type': 'application/vnd.api+json'
