@@ -1,18 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { TAB_DIRECTIVES } from 'ng2-bootstrap/components/tabs';
 
 import { AlertsService } from '../../services/alerts/alerts';
 import { AssetsService } from '../../services/assets/assets';
 import { Blueprint, BlueprintYAML, APIService } from '../../services/api/api';
 
 @Component({
-  directives: [
-    TAB_DIRECTIVES,
-  ],
-  providers: [
-    APIService,
-  ],
   selector: 'add-blueprint',
   template: require('./add-blueprint.html'),
 })

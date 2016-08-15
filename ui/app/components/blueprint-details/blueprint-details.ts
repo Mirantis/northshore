@@ -6,9 +6,6 @@ import { AssetsService } from '../../services/assets/assets';
 import { Blueprint, APIService } from '../../services/api/api';
 
 @Component({
-  providers: [
-    APIService,
-  ],
   selector: 'blueprint-details',
   template: require('./blueprint-details.html'),
 })

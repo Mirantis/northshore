@@ -1,28 +1,11 @@
 import { Component } from '@angular/core';
-import { CORE_DIRECTIVES } from '@angular/common';
-import { AlertComponent, CollapseDirective } from 'ng2-bootstrap/ng2-bootstrap';
 
 import { AlertsService } from '../../services/alerts/alerts';
 import { AssetsService } from '../../services/assets/assets';
-import { BlueprintsComponent } from '../blueprints/blueprints';
-import { HomeComponent } from '../home/home';
 
 import '../../../assets/custom.css';
 
 @Component({
-  directives: [
-    AlertComponent,
-    CollapseDirective,
-    CORE_DIRECTIVES,
-  ],
-  precompile: [
-    BlueprintsComponent,
-    HomeComponent,
-  ],
-  providers: [
-    AlertsService,
-    AssetsService,
-  ],
   selector: 'my-app',
   template: require('./app.html'),
 })

@@ -2,15 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Blueprint, APIService } from '../../services/api/api';
-import { BlueprintDetailsComponent } from '../blueprint-details/blueprint-details';
 
 @Component({
-  directives: [
-    BlueprintDetailsComponent,
-  ],
-  providers: [
-    APIService,
-  ],
   selector: 'blueprints',
   template: require('./blueprints.html'),
 })
