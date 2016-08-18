@@ -341,3 +341,19 @@ func (items *Blueprints) Next() interface{} {
 func (items *Blueprints) Prepare(len int) {
 	*items = make([]Blueprint, 0, len)
 }
+
+// Used to avoid recursion in UnmarshalJSON below
+// Note at http://attilaolah.eu/2013/11/29/json-decoding-in-go/
+type blueprint Blueprint
+
+// UnmarshalJSON implements Unmarshaller interface
+func (bp *Blueprint) UnmarshalJSON(b []byte) (err error) {
+	log.Debugln("#Blueprint,#UnmarshalJSON")
+	// return json.Unmarshal(b, bp) // stack owerflow
+
+	buf := blueprint{}
+	if err = json.Unmarshal(b, &buf); err == nil {
+		*bp = Blueprint(buf)
+	}
+	return
+}
