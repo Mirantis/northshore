@@ -160,8 +160,8 @@ func Save(bucket []byte, key []byte, v interface{}) error {
 type Storable interface {
 	// Bucket returns the bucket name
 	Bucket() []byte
-	// Next wraps an item constructor
-	Next() interface{}
+	// Next is an iterator, takes key returns ref to item instance
+	Next([]byte) interface{}
 	// Prepare sets collection size
 	Prepare(int)
 }
@@ -178,7 +178,7 @@ func LoadStorable(items Storable) error {
 
 		b.ForEach(func(k, v []byte) error {
 
-			if err := json.Unmarshal(v, items.Next()); err != nil {
+			if err := json.Unmarshal(v, items.Next(k)); err != nil {
 				log.Errorln("#DB,#LoadStorable", err)
 				return err
 			}

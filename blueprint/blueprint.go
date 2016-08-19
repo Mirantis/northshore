@@ -330,7 +330,7 @@ func (items *Blueprints) Bucket() []byte {
 }
 
 // Next implements Storable interface
-func (items *Blueprints) Next() interface{} {
+func (items *Blueprints) Next([]byte) interface{} {
 	item := new(Blueprint)
 	*items = append(*items, *item)
 	l := len(*items)

@@ -48,7 +48,7 @@ func (s BlueprintResource) FindOne(id string, r api2go.Request) (api2go.Responde
 
 	var bb blueprint.Blueprints
 	// bb.Prepare(1)
-	err := store.Load(bb.Bucket(), []byte(id), bb.Next())
+	err := store.Load(bb.Bucket(), []byte(id), bb.Next([]byte(id)))
 	log.Debugln("#FindOne ##", err, bb, len(bb), cap(bb))
 
 	var bp blueprint.Blueprint
