@@ -32,8 +32,15 @@ func (s BlueprintResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	// if err := store.LoadBucketAsSlice([]byte(blueprint.DBBucket), &bps); err != nil {
 
 	// bps, err := blueprint.LoadAll()
-	var bps blueprint.Blueprints
+	var bps blueprint.BlueprintsSlice
 	err := store.LoadStorable(&bps)
+	log.Debugln("#FindAll #", bps)
+	bp := bps[0]
+	log.Debugln("#FindAll #", bp, *bp)
+
+	var bpm blueprint.BlueprintsMap
+	store.LoadStorable(&bpm)
+	log.Debugln("#FindAll ##", bpm)
 
 	if err != nil {
 		log.Errorln("#BlueprintResource,#FindAll", err)
@@ -46,7 +53,7 @@ func (s BlueprintResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 // FindOne implements `api2go.CRUD` interface
 func (s BlueprintResource) FindOne(id string, r api2go.Request) (api2go.Responder, error) {
 
-	var bb blueprint.Blueprints
+	var bb blueprint.BlueprintsSlice
 	// bb.Prepare(1)
 	err := store.Load(bb.Bucket(), []byte(id), bb.Next([]byte(id)))
 	log.Debugln("#FindOne ##", err, bb, len(bb), cap(bb))

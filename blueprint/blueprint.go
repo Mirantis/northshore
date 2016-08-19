@@ -321,25 +321,49 @@ func LoadAll() (items []Blueprint, err error) {
 	return items, err
 }
 
-// Blueprints represents Storable collection
-type Blueprints []Blueprint
+// BlueprintsMap represents Storable collection
+type BlueprintsMap map[string]*Blueprint
 
 // Bucket implements Storable interface
-func (items *Blueprints) Bucket() []byte {
+func (items *BlueprintsMap) Bucket() []byte {
 	return []byte(DBBucket)
 }
 
 // Next implements Storable interface
-func (items *Blueprints) Next([]byte) interface{} {
+func (items *BlueprintsMap) Next(k []byte) interface{} {
 	item := new(Blueprint)
-	*items = append(*items, *item)
+	(*items)[string(k)] = item
+	return (*items)[string(k)]
+}
+
+// Prepare implements Storable interface
+func (items *BlueprintsMap) Prepare(int) {
+	*items = make(map[string]*Blueprint)
+}
+
+// BlueprintsSlice represents Storable collection
+type BlueprintsSlice []*Blueprint
+
+// Bucket implements Storable interface
+func (items *BlueprintsSlice) Bucket() []byte {
+	return []byte(DBBucket)
+}
+
+// Next implements Storable interface
+func (items *BlueprintsSlice) Next([]byte) interface{} {
+	// item := new(Blueprint)
+	// *items = append(*items, *item)
+	// l := len(*items)
+	// return &(*items)[l-1]
+	item := new(Blueprint)
+	*items = append(*items, item)
 	l := len(*items)
 	return &(*items)[l-1]
 }
 
 // Prepare implements Storable interface
-func (items *Blueprints) Prepare(len int) {
-	*items = make([]Blueprint, 0, len)
+func (items *BlueprintsSlice) Prepare(len int) {
+	*items = make([]*Blueprint, 0, len)
 }
 
 // Used to avoid recursion in UnmarshalJSON below
