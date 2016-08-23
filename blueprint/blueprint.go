@@ -15,13 +15,11 @@ package blueprint
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/boltdb/bolt"
 
 	"github.com/Mirantis/northshore/store"
 	"github.com/docker/engine-api/client"
@@ -292,92 +290,8 @@ func ParseBytes(b []byte) (bp Blueprint, err error) {
 	return bp, nil
 }
 
-// LoadAll loads stored blueprints
-func LoadAll() (items []Blueprint, err error) {
-	db := store.OpenDBBucket([]byte(DBBucket))
-	defer db.Close()
-
-	err = db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(DBBucket))
-		items = make([]Blueprint, 0, b.Stats().KeyN)
-
-		log.Debugln("#blueprint,#LoadAll", b.Stats().KeyN, len(items))
-
-		b.ForEach(func(k, v []byte) error {
-			item := new(Blueprint)
-			if err = json.Unmarshal(v, item); err != nil {
-				log.Errorln("#DB,#LoadBucket", err)
-				return err
-			}
-			items = append(items, *item)
-
-			log.Debugln("#blueprint,#LoadAll,##", string(k), len(items))
-			return nil
-		})
-
-		return nil
-	})
-
-	return items, err
-}
-
-// BlueprintsMap represents Storable collection
-type BlueprintsMap map[string]*Blueprint
-
-// Bucket implements Storable interface
-func (items *BlueprintsMap) Bucket() []byte {
-	return []byte(DBBucket)
-}
-
-// Next implements Storable interface
-func (items *BlueprintsMap) Next(k []byte) interface{} {
-	item := new(Blueprint)
-	(*items)[string(k)] = item
-	return (*items)[string(k)]
-}
-
-// Prepare implements Storable interface
-func (items *BlueprintsMap) Prepare(int) {
-	*items = make(map[string]*Blueprint)
-}
-
-// BlueprintsSlice represents Storable collection
-type BlueprintsSlice []*Blueprint
-
-// Bucket implements Storable interface
-func (items *BlueprintsSlice) Bucket() []byte {
-	return []byte(DBBucket)
-}
-
-// Next implements Storable interface
-func (items *BlueprintsSlice) Next([]byte) interface{} {
-	// item := new(Blueprint)
-	// *items = append(*items, *item)
-	// l := len(*items)
-	// return &(*items)[l-1]
-	item := new(Blueprint)
-	*items = append(*items, item)
-	l := len(*items)
-	return &(*items)[l-1]
-}
-
-// Prepare implements Storable interface
-func (items *BlueprintsSlice) Prepare(len int) {
-	*items = make([]*Blueprint, 0, len)
-}
-
-// Used to avoid recursion in UnmarshalJSON below
-// Note at http://attilaolah.eu/2013/11/29/json-decoding-in-go/
-type blueprint Blueprint
-
-// UnmarshalJSON implements Unmarshaller interface
-func (bp *Blueprint) UnmarshalJSON(b []byte) (err error) {
-	log.Debugln("#Blueprint,#UnmarshalJSON")
-	// return json.Unmarshal(b, bp) // stack owerflow
-
-	buf := blueprint{}
-	if err = json.Unmarshal(b, &buf); err == nil {
-		*bp = Blueprint(buf)
-	}
+// GetByID returns one Blueprint
+func GetByID(id []byte) (bp Blueprint, err error) {
+	err = store.Load([]byte(DBBucket), id, &bp)
 	return
 }

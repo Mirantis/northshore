@@ -17,7 +17,6 @@ package store
 import (
 	"encoding/json"
 	"errors"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -25,7 +24,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func OpenDBBucket(bucket []byte) *bolt.DB {
+func openDBBucket(bucket []byte) *bolt.DB {
 	path := viper.GetString("BoltDBPath")
 	log.Debugln("Open #DB -> ", path)
 	db, err := bolt.Open(path, 0600, nil)
@@ -48,7 +47,7 @@ func OpenDBBucket(bucket []byte) *bolt.DB {
 
 // Delete deletes key from boltdb Bucket
 func Delete(bucket []byte, key []byte) error {
-	db := OpenDBBucket(bucket)
+	db := openDBBucket(bucket)
 	defer db.Close()
 
 	if err := db.Update(func(tx *bolt.Tx) error {
@@ -62,7 +61,7 @@ func Delete(bucket []byte, key []byte) error {
 
 // Load loads item from boltdb Bucket
 func Load(bucket []byte, key []byte, v interface{}) error {
-	db := OpenDBBucket(bucket)
+	db := openDBBucket(bucket)
 	defer db.Close()
 
 	log.Debugln("#DB", "Load data from DB")
@@ -83,59 +82,9 @@ func Load(bucket []byte, key []byte, v interface{}) error {
 	return err
 }
 
-// LoadBucket loads all items from boltdb Bucket
-func LoadBucket(bucket []byte, buf *[]interface{}) error {
-	db := OpenDBBucket(bucket)
-	defer db.Close()
-
-	log.Debugln("#DB", "Load bucket from DB")
-	err := db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucket)
-		b.ForEach(func(k, v []byte) error {
-			var item interface{}
-			if err := json.Unmarshal(v, &item); err != nil {
-				log.Errorln("#DB,#LoadBucket", err)
-				return err
-			}
-			*buf = append(*buf, item)
-			return nil
-		})
-		return nil
-	})
-	return err
-}
-
-// LoadBucketAsSlice loads all items from boltdb Bucket
-func LoadBucketAsSlice(bucket []byte, v interface{}) error {
-	db := OpenDBBucket(bucket)
-	defer db.Close()
-
-	err := db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucket)
-
-		ss := make([]string, b.Stats().KeyN)
-		idx := 0
-		b.ForEach(func(_, v []byte) error {
-			ss[idx] = string(v)
-			idx++
-			return nil
-		})
-
-		s := "[" + strings.Join(ss, ", ") + "]"
-
-		if err := json.Unmarshal([]byte(s), v); err != nil {
-			log.Errorln("#DB,#LoadBucketAsSlice", err)
-			return err
-		}
-
-		return nil
-	})
-	return err
-}
-
 // Save stores item in boltdb Bucket as JSON
 func Save(bucket []byte, key []byte, v interface{}) error {
-	db := OpenDBBucket(bucket)
+	db := openDBBucket(bucket)
 	defer db.Close()
 
 	log.Debugln("#DB", "Save data to DB")
@@ -151,41 +100,6 @@ func Save(bucket []byte, key []byte, v interface{}) error {
 			log.Errorln("#DB,#Store", err)
 			return err
 		}
-		return nil
-	})
-	return err
-}
-
-// Storable defines collection interface
-type Storable interface {
-	// Bucket returns the bucket name
-	Bucket() []byte
-	// Next is an iterator, takes key returns ref to item instance
-	Next([]byte) interface{}
-	// Prepare sets collection size
-	Prepare(int)
-}
-
-// LoadStorable loads all items from boltdb Bucket
-func LoadStorable(items Storable) error {
-	bucket := items.Bucket()
-	db := OpenDBBucket(bucket)
-	defer db.Close()
-
-	err := db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucket)
-		items.Prepare(b.Stats().KeyN)
-
-		b.ForEach(func(k, v []byte) error {
-
-			if err := json.Unmarshal(v, items.Next(k)); err != nil {
-				log.Errorln("#DB,#LoadStorable", err)
-				return err
-			}
-
-			return nil
-		})
-
 		return nil
 	})
 	return err
