@@ -17,7 +17,6 @@ package store
 import (
 	"encoding/json"
 	"errors"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -78,56 +77,6 @@ func Load(bucket []byte, key []byte, v interface{}) error {
 			log.Errorln("#DB,#Load", err)
 			return err
 		}
-		return nil
-	})
-	return err
-}
-
-// LoadBucket loads all items from boltdb Bucket
-func LoadBucket(bucket []byte, buf *[]interface{}) error {
-	db := openDBBucket(bucket)
-	defer db.Close()
-
-	log.Debugln("#DB", "Load bucket from DB")
-	err := db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucket)
-		b.ForEach(func(k, v []byte) error {
-			var item interface{}
-			if err := json.Unmarshal(v, &item); err != nil {
-				log.Errorln("#DB,#LoadBucket", err)
-				return err
-			}
-			*buf = append(*buf, item)
-			return nil
-		})
-		return nil
-	})
-	return err
-}
-
-// LoadBucketAsSlice loads all items from boltdb Bucket
-func LoadBucketAsSlice(bucket []byte, v interface{}) error {
-	db := openDBBucket(bucket)
-	defer db.Close()
-
-	err := db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket(bucket)
-
-		ss := make([]string, b.Stats().KeyN)
-		idx := 0
-		b.ForEach(func(_, v []byte) error {
-			ss[idx] = string(v)
-			idx++
-			return nil
-		})
-
-		s := "[" + strings.Join(ss, ", ") + "]"
-
-		if err := json.Unmarshal([]byte(s), v); err != nil {
-			log.Errorln("#DB,#LoadBucketAsSlice", err)
-			return err
-		}
-
 		return nil
 	})
 	return err

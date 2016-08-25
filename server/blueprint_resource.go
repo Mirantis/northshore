@@ -18,7 +18,6 @@ import (
 	"net/http"
 
 	"github.com/Mirantis/northshore/blueprint"
-	"github.com/Mirantis/northshore/store"
 	log "github.com/Sirupsen/logrus"
 	"github.com/manyminds/api2go"
 )
@@ -28,8 +27,9 @@ type BlueprintResource struct{}
 
 // FindAll implements `api2go.FindAll` interface
 func (s BlueprintResource) FindAll(r api2go.Request) (api2go.Responder, error) {
-	var bps []blueprint.Blueprint
-	if err := store.LoadBucketAsSlice([]byte(blueprint.DBBucket), &bps); err != nil {
+	bps, err := blueprint.GetBlueprintsSlice()
+
+	if err != nil {
 		log.Errorln("#BlueprintResource,#FindAll", err)
 		return &api2go.Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusInternalServerError)
 	}
@@ -39,8 +39,9 @@ func (s BlueprintResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 
 // FindOne implements `api2go.CRUD` interface
 func (s BlueprintResource) FindOne(id string, r api2go.Request) (api2go.Responder, error) {
-	var bp blueprint.Blueprint
-	if err := store.Load([]byte(blueprint.DBBucket), []byte(id), &bp); err != nil {
+	bp, err := blueprint.GetByID([]byte(id))
+
+	if err != nil {
 		log.WithFields(log.Fields{
 			"id": id,
 		}).Errorln("#BlueprintResource,#FindOne", err)
@@ -52,8 +53,9 @@ func (s BlueprintResource) FindOne(id string, r api2go.Request) (api2go.Responde
 
 // Delete implements `api2go.CRUD` interface
 func (s BlueprintResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	var bp blueprint.Blueprint
-	if err := store.Load([]byte(blueprint.DBBucket), []byte(id), &bp); err != nil {
+	bp, err := blueprint.GetByID([]byte(id))
+
+	if err != nil {
 		log.WithFields(log.Fields{
 			"id": id,
 		}).Errorln("#BlueprintResource,#FindOne", err)
@@ -105,8 +107,9 @@ func (s BlueprintResource) Update(obj interface{}, r api2go.Request) (api2go.Res
 	}
 
 	// TODO: check for ID from payload is equal to route param
-	var bpOld blueprint.Blueprint
-	if err := store.Load([]byte(blueprint.DBBucket), []byte(bp.ID.String()), &bpOld); err != nil {
+	_, err := blueprint.GetByID([]byte(bp.ID.String()))
+
+	if err != nil {
 		log.WithFields(log.Fields{
 			"id":  bp.ID,
 			"obj": obj,

@@ -289,3 +289,9 @@ func ParseBytes(b []byte) (bp Blueprint, err error) {
 
 	return bp, nil
 }
+
+// GetByID returns one Blueprint
+func GetByID(id []byte) (bp Blueprint, err error) {
+	err = store.Load([]byte(DBBucket), id, &bp)
+	return
+}
