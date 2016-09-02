@@ -3,8 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
-import { AlertComponent, CollapseDirective } from 'ng2-bootstrap/ng2-bootstrap';
-import { TAB_DIRECTIVES } from 'ng2-bootstrap/components/tabs';
+import { AlertModule, CollapseModule, TabsModule } from 'ng2-bootstrap/ng2-bootstrap';
 
 import { routing } from './routing';
 
@@ -26,13 +25,13 @@ import { AssetsService } from './services/assets/assets';
     FormsModule,
     HttpModule,
     routing,
+    // ng2-bootstrap
+    AlertModule,
+    CollapseModule,
+    TabsModule,
   ],
 
   declarations: [
-    // ng2-bootstrap
-    AlertComponent,
-    CollapseDirective,
-    TAB_DIRECTIVES,
     // components
     AppComponent,
     AddBlueprintComponent,
