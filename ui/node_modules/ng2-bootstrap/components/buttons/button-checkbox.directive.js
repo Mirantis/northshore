@@ -12,7 +12,8 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var core_1 = require('@angular/core');
-var common_1 = require('@angular/common');
+var forms_1 = require('@angular/forms');
+// TODO: config: activeClass - Class to apply to the checked buttons.
 var ButtonCheckboxDirective = (function () {
     function ButtonCheckboxDirective(cd) {
         this.state = false;
@@ -85,7 +86,7 @@ var ButtonCheckboxDirective = (function () {
     ButtonCheckboxDirective = __decorate([
         core_1.Directive({ selector: '[btnCheckbox][ngModel]' }),
         __param(0, core_1.Self()), 
-        __metadata('design:paramtypes', [common_1.NgModel])
+        __metadata('design:paramtypes', [forms_1.NgModel])
     ], ButtonCheckboxDirective);
     return ButtonCheckboxDirective;
 }());
