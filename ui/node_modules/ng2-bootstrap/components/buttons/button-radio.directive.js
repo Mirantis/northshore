@@ -12,7 +12,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var core_1 = require('@angular/core');
-var common_1 = require('@angular/common');
+var forms_1 = require('@angular/forms');
+// TODO: if uncheckable, null should be set to ngModel
+// if disabled, button should not be checkable
 var ButtonRadioDirective = (function () {
     function ButtonRadioDirective(cd, el) {
         this.onChange = Function.prototype;
@@ -81,7 +83,7 @@ var ButtonRadioDirective = (function () {
     ButtonRadioDirective = __decorate([
         core_1.Directive({ selector: '[btnRadio][ngModel]' }),
         __param(0, core_1.Self()), 
-        __metadata('design:paramtypes', [common_1.NgModel, core_1.ElementRef])
+        __metadata('design:paramtypes', [forms_1.NgModel, core_1.ElementRef])
     ], ButtonRadioDirective);
     return ButtonRadioDirective;
 }());

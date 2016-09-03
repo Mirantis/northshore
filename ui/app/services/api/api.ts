@@ -61,14 +61,14 @@ export class APIService {
       .interval(this.blueprintsInterval)
       .startWith(0)
       .switchMap(() => this.http.get(this.blueprintsUrl))
-      .switchMap(res => Observable.fromPromise(p.deserialize(res.json())))
+      .switchMap(res => <Observable<Blueprint[]>>Observable.fromPromise(p.deserialize(res.json())))
       .map(this.extendBlueprintsData)
       .share()
       .catch(error => this.handleError(error, '#APIService.getBlueprints,#Error'));
 
   }
 
-  private extendBlueprintsData(bps: {}) {
+  private extendBlueprintsData(bps: Blueprint[]) {
     let stagesStatesBages = {};
     let filters = {
       green: ['running'],
@@ -139,7 +139,7 @@ export class APIService {
 
     return this.http
       .post(this.parseBlueprintUrl, payload, { headers: headers })
-      .switchMap(res => Observable.fromPromise(p.deserialize(res.json())))
+      .switchMap(res => <Observable<Blueprint>>Observable.fromPromise(p.deserialize(res.json())))
       .catch(error => this.handleError(error, '#APIService.parseBlueprint,#Error'));
   }
 
